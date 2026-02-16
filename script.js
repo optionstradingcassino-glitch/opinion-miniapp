@@ -15,5 +15,6 @@ alert("You selected: " + option + " (Trading logic later)");
 }
 
 function deposit(){
-alert("Stripe deposit coming soon");
+ window.location.href="https://buy.stripe.com/test_eVq6oGbqtaZee4cg0Q24000";
 }
+
