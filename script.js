@@ -15,6 +15,25 @@ alert("You selected: " + option + " (Trading logic later)");
 }
 
 function deposit(){
- window.location.href="https://buy.stripe.com/test_eVq6oGbqtaZee4cg0Q24000";
+async function deposit(){
+
+const tg = window.Telegram.WebApp;
+const user = tg.initDataUnsafe.user;
+
+const res = await fetch(
+"https://liketekvzrazheolmfnj.supabase.co/functions/v1/create-checkout-session",
+{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({
+telegram_id: user.id,
+amount: 10
+})
+});
+
+const data = await res.json();
+
+window.location.href = data.url;
 }
+
 
