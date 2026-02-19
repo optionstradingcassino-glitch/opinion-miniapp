@@ -7,25 +7,44 @@
   <!-- Telegram Mini App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Load our script safely -->
+  <!-- Your JS logic -->
   <script src="script.js" defer></script>
 
   <style>
     body{
-      font-family: Arial;
-      background:#0f172a;
+      font-family: Arial, sans-serif;
+      background:#0f172a;   /* dark premium look */
       color:white;
       text-align:center;
-      padding:20px;
+      padding:25px;
+    }
+
+    h2,h3,p{
+      margin:12px 0;
+    }
+
+    input{
+      padding:10px;
+      border-radius:8px;
+      border:none;
+      margin:10px;
+      width:180px;
+      text-align:center;
+      font-size:16px;
     }
 
     button{
       padding:12px 20px;
       margin:10px;
-      border-radius:8px;
+      border-radius:10px;
       border:none;
       font-size:16px;
       cursor:pointer;
+      transition:0.2s;
+    }
+
+    button:hover{
+      transform:scale(1.05);
     }
 
     .yes{ background:#22c55e; color:white; }
@@ -36,20 +55,25 @@
 
 <body>
 
-  <!-- USER NAME -->
+  <!-- USER NAME (filled by script.js) -->
   <h2 id="user">Loading Telegram user...</h2>
 
-  <!-- WALLET BALANCE -->
+  <!-- WALLET BALANCE (filled dynamically) -->
   <h3 id="balance">Balance: loading...</h3>
 
   <hr>
 
-  <!-- SIMPLE DEMO QUESTION -->
+  <!-- DEMO MARKET QUESTION -->
   <h3>Will it rain tomorrow?</h3>
 
+  <!-- ✅ NEW: STAKE INPUT -->
+  <input id="stake" type="number" placeholder="Enter points" min="1">
+
   <!-- TRADE BUTTONS -->
-  <button class="yes" onclick="trade('YES')">YES</button>
-  <button class="no" onclick="trade('NO')">NO</button>
+  <div>
+    <button class="yes" onclick="trade('YES')">YES</button>
+    <button class="no" onclick="trade('NO')">NO</button>
+  </div>
 
   <hr>
 
