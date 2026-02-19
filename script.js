@@ -1,10 +1,9 @@
-console.log("NEW VERSION LOADED");
+console.log("SAFE SCRIPT LOADED");
 
 // Detect Telegram WebApp safely
 let tg = window.Telegram?.WebApp;
 
 if (tg) {
-
   tg.expand();
 
   if (tg.initDataUnsafe?.user) {
@@ -16,52 +15,45 @@ if (tg) {
   }
 
 } else {
-
   console.log("Opened outside Telegram (browser test)");
   document.getElementById("user").innerText =
     "Opened outside Telegram (test mode)";
-
 }
 
 
-// -------- TRADE BUTTON --------
+// TRADE BUTTON
 function trade(option){
   alert("You selected: " + option + " (Trading logic later)");
 }
 
 
-// -------- DEPOSIT BUTTON --------
+// DEPOSIT BUTTON (SAFE TELEGRAM VERSION)
 async function deposit(){
 
   try {
 
     let telegram_id;
 
-    // Use real Telegram ID if available
     if (tg && tg.initDataUnsafe?.user?.id){
       telegram_id = tg.initDataUnsafe.user.id;
     } else {
-      // fallback for browser testing
-      telegram_id = "12345";
-      console.log("Using fallback telegram_id for testing:", telegram_id);
+      telegram_id = "12345";   // fallback for browser testing
+      console.log("Using fallback telegram_id:", telegram_id);
     }
 
-    const response = await fetch(
+    const res = await fetch(
       "https://liketekvzrazheolmfnj.supabase.co/functions/v1/create-checkout-session",
       {
-        method: "POST",
-        headers: {
-          "Content-Type":"application/json"
-        },
-        body: JSON.stringify({
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
           telegram_id: telegram_id,
           amount: 10
         })
       }
     );
 
-    const data = await response.json();
-
+    const data = await res.json();
     console.log("Checkout response:", data);
 
     if(!data.url){
@@ -69,8 +61,12 @@ async function deposit(){
       return;
     }
 
-    // Redirect to Stripe dynamic checkout
-    window.location.href = data.url;
+    // ✅ THIS IS THE IMPORTANT SAFE TELEGRAM OPEN
+    if (tg) {
+      tg.openLink(data.url);      // opens outside Telegram iframe
+    } else {
+      window.location.href = data.url;
+    }
 
   } catch(err){
 
