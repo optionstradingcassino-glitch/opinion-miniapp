@@ -73,7 +73,11 @@ async function loadMarkets(){
       }
     );
 
-    const markets = await res.json();
+    let markets = await res.json();
+
+// keep only open markets
+markets = markets.filter(m => m.status === "open");
+
 
     if(!markets.length){
       document.getElementById("markets").innerHTML = "No active markets";
