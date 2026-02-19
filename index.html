@@ -1,31 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Opinion Market</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8">
+  <title>Opinion Trading</title>
+
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Load our script safely -->
+  <script src="script.js" defer></script>
+
+  <style>
+    body{
+      font-family: Arial;
+      background:#0f172a;
+      color:white;
+      text-align:center;
+      padding:20px;
+    }
+
+    button{
+      padding:12px 20px;
+      margin:10px;
+      border-radius:8px;
+      border:none;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    .yes{ background:#22c55e; color:white; }
+    .no{ background:#ef4444; color:white; }
+    .deposit{ background:#3b82f6; color:white; }
+  </style>
 </head>
 
 <body>
 
-<h1>Opinion Market</h1>
+  <!-- USER NAME -->
+  <h2 id="user">Loading Telegram user...</h2>
 
-<p id="user">Loading Telegram user...</p>
+  <!-- WALLET BALANCE -->
+  <h3 id="balance">Balance: loading...</h3>
 
-<div class="card">
-<h2>Will it rain tomorrow?</h2>
+  <hr>
 
-<button onclick="trade('YES')">Buy YES</button>
-<button onclick="trade('NO')">Buy NO</button>
-</div>
+  <!-- SIMPLE DEMO QUESTION -->
+  <h3>Will it rain tomorrow?</h3>
 
-<br>
+  <!-- TRADE BUTTONS -->
+  <button class="yes" onclick="trade('YES')">YES</button>
+  <button class="no" onclick="trade('NO')">NO</button>
 
-<button onclick="deposit()">Deposit</button>
+  <hr>
 
-<script src="script.js" defer></script>
-
+  <!-- DEPOSIT BUTTON -->
+  <button class="deposit" onclick="deposit()">Deposit €10</button>
 
 </body>
 </html>
