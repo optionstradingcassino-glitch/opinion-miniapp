@@ -1,9 +1,8 @@
 console.log("SAFE SCRIPT LOADED");
 
-// ---------------- TELEGRAM INIT ----------------
-
 let tg = window.Telegram?.WebApp;
 
+// ---------- INIT USER ----------
 function initUser(){
 
   if (tg) {
@@ -20,27 +19,23 @@ function initUser(){
 
   } else {
     document.getElementById("user").innerText =
-      "Opened outside Telegram (test mode)";
+      "Opened outside Telegram";
   }
-
 }
 
-
-// ---------------- LOAD WALLET ----------------
-
+// ---------- LOAD BALANCE ----------
 async function loadBalance(){
 
   try{
 
-    let telegram_id =
-      tg?.initDataUnsafe?.user?.id || "12345";
+    const telegram_id = tg?.initDataUnsafe?.user?.id || "12345";
 
     const res = await fetch(
-      "https://liketekvzrazheolmfnj.supabase.co/rest/v1/wallets?telegram_id=eq."+telegram_id,
+      "https://liketekvzrazheolmfnj.supabase.co/rest/v1/wallets?select=*&telegram_id=eq."+telegram_id,
       {
         headers:{
-          "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE",
-          "Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"
+          "apikey":"PASTE_YOUR_ANON_KEY",
+          "Authorization":"Bearer PASTE_YOUR_ANON_KEY"
         }
       }
     );
@@ -50,21 +45,19 @@ async function loadBalance(){
     document.getElementById("balance").innerText =
       "Balance: " + (data[0]?.balance_points || 0) + " points";
 
-  }catch(err){
-    console.error("Balance load error:", err);
+  }catch(e){
+    console.log("Balance error",e);
   }
-
 }
 
 
-// ---------------- LOAD MARKETS ----------------
-
+// ---------- LOAD MARKETS WITH POOL ODDS ----------
 async function loadMarkets(){
 
   try{
 
     const res = await fetch(
-      "https://liketekvzrazheolmfnj.supabase.co/rest/v1/markets?status=eq.open",
+      "https://liketekvzrazheolmfnj.supabase.co/rest/v1/markets?select=*",
       {
         headers:{
           "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE",
@@ -75,92 +68,64 @@ async function loadMarkets(){
 
     let markets = await res.json();
 
-// keep only open markets
-markets = markets.filter(m => m.status === "open");
-
+    // only open markets
+    markets = markets.filter(m => m.status === "open");
 
     if(!markets.length){
-      document.getElementById("markets").innerHTML = "No active markets";
+      document.getElementById("markets").innerHTML="No active markets";
       return;
     }
 
-    let html = "";
+    let html="";
 
     for(const m of markets){
 
-// calculate pools
-const yes = m.yes_pool || 0;
-const no = m.no_pool || 0;
-const total = yes + no;
+      const yes = m.yes_pool || 0;
+      const no  = m.no_pool  || 0;
+      const total = yes+no;
 
-// dynamic odds
-const yesOdds = yes > 0 ? (total / yes).toFixed(2) : "1.00";
-const noOdds  = no  > 0 ? (total / no).toFixed(2) : "1.00";
+      const yesOdds = yes>0 ? (total/yes).toFixed(2) : "1.00";
+      const noOdds  = no>0  ? (total/no ).toFixed(2) : "1.00";
 
-html += `
-  <div class="market">
-    <h3>${m.question}</h3>
+      html+=`
+        <div class="market">
+          <h3>${m.question}</h3>
 
-    <input id="stake_${m.id}" type="number"
-      placeholder="Enter points"
-      oninput="updatePreviewMarket('${m.id}')">
+          <input id="stake_${m.id}" type="number"
+            placeholder="Enter points">
 
-    <p id="preview_${m.id}"></p>
+          <button class="yes"
+            onclick="tradeMarket('${m.id}','YES')">
+            YES (${yesOdds}x)
+          </button>
 
-    <button class="yes"
-      onclick="tradeMarket('${m.id}','YES')">
-      YES (${yesOdds}x)
-    </button>
+          <button class="no"
+            onclick="tradeMarket('${m.id}','NO')">
+            NO (${noOdds}x)
+          </button>
+        </div>
+      `;
+    }
 
-    <button class="no"
-      onclick="tradeMarket('${m.id}','NO')">
-      NO (${noOdds}x)
-    </button>
-  </div>
-`;
+    document.getElementById("markets").innerHTML=html;
 
-
-    document.getElementById("markets").innerHTML = html;
-
-  }catch(err){
-    console.error("Market load error:", err);
+  }catch(e){
+    console.log("Market load error",e);
   }
-
 }
 
 
-// ---------------- PROFIT PREVIEW PER MARKET ----------------
-
-function updatePreviewMarket(marketId){
-
-  const stake =
-    Number(document.getElementById("stake_"+marketId)?.value || 0);
-
-  if(stake>0){
-    const payout = Math.floor(stake * 1.8);
-    document.getElementById("preview_"+marketId).innerText =
-      "If you win → " + payout + " points";
-  }else{
-    document.getElementById("preview_"+marketId).innerText = "";
-  }
-
-}
-
-
-// ---------------- PLACE TRADE ----------------
-
-async function tradeMarket(marketId, option){
+// ---------- TRADE ----------
+async function tradeMarket(marketId,option){
 
   try{
 
-    let telegram_id =
-      tg?.initDataUnsafe?.user?.id || "12345";
+    const telegram_id = tg?.initDataUnsafe?.user?.id || "12345";
+    const stake =
+      Number(document.getElementById("stake_"+marketId).value||0);
 
-    const stakeValue =
-      Number(document.getElementById("stake_"+marketId)?.value || 0);
-
-    if(stakeValue <= 0){
-      alert("Enter stake first");
+    if(!stake){
+      alert("Enter stake");
       return;
     }
 
@@ -170,82 +135,62 @@ async function tradeMarket(marketId, option){
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
-          telegram_id: telegram_id,
-          market_id: marketId,
-          choice: option,
-          stake: stakeValue
+          telegram_id,
+          market_id:marketId,
+          choice:option,
+          stake
         })
       }
     );
 
     const data = await res.json();
-    console.log("Trade response:", data);
 
     if(data.success){
       alert("Trade placed!");
-      document.getElementById("stake_"+marketId).value="";
-      updatePreviewMarket(marketId);
       loadBalance();
+      loadMarkets(); // refresh odds after trade
     }else{
       alert("Trade failed");
     }
 
-  }catch(err){
-    console.error("Trade error:", err);
-    alert("Trade error");
+  }catch(e){
+    console.log("Trade error",e);
   }
-
 }
 
 
-// ---------------- DEPOSIT ----------------
-
+// ---------- DEPOSIT ----------
 async function deposit(){
 
-  try {
+  const telegram_id = tg?.initDataUnsafe?.user?.id || "12345";
 
-    let telegram_id =
-      tg?.initDataUnsafe?.user?.id || "12345";
-
-    const res = await fetch(
-      "https://liketekvzrazheolmfnj.supabase.co/functions/v1/create-checkout-session",
-      {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-          telegram_id: telegram_id,
-          amount: 10
-        })
-      }
-    );
-
-    const data = await res.json();
-
-    if(!data.url){
-      alert("Checkout session failed");
-      return;
+  const res = await fetch(
+    "https://liketekvzrazheolmfnj.supabase.co/functions/v1/create-checkout-session",
+    {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        telegram_id,
+        amount:10
+      })
     }
+  );
 
-    if (tg) tg.openLink(data.url);
-    else window.location.href = data.url;
+  const data = await res.json();
 
-  } catch(err){
-
-    console.error("Deposit error:", err);
-    alert("Deposit failed");
-
+  if(data.url){
+    if(tg) tg.openLink(data.url);
+    else window.location.href=data.url;
   }
-
 }
 
 
-// ---------------- START APP ----------------
-
+// ---------- START ----------
 function startApp(){
 
   initUser();
 
-  if (tg){
+  if(tg){
     Telegram.WebApp.ready();
     setTimeout(()=>{
       loadBalance();
@@ -255,7 +200,6 @@ function startApp(){
     loadBalance();
     loadMarkets();
   }
-
 }
 
 startApp();
