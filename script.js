@@ -2,10 +2,8 @@ console.log("SAFE SCRIPT LOADED");
 
 // ---------------- TELEGRAM INIT ----------------
 
-// Detect Telegram environment safely
 let tg = window.Telegram?.WebApp;
 
-// Show username if inside Telegram
 if (tg) {
 
   tg.expand();
@@ -20,7 +18,6 @@ if (tg) {
 
 } else {
 
-  // Browser testing mode
   document.getElementById("user").innerText =
     "Opened outside Telegram (test mode)";
 }
@@ -34,19 +31,16 @@ async function loadBalance(){
 
     let telegram_id;
 
-    // Get real Telegram ID if inside Telegram
     if (tg && tg.initDataUnsafe?.user?.id){
       telegram_id = tg.initDataUnsafe.user.id;
     } else {
-      telegram_id = "12345"; // fallback for browser testing
+      telegram_id = "12345";
     }
 
-    // Fetch wallet from Supabase REST API
     const res = await fetch(
       "https://liketekvzrazheolmfnj.supabase.co/rest/v1/wallets?telegram_id=eq."+telegram_id,
       {
         headers:{
-          // ⚠️ REPLACE THIS WITH YOUR REAL ANON KEY
           "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE",
           "Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"
         }
@@ -55,7 +49,6 @@ async function loadBalance(){
 
     const data = await res.json();
 
-    // Update balance on screen
     if(data.length>0){
       document.getElementById("balance").innerText =
         "Balance: " + data[0].balance_points + " points";
@@ -71,14 +64,53 @@ async function loadBalance(){
 }
 
 
-// ---------------- TRADE BUTTON ----------------
+// ---------------- TRADE FUNCTION ----------------
 
-function trade(option){
-  alert("You selected: " + option + " (Trading logic next step)");
+async function trade(option){
+
+  try{
+
+    let telegram_id;
+
+    if (tg && tg.initDataUnsafe?.user?.id){
+      telegram_id = tg.initDataUnsafe.user.id;
+    } else {
+      telegram_id = "12345";
+    }
+
+    const res = await fetch(
+      "https://liketekvzrazheolmfnj.supabase.co/functions/v1/place-trade",
+      {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+          telegram_id: telegram_id,
+          market_id: 1,      // temporary test market
+          choice: option,
+          stake: 10          // deduct 10 points for now
+        })
+      }
+    );
+
+    const data = await res.json();
+    console.log("Trade response:", data);
+
+    if(data.success){
+      alert("Trade placed!");
+      loadBalance();   // refresh wallet balance
+    }else{
+      alert("Trade failed");
+    }
+
+  }catch(err){
+    console.error("Trade error:", err);
+    alert("Trade error");
+  }
+
 }
 
 
-// ---------------- DEPOSIT BUTTON ----------------
+// ---------------- DEPOSIT FUNCTION ----------------
 
 async function deposit(){
 
@@ -89,10 +121,9 @@ async function deposit(){
     if (tg && tg.initDataUnsafe?.user?.id){
       telegram_id = tg.initDataUnsafe.user.id;
     } else {
-      telegram_id = "12345"; // browser fallback
+      telegram_id = "12345";
     }
 
-    // Call backend to create Stripe checkout session
     const res = await fetch(
       "https://liketekvzrazheolmfnj.supabase.co/functions/v1/create-checkout-session",
       {
@@ -113,9 +144,8 @@ async function deposit(){
       return;
     }
 
-    // Open Stripe safely outside Telegram iframe
     if (tg) {
-      tg.openLink(data.url);
+      tg.openLink(data.url);   // open Stripe outside Telegram iframe
     } else {
       window.location.href = data.url;
     }
@@ -130,6 +160,6 @@ async function deposit(){
 }
 
 
-// ---------------- AUTO LOAD BALANCE ON START ----------------
+// ---------------- AUTO LOAD BALANCE ----------------
 
 loadBalance();
