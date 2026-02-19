@@ -92,7 +92,7 @@ async function trade(option){
           telegram_id: telegram_id,
           market_id: "65bc2ad9-b335-40b6-b60f-12bdd2964afa",
           choice: option,
-          stake: 10
+          stake: Number(document.getElementById("stake").value || 0)
         })
       }
     );
