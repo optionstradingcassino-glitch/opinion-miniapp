@@ -4,16 +4,16 @@
   <meta charset="UTF-8">
   <title>Opinion Trading</title>
 
-  <!-- Telegram Mini App SDK -->
+  <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Your JS logic -->
+  <!-- Your script -->
   <script src="script.js" defer></script>
 
   <style>
     body{
       font-family: Arial, sans-serif;
-      background:#0f172a;   /* dark premium look */
+      background:#0f172a;
       color:white;
       text-align:center;
       padding:25px;
@@ -24,19 +24,20 @@
     }
 
     input{
-      padding:10px;
-      border-radius:8px;
+      padding:12px;
+      border-radius:12px;
       border:none;
-      margin:10px;
-      width:180px;
+      margin:15px auto;
+      width:220px;
       text-align:center;
       font-size:16px;
+      display:block;
     }
 
     button{
-      padding:12px 20px;
+      padding:12px 24px;
       margin:10px;
-      border-radius:10px;
+      border-radius:12px;
       border:none;
       font-size:16px;
       cursor:pointer;
@@ -50,38 +51,46 @@
     .yes{ background:#22c55e; color:white; }
     .no{ background:#ef4444; color:white; }
     .deposit{ background:#3b82f6; color:white; }
+
+    .market{
+      margin:25px auto;
+      padding:20px;
+      border:1px solid #334155;
+      border-radius:15px;
+      max-width:320px;
+    }
+
+    hr{
+      margin:25px 0;
+      border-color:#334155;
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- USER NAME (filled by script.js) -->
+  <!-- Username -->
   <h2 id="user">Loading Telegram user...</h2>
 
-  <!-- WALLET BALANCE (filled dynamically) -->
+  <!-- Wallet balance -->
   <h3 id="balance">Balance: loading...</h3>
 
   <hr>
 
-  <!-- DEMO MARKET QUESTION -->
-  <div id="markets">
-  Loading markets...
-</div>
-
-
-  <!-- ✅ NEW: STAKE INPUT -->
+  <!-- Stake input shared by all markets -->
   <input id="stake" type="number" placeholder="Enter points" min="1" oninput="updatePreview()">
-<p id="profitPreview"></p>
 
-  <!-- TRADE BUTTONS -->
-  <div>
-    <button class="yes" onclick="trade('YES')">YES</button>
-    <button class="no" onclick="trade('NO')">NO</button>
+  <!-- Profit preview -->
+  <p id="profitPreview"></p>
+
+  <!-- Markets from Supabase appear here -->
+  <div id="markets">
+    Loading markets...
   </div>
 
   <hr>
 
-  <!-- DEPOSIT BUTTON -->
+  <!-- Deposit button -->
   <button class="deposit" onclick="deposit()">Deposit €10</button>
 
 </body>
