@@ -203,3 +203,5 @@ function startApp(){
 }
 
 startApp();
+
+window.tradeMarket = tradeMarket;
