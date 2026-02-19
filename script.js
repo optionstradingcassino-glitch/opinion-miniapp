@@ -41,8 +41,8 @@ async function loadBalance(){
       "https://liketekvzrazheolmfnj.supabase.co/rest/v1/wallets?telegram_id=eq."+telegram_id,
       {
         headers:{
-          "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE",
-          "Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"
+          "apikey":"PASTE_YOUR_SUPABASE_ANON_KEY_HERE",
+          "Authorization":"Bearer PASTE_YOUR_SUPABASE_ANON_KEY_HERE"
         }
       }
     );
@@ -85,9 +85,9 @@ async function trade(option){
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
           telegram_id: telegram_id,
-          market_id: 1,      // temporary test market
+          market_id: "65bc2ad9-b335-40b6-b60f-12bdd2964afa",  // ✅ YOUR REAL UUID
           choice: option,
-          stake: 10          // deduct 10 points for now
+          stake: 10
         })
       }
     );
@@ -97,7 +97,7 @@ async function trade(option){
 
     if(data.success){
       alert("Trade placed!");
-      loadBalance();   // refresh wallet balance
+      loadBalance();   // refresh wallet after deduction
     }else{
       alert("Trade failed");
     }
@@ -145,7 +145,7 @@ async function deposit(){
     }
 
     if (tg) {
-      tg.openLink(data.url);   // open Stripe outside Telegram iframe
+      tg.openLink(data.url);
     } else {
       window.location.href = data.url;
     }
