@@ -1,3 +1,5 @@
+console.log("NEW VERSION LOADED");
+
 // Detect Telegram WebApp safely
 let tg = window.Telegram?.WebApp;
 
@@ -15,61 +17,65 @@ if (tg) {
 
 } else {
 
-  console.log("Opened outside Telegram");
+  console.log("Opened outside Telegram (browser test)");
   document.getElementById("user").innerText =
     "Opened outside Telegram (test mode)";
 
 }
 
-// --- TRADE BUTTON ---
-function trade(option) {
+
+// -------- TRADE BUTTON --------
+function trade(option){
   alert("You selected: " + option + " (Trading logic later)");
 }
 
 
-// --- DEPOSIT BUTTON ---
-async function deposit() {
+// -------- DEPOSIT BUTTON --------
+async function deposit(){
 
   try {
 
     let telegram_id;
 
-    // If inside Telegram, use real user ID
-    if (tg && tg.initDataUnsafe?.user?.id) {
+    // Use real Telegram ID if available
+    if (tg && tg.initDataUnsafe?.user?.id){
       telegram_id = tg.initDataUnsafe.user.id;
     } else {
       // fallback for browser testing
-      console.log("Testing outside Telegram → using dummy ID");
       telegram_id = "12345";
+      console.log("Using fallback telegram_id for testing:", telegram_id);
     }
 
-    const res = await fetch(
-      "https://liketekvzrazheolmfnj.supabase.co/functions/v1/create-checkout-session",
+    const response = await fetch(
+      "https://YOURPROJECT.supabase.co/functions/v1/create-checkout-session",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type":"application/json"
+        },
         body: JSON.stringify({
           telegram_id: telegram_id,
-          amount: 10   // default €10 deposit (change later if needed)
+          amount: 10
         })
       }
     );
 
-    const data = await res.json();
+    const data = await response.json();
 
-    if (!data.url) {
-      alert("Failed to create checkout session");
-      console.error(data);
+    console.log("Checkout response:", data);
+
+    if(!data.url){
+      alert("Checkout session failed");
       return;
     }
 
-    // redirect to Stripe checkout
+    // Redirect to Stripe dynamic checkout
     window.location.href = data.url;
 
-  } catch (err) {
+  } catch(err){
 
     console.error("Deposit error:", err);
-    alert("Deposit failed. Check console.");
+    alert("Deposit failed — check console");
 
   }
 
