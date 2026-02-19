@@ -88,24 +88,37 @@ markets = markets.filter(m => m.status === "open");
 
     for(const m of markets){
 
-      html += `
-        <div class="market">
-          <h3>${m.question}</h3>
+// calculate pools
+const yes = m.yes_pool || 0;
+const no = m.no_pool || 0;
+const total = yes + no;
 
-          <input id="stake_${m.id}" type="number"
-            placeholder="Enter points"
-            oninput="updatePreviewMarket('${m.id}')">
+// dynamic odds
+const yesOdds = yes > 0 ? (total / yes).toFixed(2) : "1.00";
+const noOdds  = no  > 0 ? (total / no).toFixed(2) : "1.00";
 
-          <p id="preview_${m.id}"></p>
+html += `
+  <div class="market">
+    <h3>${m.question}</h3>
 
-          <button class="yes"
-            onclick="tradeMarket('${m.id}','YES')">YES</button>
+    <input id="stake_${m.id}" type="number"
+      placeholder="Enter points"
+      oninput="updatePreviewMarket('${m.id}')">
 
-          <button class="no"
-            onclick="tradeMarket('${m.id}','NO')">NO</button>
-        </div>
-      `;
-    }
+    <p id="preview_${m.id}"></p>
+
+    <button class="yes"
+      onclick="tradeMarket('${m.id}','YES')">
+      YES (${yesOdds}x)
+    </button>
+
+    <button class="no"
+      onclick="tradeMarket('${m.id}','NO')">
+      NO (${noOdds}x)
+    </button>
+  </div>
+`;
+
 
     document.getElementById("markets").innerHTML = html;
 
