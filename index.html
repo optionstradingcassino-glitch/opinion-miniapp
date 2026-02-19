@@ -67,7 +67,8 @@
   <h3>Will it rain tomorrow?</h3>
 
   <!-- ✅ NEW: STAKE INPUT -->
-  <input id="stake" type="number" placeholder="Enter points" min="1">
+  <input id="stake" type="number" placeholder="Enter points" min="1" oninput="updatePreview()">
+<p id="profitPreview"></p>
 
   <!-- TRADE BUTTONS -->
   <div>
