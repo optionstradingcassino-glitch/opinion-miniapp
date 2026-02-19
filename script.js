@@ -47,7 +47,7 @@ async function deposit(){
     }
 
     const response = await fetch(
-      "https://YOURPROJECT.supabase.co/functions/v1/create-checkout-session",
+      "https://liketekvzrazheolmfnj.supabase.co/functions/v1/create-checkout-session",
       {
         method: "POST",
         headers: {
