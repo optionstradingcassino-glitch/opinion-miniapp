@@ -85,9 +85,54 @@ function updatePreview(){
 }
 
 
-// ---------------- TRADE FUNCTION ----------------
+// ---------------- LOAD MARKETS ----------------
 
-async function trade(option){
+async function loadMarkets(){
+
+  try{
+
+    const res = await fetch(
+      "https://liketekvzrazheolmfnj.supabase.co/rest/v1/markets?status=eq.open",
+      {
+        headers:{
+          "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE",
+          "Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"
+        }
+      }
+    );
+
+    const markets = await res.json();
+
+    if(!markets.length){
+      document.getElementById("markets").innerHTML = "No active markets";
+      return;
+    }
+
+    let html = "";
+
+    for(const m of markets){
+
+      html += `
+        <div style="margin:20px;padding:15px;border:1px solid #334155;border-radius:10px;">
+          <h3>${m.question}</h3>
+          <button class="yes" onclick="tradeMarket('${m.id}','YES')">YES</button>
+          <button class="no" onclick="tradeMarket('${m.id}','NO')">NO</button>
+        </div>
+      `;
+    }
+
+    document.getElementById("markets").innerHTML = html;
+
+  }catch(err){
+    console.error("Market load error:", err);
+  }
+
+}
+
+
+// ---------------- TRADE PER MARKET ----------------
+
+async function tradeMarket(marketId, option){
 
   try{
 
@@ -113,7 +158,7 @@ async function trade(option){
         headers:{ "Content-Type":"application/json" },
         body:JSON.stringify({
           telegram_id: telegram_id,
-          market_id: "65bc2ad9-b335-40b6-b60f-12bdd2964afa",
+          market_id: marketId,
           choice: option,
           stake: stakeValue
         })
@@ -140,7 +185,7 @@ async function trade(option){
 }
 
 
-// ---------------- DEPOSIT FUNCTION ----------------
+// ---------------- DEPOSIT ----------------
 
 async function deposit(){
 
@@ -190,7 +235,7 @@ async function deposit(){
 }
 
 
-// ---------------- SAFE START ----------------
+// ---------------- START APP SAFELY ----------------
 
 function startApp(){
 
@@ -198,9 +243,13 @@ function startApp(){
 
   if (tg){
     Telegram.WebApp.ready();
-    setTimeout(loadBalance, 500);
+    setTimeout(()=>{
+      loadBalance();
+      loadMarkets();   // ⭐ NEW: load markets automatically
+    },500);
   }else{
     loadBalance();
+    loadMarkets();
   }
 
 }
