@@ -4,7 +4,6 @@ console.log("SAFE SCRIPT LOADED");
 
 let tg = window.Telegram?.WebApp;
 
-// Set username display
 function initUser(){
 
   if (tg) {
@@ -39,15 +38,15 @@ async function loadBalance(){
     if (tg && tg.initDataUnsafe?.user?.id){
       telegram_id = tg.initDataUnsafe.user.id;
     } else {
-      telegram_id = "12345"; // browser test fallback
+      telegram_id = "12345";
     }
 
     const res = await fetch(
       "https://liketekvzrazheolmfnj.supabase.co/rest/v1/wallets?telegram_id=eq."+telegram_id,
       {
         headers:{
-          "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE",
-          "Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"
+          "apikey":"",eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8ZoNJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE
+          "Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8ZoNJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"
         }
       }
     );
@@ -69,6 +68,23 @@ async function loadBalance(){
 }
 
 
+// ---------------- PROFIT PREVIEW ----------------
+
+function updatePreview(){
+
+  const stake = Number(document.getElementById("stake").value || 0);
+
+  if(stake>0){
+    const payout = Math.floor(stake * 1.8);
+    document.getElementById("profitPreview").innerText =
+      "If you win → " + payout + " points";
+  }else{
+    document.getElementById("profitPreview").innerText = "";
+  }
+
+}
+
+
 // ---------------- TRADE FUNCTION ----------------
 
 async function trade(option){
@@ -83,6 +99,13 @@ async function trade(option){
       telegram_id = "12345";
     }
 
+    const stakeValue = Number(document.getElementById("stake").value || 0);
+
+    if(stakeValue <= 0){
+      alert("Enter stake first");
+      return;
+    }
+
     const res = await fetch(
       "https://liketekvzrazheolmfnj.supabase.co/functions/v1/place-trade",
       {
@@ -92,7 +115,7 @@ async function trade(option){
           telegram_id: telegram_id,
           market_id: "65bc2ad9-b335-40b6-b60f-12bdd2964afa",
           choice: option,
-          stake: Number(document.getElementById("stake").value || 0)
+          stake: stakeValue
         })
       }
     );
@@ -102,7 +125,9 @@ async function trade(option){
 
     if(data.success){
       alert("Trade placed!");
-      loadBalance(); // refresh wallet
+      document.getElementById("stake").value="";
+      updatePreview();
+      loadBalance();
     }else{
       alert("Trade failed");
     }
@@ -165,9 +190,8 @@ async function deposit(){
 }
 
 
-// ---------------- SAFE INITIALIZATION ----------------
+// ---------------- SAFE START ----------------
 
-// Wait until Telegram is fully ready before loading balance
 function startApp(){
 
   initUser();
