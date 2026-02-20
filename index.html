@@ -4,13 +4,8 @@
   <meta charset="UTF-8">
   <title>Opinion Trading</title>
 
-  <!-- Telegram SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Your script -->
-  <script src="./script.jsv=3"></script>
-
   <style>
+    /* -------- BASIC DARK THEME -------- */
     body{
       font-family: Arial, sans-serif;
       background:#0f172a;
@@ -19,24 +14,21 @@
       padding:25px;
     }
 
-    h2,h3,p{
-      margin:12px 0;
-    }
+    h2,h3,p{ margin:12px 0; }
 
     input{
       padding:12px;
       border-radius:12px;
       border:none;
-      margin:15px auto;
-      width:220px;
+      margin:10px;
+      width:200px;
       text-align:center;
       font-size:16px;
-      display:block;
     }
 
     button{
-      padding:12px 24px;
-      margin:10px;
+      padding:12px 22px;
+      margin:8px;
       border-radius:12px;
       border:none;
       font-size:16px;
@@ -44,9 +36,7 @@
       transition:0.2s;
     }
 
-    button:hover{
-      transform:scale(1.05);
-    }
+    button:hover{ transform:scale(1.05); }
 
     .yes{ background:#22c55e; color:white; }
     .no{ background:#ef4444; color:white; }
@@ -57,7 +47,7 @@
       padding:20px;
       border:1px solid #334155;
       border-radius:15px;
-      max-width:320px;
+      max-width:340px;
     }
 
     hr{
@@ -69,29 +59,34 @@
 
 <body>
 
-  <!-- Username -->
+  <!-- ---------- TELEGRAM USERNAME ---------- -->
   <h2 id="user">Loading Telegram user...</h2>
 
-  <!-- Wallet balance -->
+  <!-- ---------- WALLET BALANCE ---------- -->
   <h3 id="balance">Balance: loading...</h3>
 
   <hr>
 
-  <!-- Stake input shared by all markets -->
-  <input id="stake" type="number" placeholder="Enter points" min="1" oninput="updatePreview()">
-
-  <!-- Profit preview -->
-  <p id="profitPreview"></p>
-
-  <!-- Markets from Supabase appear here -->
+  <!-- ---------- MARKETS FROM SUPABASE ---------- -->
   <div id="markets">
     Loading markets...
   </div>
 
   <hr>
 
-  <!-- Deposit button -->
+  <!-- ---------- DEPOSIT BUTTON ---------- -->
   <button class="deposit" onclick="deposit()">Deposit €10</button>
+
+  <!-- ================================================= -->
+  <!-- IMPORTANT: SCRIPTS MUST BE AT BOTTOM OF BODY      -->
+  <!-- Telegram SDK must load BEFORE your script.js      -->
+  <!-- ================================================= -->
+
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Your app logic (cache-busted so Telegram loads latest version) -->
+  <script src="/script.js?v=5"></script>
 
 </body>
 </html>
