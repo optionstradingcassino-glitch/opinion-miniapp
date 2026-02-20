@@ -1,41 +1,55 @@
-console.log("SAFE SCRIPT LOADED");
+/* =========================================================
+   OPINION TRADING MINI APP SCRIPT
+   Pool-based dynamic odds version
+   ========================================================= */
 
+/* ================== 🔑 PUT YOUR ANON KEY HERE ================== */
+
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
+
+/* =============================================================== */
+
+console.log("SCRIPT LOADED");
+
+/* ---------- Telegram object ---------- */
 let tg = window.Telegram?.WebApp;
 
-// ---------- INIT USER ----------
+
+/* =========================================================
+   USER DISPLAY
+   ========================================================= */
 function initUser(){
 
-  if (tg) {
-
+  if(tg && tg.initDataUnsafe?.user){
     tg.expand();
 
-    if (tg.initDataUnsafe?.user) {
-      document.getElementById("user").innerText =
-        "Hello, " + tg.initDataUnsafe.user.first_name;
-    } else {
-      document.getElementById("user").innerText =
-        "Hello, Telegram user detected";
-    }
-
-  } else {
     document.getElementById("user").innerText =
-      "Opened outside Telegram";
+      "Hello, " + tg.initDataUnsafe.user.first_name;
   }
+  else{
+    document.getElementById("user").innerText =
+      "Opened outside Telegram (test mode)";
+  }
+
 }
 
-// ---------- LOAD BALANCE ----------
+
+/* =========================================================
+   LOAD WALLET BALANCE
+   ========================================================= */
 async function loadBalance(){
 
   try{
 
-    const telegram_id = tg?.initDataUnsafe?.user?.id || "12345";
+    const telegram_id =
+      tg?.initDataUnsafe?.user?.id || "12345"; // fallback for browser testing
 
     const res = await fetch(
-      "https://liketekvzrazheolmfnj.supabase.co/rest/v1/wallets?select=*&telegram_id=eq."+telegram_id,
+      `https://liketekvzrazheolmfnj.supabase.co/rest/v1/wallets?select=*&telegram_id=eq.${telegram_id}`,
       {
         headers:{
-          "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE",
-          "Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
         }
       }
     );
@@ -45,13 +59,16 @@ async function loadBalance(){
     document.getElementById("balance").innerText =
       "Balance: " + (data[0]?.balance_points || 0) + " points";
 
-  }catch(e){
-    console.log("Balance error",e);
+  }catch(err){
+    console.log("Balance error:",err);
   }
+
 }
 
 
-// ---------- LOAD MARKETS WITH POOL ODDS ----------
+/* =========================================================
+   LOAD MARKETS + CALCULATE POOL ODDS
+   ========================================================= */
 async function loadMarkets(){
 
   try{
@@ -60,16 +77,16 @@ async function loadMarkets(){
       "https://liketekvzrazheolmfnj.supabase.co/rest/v1/markets?select=*",
       {
         headers:{
-          "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE",
-          "Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
         }
       }
     );
 
     let markets = await res.json();
 
-    // only open markets
-    markets = markets.filter(m => m.status === "open");
+    // show only open markets
+    markets = markets.filter(m => m.status==="open");
 
     if(!markets.length){
       document.getElementById("markets").innerHTML="No active markets";
@@ -82,50 +99,60 @@ async function loadMarkets(){
 
       const yes = m.yes_pool || 0;
       const no  = m.no_pool  || 0;
-      const total = yes+no;
+      const total = yes + no;
 
+      // dynamic pool odds
       const yesOdds = yes>0 ? (total/yes).toFixed(2) : "1.00";
       const noOdds  = no>0  ? (total/no ).toFixed(2) : "1.00";
 
       html+=`
         <div class="market">
+
           <h3>${m.question}</h3>
 
-          <input id="stake_${m.id}" type="number"
-            placeholder="Enter points">
+          <!-- stake input per market -->
+          <input id="stake_${m.id}" type="number" placeholder="Enter points">
 
+          <!-- YES button with live odds -->
           <button class="yes"
             onclick="tradeMarket('${m.id}','YES')">
             YES (${yesOdds}x)
           </button>
 
+          <!-- NO button with live odds -->
           <button class="no"
             onclick="tradeMarket('${m.id}','NO')">
             NO (${noOdds}x)
           </button>
+
         </div>
       `;
     }
 
     document.getElementById("markets").innerHTML=html;
 
-  }catch(e){
-    console.log("Market load error",e);
+  }catch(err){
+    console.log("Market load error:",err);
   }
+
 }
 
 
-// ---------- TRADE ----------
+/* =========================================================
+   PLACE TRADE
+   ========================================================= */
 async function tradeMarket(marketId,option){
 
   try{
 
-    const telegram_id = tg?.initDataUnsafe?.user?.id || "12345";
+    const telegram_id =
+      tg?.initDataUnsafe?.user?.id || "12345";
+
     const stake =
-      Number(document.getElementById("stake_"+marketId).value||0);
+      Number(document.getElementById("stake_"+marketId)?.value || 0);
 
     if(!stake){
-      alert("Enter stake");
+      alert("Enter stake first");
       return;
     }
 
@@ -146,23 +173,31 @@ async function tradeMarket(marketId,option){
     const data = await res.json();
 
     if(data.success){
+
       alert("Trade placed!");
-      loadBalance();
-      loadMarkets(); // refresh odds after trade
+
+      loadBalance();   // refresh wallet
+      loadMarkets();   // refresh pools + odds immediately
+
     }else{
-      alert("Trade failed");
+      alert(data.error || "Trade failed");
     }
 
-  }catch(e){
-    console.log("Trade error",e);
+  }catch(err){
+    console.log("Trade error:",err);
+    alert("Trade failed");
   }
+
 }
 
 
-// ---------- DEPOSIT ----------
+/* =========================================================
+   DEPOSIT VIA STRIPE
+   ========================================================= */
 async function deposit(){
 
-  const telegram_id = tg?.initDataUnsafe?.user?.id || "12345";
+  const telegram_id =
+    tg?.initDataUnsafe?.user?.id || "12345";
 
   const res = await fetch(
     "https://liketekvzrazheolmfnj.supabase.co/functions/v1/create-checkout-session",
@@ -179,13 +214,21 @@ async function deposit(){
   const data = await res.json();
 
   if(data.url){
-    if(tg) tg.openLink(data.url);
-    else window.location.href=data.url;
+
+    if(tg){
+      tg.openLink(data.url);
+    }else{
+      window.location.href=data.url;
+    }
+
   }
+
 }
 
 
-// ---------- START ----------
+/* =========================================================
+   START APP
+   ========================================================= */
 function startApp(){
 
   initUser();
@@ -196,12 +239,19 @@ function startApp(){
       loadBalance();
       loadMarkets();
     },500);
-  }else{
+  }
+  else{
     loadBalance();
     loadMarkets();
   }
+
 }
 
 startApp();
 
+
+/* =========================================================
+   IMPORTANT:
+   Make tradeMarket visible globally for button onclick
+   ========================================================= */
 window.tradeMarket = tradeMarket;
