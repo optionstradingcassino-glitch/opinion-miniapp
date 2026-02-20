@@ -243,6 +243,7 @@ function startApp(){
   else{
     loadBalance();
     loadMarkets();
+     setInterval(loadMarkets, 5000);  // refresh odds every 5 sec
   }
 
 }
