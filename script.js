@@ -1,37 +1,66 @@
-// ===== SUPABASE SETUP =====
-// Replace these with your real values
+// ===============================
+// SUPABASE CONFIG  (PUT YOURS)
+// ===============================
 const SUPABASE_URL = "https://liketekvzrazheolmfnj.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
 
-// Import from CDN
+// Load Supabase from CDN
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 // Create client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Expose for console testing
 window.supabase = supabase;
 
-console.log("Auth + Trading script loaded");
+console.log("SCRIPT LOADED");
 
 
-// ===== TELEGRAM USER DETECTION =====
+// ===============================
+// TELEGRAM USER ID
+// ===============================
 let telegramId = null;
 
 if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
   telegramId = String(window.Telegram.WebApp.initDataUnsafe.user.id);
 } else {
-  telegramId = "test_telegram"; // fallback for browser testing
+  telegramId = "test_user"; // browser testing fallback
 }
 
-console.log("Telegram ID:", telegramId);
+console.log("Telegram:", telegramId);
 
 
-// =====================================================
-// =============== AUTH FUNCTIONS =======================
-// =====================================================
+// ===============================
+// CHECK SESSION ON LOAD
+// ===============================
+async function checkUserSession(){
 
-// ===== SIGNUP =====
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if(!session){
+
+    console.log("NO SESSION → SHOW LOGIN");
+
+    document.getElementById("loginBox").style.display = "block";
+    document.getElementById("appBox").style.display = "none";
+
+  } else {
+
+    console.log("SESSION FOUND:", session.user.email);
+
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("appBox").style.display = "block";
+
+    await linkUser(session.user);
+
+    // LOAD YOUR APP ONLY HERE
+    loadBalance();
+    loadMarkets();
+  }
+}
+
+
+// ===============================
+// SIGNUP
+// ===============================
 async function signup(){
 
   const email = document.getElementById("email").value;
@@ -47,14 +76,16 @@ async function signup(){
     return;
   }
 
-  // Save user to your custom users table
   await linkUser(data.user);
 
-  alert("Signup successful!");
+  alert("Signup success");
+  checkUserSession();
 }
 
 
-// ===== LOGIN =====
+// ===============================
+// LOGIN
+// ===============================
 async function login(){
 
   const email = document.getElementById("email").value;
@@ -72,11 +103,14 @@ async function login(){
 
   await linkUser(data.user);
 
-  alert("Login successful!");
+  alert("Login success");
+  checkUserSession();
 }
 
 
-// ===== LINK AUTH USER TO TELEGRAM =====
+// ===============================
+// LINK USER TO DB
+// ===============================
 async function linkUser(user){
 
   if(!user) return;
@@ -93,20 +127,31 @@ async function linkUser(user){
 }
 
 
-// =====================================================
-// =============== YOUR EXISTING APP ====================
-// =====================================================
-
-// NOTE: keep your existing wallet load / market load / trade code BELOW this
-
-// Example:
-// loadBalance();
-// loadMarkets();
+// ===============================
+// LOGOUT (optional)
+// ===============================
+async function logout(){
+  await supabase.auth.signOut();
+  location.reload();
+}
 
 
-// =====================================================
-// =============== OPTIONAL CONSOLE TEST ================
-// =====================================================
+// ===============================
+// YOUR EXISTING APP FUNCTIONS
+// ===============================
 
-// Now you can test in console:
-// supabase.auth.signUp({ email:"a@a.com", password:"12345678" })
+// keep your real implementations here
+
+async function loadBalance(){
+  console.log("LOAD BALANCE HERE");
+}
+
+async function loadMarkets(){
+  console.log("LOAD MARKETS HERE");
+}
+
+
+// ===============================
+// START APP
+// ===============================
+checkUserSession();
