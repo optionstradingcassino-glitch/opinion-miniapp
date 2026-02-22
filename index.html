@@ -4,89 +4,90 @@
   <meta charset="UTF-8">
   <title>Opinion Trading</title>
 
+  <!-- Telegram Mini App Script -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
-    /* -------- BASIC DARK THEME -------- */
     body{
-      font-family: Arial, sans-serif;
-      background:#0f172a;
+      font-family: Arial;
+      background:#111;
       color:white;
       text-align:center;
-      padding:25px;
+      padding:20px;
     }
 
-    h2,h3,p{ margin:12px 0; }
-
     input{
-      padding:12px;
-      border-radius:12px;
+      padding:10px;
+      margin:5px;
+      width:220px;
+      border-radius:6px;
       border:none;
-      margin:10px;
-      width:200px;
-      text-align:center;
-      font-size:16px;
     }
 
     button{
-      padding:12px 22px;
-      margin:8px;
-      border-radius:12px;
+      padding:10px 15px;
+      margin:5px;
       border:none;
-      font-size:16px;
+      border-radius:6px;
       cursor:pointer;
-      transition:0.2s;
+      font-weight:bold;
     }
 
-    button:hover{ transform:scale(1.05); }
+    .yes{ background:#2ecc71; color:black; }
+    .no{ background:#e74c3c; color:white; }
+    .primary{ background:#3498db; color:white; }
+    .logout{ background:#555; color:white; }
 
-    .yes{ background:#22c55e; color:white; }
-    .no{ background:#ef4444; color:white; }
-    .deposit{ background:#3b82f6; color:white; }
-
-    .market{
-      margin:25px auto;
-      padding:20px;
-      border:1px solid #334155;
-      border-radius:15px;
-      max-width:340px;
-    }
-
-    hr{
-      margin:25px 0;
-      border-color:#334155;
+    #marketCard{
+      background:#1c1c1c;
+      margin:15px auto;
+      padding:15px;
+      border-radius:10px;
+      max-width:420px;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- ---------- TELEGRAM USERNAME ---------- -->
-  <h2 id="user">Loading Telegram user...</h2>
+<!-- ================= LOGIN BOX ================= -->
+<div id="loginBox">
 
-  <!-- ---------- WALLET BALANCE ---------- -->
-  <h3 id="balance">Balance: loading...</h3>
+  <h2>Login / Signup</h2>
+
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+
+  <button class="primary" onclick="signup()">Sign Up</button>
+  <button class="primary" onclick="login()">Login</button>
+
+</div>
+
+
+<!-- ================= MAIN APP ================= -->
+<div id="appBox" style="display:none;">
+
+  <h2>Opinion Trading</h2>
+
+  <div id="userEmail"></div>
+
+  <h3>Balance: <span id="balance">Loading...</span> pts</h3>
+
+  <button class="logout" onclick="logout()">Logout</button>
 
   <hr>
 
-  <!-- ---------- MARKETS FROM SUPABASE ---------- -->
+  <h3>Markets</h3>
+
   <div id="markets">
     Loading markets...
   </div>
 
-  <hr>
+</div>
 
-  <!-- ---------- DEPOSIT BUTTON ---------- -->
-  <button class="deposit" onclick="deposit()">Deposit €10</button>
 
-  <!-- ================================================= -->
-  <!-- IMPORTANT: SCRIPTS MUST BE AT BOTTOM OF BODY      -->
-  <!-- Telegram SDK must load BEFORE your script.js      -->
-  <!-- ================================================= -->
-
-  <!-- Telegram Mini App SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Your app logic (cache-busted so Telegram loads latest version) -->
-  <script src="/script.js?v=5"></script>
+<!-- ================= LOAD SCRIPT ================= -->
+<script type="module" src="script.js"></script>
 
 </body>
 </html>
