@@ -1,13 +1,11 @@
 // ========================================
-// SUPABASE CONFIG (USE YOUR OWN KEYS)
+// SUPABASE CONFIG (PUT YOUR REAL ANON KEY)
 // ========================================
 const SUPABASE_URL = "https://liketekvzrazheolmfnj.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
 
-// Load Supabase from CDN
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// Create Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 window.supabase = supabase;
 
@@ -15,22 +13,21 @@ console.log("Script Loaded");
 
 
 // ========================================
-// GET TELEGRAM USER ID
+// TELEGRAM USER ID
 // ========================================
 let telegramId = null;
 
-// If inside Telegram
 if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
   telegramId = String(window.Telegram.WebApp.initDataUnsafe.user.id);
 } else {
-  telegramId = "test_user"; // for browser testing
+  telegramId = "test_user"; // browser testing
 }
 
 console.log("Telegram ID:", telegramId);
 
 
 // ========================================
-// CHECK USER SESSION ON APP LOAD
+// CHECK SESSION ON LOAD
 // ========================================
 async function checkUserSession() {
 
@@ -50,10 +47,8 @@ async function checkUserSession() {
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("appBox").style.display = "block";
 
-    // Ensure user exists in public.users
     await linkUser(session.user);
 
-    // Load app data
     await loadBalance();
     await loadMarkets();
   }
@@ -61,7 +56,7 @@ async function checkUserSession() {
 
 
 // ========================================
-// SIGN UP
+// SIGNUP
 // ========================================
 async function signup() {
 
@@ -78,7 +73,6 @@ async function signup() {
     return;
   }
 
-  // Link user in our database
   await linkUser(data.user);
 
   alert("Signup successful");
@@ -104,7 +98,6 @@ async function login() {
     return;
   }
 
-  // Link user in our database
   await linkUser(data.user);
 
   alert("Login successful");
@@ -113,15 +106,15 @@ async function login() {
 
 
 // ========================================
-// CREATE OR VERIFY USER IN DATABASE
+// CREATE OR VERIFY USER + WALLET
 // ========================================
 async function linkUser(user) {
 
   if (!user) return;
 
-  console.log("Linking user to DB...");
+  console.log("Linking user...");
 
-  // 1️⃣ Check if user already exists
+  // Check if user exists
   const { data: existingUser, error: selectError } = await supabase
     .from("users")
     .select("*")
@@ -130,42 +123,42 @@ async function linkUser(user) {
 
   if (selectError) {
     console.error("Select error:", selectError);
-    alert("Select Error: " + selectError.message);
+    alert(selectError.message);
     return;
   }
 
-  // 2️⃣ If not exists → Insert new user
+  // If user does not exist → create
   if (!existingUser) {
 
-    const { error: insertError } = await supabase
+    const { error: insertUserError } = await supabase
       .from("users")
       .insert({
-        id: user.id,               // MUST match auth.uid()
+        id: user.id,
         email: user.email,
         telegram_id: telegramId
       });
 
-    if (insertError) {
-      console.error("Insert error:", insertError);
-      alert("Insert Error: " + insertError.message);
+    if (insertUserError) {
+      console.error("User insert error:", insertUserError);
+      alert(insertUserError.message);
       return;
     }
 
-    console.log("User inserted successfully");
+    console.log("User created");
 
-    // 3️⃣ Create wallet automatically
+    // Create wallet
     const { error: walletError } = await supabase
       .from("wallets")
       .insert({
-        uuid: user.id,
+        id: user.id,          // IMPORTANT: must match auth.uid()
         telegram_id: telegramId,
         balance_eur: 0,
         balance_points: 0
       });
 
     if (walletError) {
-      console.error("Wallet creation error:", walletError);
-      alert("Wallet Error: " + walletError.message);
+      console.error("Wallet insert error:", walletError);
+      alert(walletError.message);
       return;
     }
 
@@ -174,15 +167,6 @@ async function linkUser(user) {
   } else {
     console.log("User already exists");
   }
-}
-
-
-// ========================================
-// LOGOUT
-// ========================================
-async function logout() {
-  await supabase.auth.signOut();
-  location.reload();
 }
 
 
@@ -196,7 +180,7 @@ async function loadBalance() {
   const { data, error } = await supabase
     .from("wallets")
     .select("balance_points")
-    .eq("uuid", user.id)
+    .eq("id", user.id)
     .single();
 
   if (error) {
@@ -204,7 +188,8 @@ async function loadBalance() {
     return;
   }
 
-  document.getElementById("balance").innerText = data.balance_points + " pts";
+  document.getElementById("balance").innerText =
+    data.balance_points + " pts";
 }
 
 
@@ -224,8 +209,15 @@ async function loadMarkets() {
   }
 
   console.log("Markets loaded:", data);
+}
 
-  // You can render them here
+
+// ========================================
+// LOGOUT
+// ========================================
+async function logout() {
+  await supabase.auth.signOut();
+  location.reload();
 }
 
 
@@ -234,10 +226,6 @@ async function loadMarkets() {
 // ========================================
 checkUserSession();
 
-
-// ========================================
-// EXPOSE BUTTON FUNCTIONS
-// ========================================
 window.signup = signup;
 window.login = login;
 window.logout = logout;
