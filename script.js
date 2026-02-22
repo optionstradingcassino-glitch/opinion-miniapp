@@ -155,3 +155,9 @@ async function loadMarkets(){
 // START APP
 // ===============================
 checkUserSession();
+
+
+// expose functions to HTML buttons
+window.signup = signup;
+window.login = login;
+window.logout = logout;
