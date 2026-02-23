@@ -2,7 +2,7 @@
 // SUPABASE CONFIG
 // ========================================
 const SUPABASE_URL = "https://liketekvzrazheolmfnj.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"; // ← PUT REAL KEY HERE
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"; // <-- PUT YOUR REAL KEY HERE
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -93,7 +93,7 @@ async function login() {
 
 
 // ========================================
-// STRIPE DEPOSIT (DEBUG VERSION)
+// STRIPE DEPOSIT (FINAL WORKING VERSION)
 // ========================================
 async function deposit() {
 
@@ -110,7 +110,8 @@ async function deposit() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": SUPABASE_ANON_KEY
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           telegram_id: telegramId,
@@ -119,20 +120,9 @@ async function deposit() {
       }
     );
 
-    console.log("Response status:", response.status);
+    const data = await response.json();
 
-    const text = await response.text();
-    console.log("Raw response:", text);
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      alert("Invalid JSON response");
-      return;
-    }
-
-    console.log("Parsed data:", data);
+    console.log("Stripe session response:", data);
 
     if (data.url) {
       window.location.href = data.url;
@@ -170,6 +160,8 @@ async function loadBalance() {
 }
 
 
+// ========================================
+// LOGOUT
 // ========================================
 async function logout() {
   await supabase.auth.signOut();
