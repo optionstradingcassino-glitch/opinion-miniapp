@@ -100,8 +100,6 @@ async function deposit() {
   const amount = prompt("Enter amount in EUR:");
   if (!amount || isNaN(amount)) return;
 
-  console.log("Creating checkout for:", telegramId, amount);
-
   try {
 
     const response = await fetch(
@@ -122,16 +120,14 @@ async function deposit() {
 
     const data = await response.json();
 
-    console.log("Stripe session response:", data);
-
     if (data.url) {
+      // IMPORTANT FIX HERE
       window.top.location.href = data.url;
     } else {
       alert("Checkout creation failed");
     }
 
   } catch (err) {
-    console.log("Deposit error:", err);
     alert("Deposit error");
   }
 }
