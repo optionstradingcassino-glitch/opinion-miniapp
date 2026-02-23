@@ -2,7 +2,7 @@
 // SUPABASE CONFIG
 // ========================================
 const SUPABASE_URL = "https://liketekvzrazheolmfnj.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
+const SUPABASE_ANON_KEY = "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -29,22 +29,28 @@ console.log("Telegram ID:", telegramId);
 
 
 // ========================================
-// CHECK SESSION
+// CHECK SESSION ON LOAD
 // ========================================
 async function checkUserSession() {
 
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
+
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("appBox").style.display = "none";
+
   } else {
 
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("appBox").style.display = "block";
 
     await linkUser(session.user);
+
+    // 🔥 LOAD BALANCE HERE
     await loadBalance();
+
+    // 🔥 LOAD MARKETS HERE
     await loadMarkets();
   }
 }
@@ -69,8 +75,6 @@ async function signup() {
   }
 
   await linkUser(data.user);
-
-  alert("Signup successful");
   checkUserSession();
 }
 
@@ -94,85 +98,68 @@ async function login() {
   }
 
   await linkUser(data.user);
-
-  alert("Login successful");
   checkUserSession();
 }
 
 
 // ========================================
-// LINK USER (FIXED LOGIC)
+// LINK USER + WALLET
 // ========================================
 async function linkUser(user) {
 
   if (!user) return;
 
-  // 1️⃣ Check if telegram_id already exists
+  // Check if telegram_id already exists
   const { data: existingTelegramUser } = await supabase
     .from("users")
     .select("*")
     .eq("telegram_id", telegramId)
     .maybeSingle();
 
-  if (existingTelegramUser) {
+  if (!existingTelegramUser) {
 
-    console.log("Telegram user already exists");
-
-    // Optional: update username if changed
     await supabase
       .from("users")
-      .update({ username: telegramUsername })
-      .eq("telegram_id", telegramId);
+      .insert({
+        id: user.id,
+        email: user.email,
+        telegram_id: telegramId,
+        username: telegramUsername
+      });
 
-    return;
+    await supabase
+      .from("wallets")
+      .insert({
+        id: user.id,
+        telegram_id: telegramId,
+        balance_eur: 0,
+        balance_points: 0
+      });
+
+    console.log("User + Wallet created");
   }
-
-  // 2️⃣ Insert new user
-  const { error: insertError } = await supabase
-    .from("users")
-    .insert({
-      id: user.id,
-      email: user.email,
-      telegram_id: telegramId,
-      username: telegramUsername
-    });
-
-  if (insertError) {
-    alert(insertError.message);
-    return;
-  }
-
-  console.log("User created");
-
-  // 3️⃣ Create wallet
-  await supabase
-    .from("wallets")
-    .insert({
-      id: user.id,
-      telegram_id: telegramId,
-      balance_eur: 0,
-      balance_points: 0
-    });
-
-  console.log("Wallet created");
 }
 
 
 // ========================================
-// LOAD BALANCE
+// LOAD BALANCE (FIXED)
 // ========================================
 async function loadBalance() {
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("wallets")
     .select("balance_points")
     .eq("telegram_id", telegramId)
     .single();
 
-  if (data) {
-    document.getElementById("balance").innerText =
-      data.balance_points + " pts";
+  if (error) {
+    console.error("Balance error:", error);
+    return;
   }
+
+  // ⚠️ IMPORTANT: Only number here
+  document.getElementById("balance").innerText =
+    data.balance_points;
 }
 
 
@@ -181,10 +168,15 @@ async function loadBalance() {
 // ========================================
 async function loadMarkets() {
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("markets")
     .select("*")
     .eq("status", "open");
+
+  if (error) {
+    console.error("Markets error:", error);
+    return;
+  }
 
   console.log("Markets:", data);
 }
@@ -197,6 +189,8 @@ async function logout() {
 }
 
 
+// ========================================
+// START APP
 // ========================================
 checkUserSession();
 
