@@ -23,14 +23,19 @@ if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
 
 
 // ========================================
+// SESSION CHECK
+// ========================================
 async function checkUserSession() {
 
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
+
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("appBox").style.display = "none";
+
   } else {
+
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("appBox").style.display = "block";
 
@@ -40,7 +45,53 @@ async function checkUserSession() {
 
 
 // ========================================
-// DEPOSIT FUNCTION (REAL STRIPE)
+// SIGNUP
+// ========================================
+async function signup() {
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Signup successful");
+  checkUserSession();
+}
+
+
+// ========================================
+// LOGIN
+// ========================================
+async function login() {
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  alert("Login successful");
+  checkUserSession();
+}
+
+
+// ========================================
+// STRIPE DEPOSIT
 // ========================================
 async function deposit() {
 
@@ -90,13 +141,17 @@ async function loadBalance() {
 }
 
 
+// ========================================
 async function logout() {
   await supabase.auth.signOut();
   location.reload();
 }
 
 
+// ========================================
 checkUserSession();
 
+window.signup = signup;
+window.login = login;
 window.deposit = deposit;
 window.logout = logout;
