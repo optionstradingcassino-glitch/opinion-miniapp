@@ -1,5 +1,5 @@
 // ========================================
-// SUPABASE CONFIG (PUT YOUR REAL ANON KEY)
+// SUPABASE CONFIG
 // ========================================
 const SUPABASE_URL = "https://liketekvzrazheolmfnj.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
@@ -20,7 +20,7 @@ let telegramId = null;
 if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
   telegramId = String(window.Telegram.WebApp.initDataUnsafe.user.id);
 } else {
-  telegramId = "test_user"; // browser testing
+  telegramId = "test_user"; // browser testing fallback
 }
 
 console.log("Telegram ID:", telegramId);
@@ -114,58 +114,63 @@ async function linkUser(user) {
 
   console.log("Linking user...");
 
-  // Check if user exists
-  const { data: existingUser, error: selectError } = await supabase
+  // ---------------------------
+  // CHECK IF USER EXISTS
+  // ---------------------------
+  const { data: existingUser } = await supabase
     .from("users")
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (selectError) {
-    console.error("Select error:", selectError);
-    alert(selectError.message);
-    return;
-  }
-
-  // If user does not exist → create
   if (!existingUser) {
 
     const { error: insertUserError } = await supabase
       .from("users")
       .insert({
-        id: user.id,
+        id: user.id,               // MUST match auth.uid()
         email: user.email,
         telegram_id: telegramId
       });
 
     if (insertUserError) {
-      console.error("User insert error:", insertUserError);
       alert(insertUserError.message);
       return;
     }
 
     console.log("User created");
+  } else {
+    console.log("User already exists");
+  }
 
-    // Create wallet
+  // ---------------------------
+  // CHECK IF WALLET EXISTS
+  // ---------------------------
+  const { data: existingWallet } = await supabase
+    .from("wallets")
+    .select("*")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!existingWallet) {
+
     const { error: walletError } = await supabase
       .from("wallets")
       .insert({
-        id: user.id,          // IMPORTANT: must match auth.uid()
+        id: user.id,               // MUST match auth.uid()
         telegram_id: telegramId,
         balance_eur: 0,
         balance_points: 0
       });
 
     if (walletError) {
-      console.error("Wallet insert error:", walletError);
       alert(walletError.message);
       return;
     }
 
     console.log("Wallet created");
-
   } else {
-    console.log("User already exists");
+    console.log("Wallet already exists");
   }
 }
 
