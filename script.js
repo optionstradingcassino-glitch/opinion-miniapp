@@ -125,7 +125,7 @@ async function deposit() {
     console.log("Stripe session response:", data);
 
     if (data.url) {
-      window.location.href = data.url;
+      window.top.location.href = data.url;
     } else {
       alert("Checkout creation failed");
     }
