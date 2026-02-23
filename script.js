@@ -2,7 +2,7 @@
 // SUPABASE CONFIG
 // ========================================
 const SUPABASE_URL = "https://liketekvzrazheolmfnj.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"; // ← PUT REAL KEY HERE
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -21,9 +21,11 @@ if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
   telegramId = "test_user";
 }
 
+console.log("Telegram ID:", telegramId);
+
 
 // ========================================
-// SESSION CHECK
+// CHECK SESSION
 // ========================================
 async function checkUserSession() {
 
@@ -91,34 +93,56 @@ async function login() {
 
 
 // ========================================
-// STRIPE DEPOSIT
+// STRIPE DEPOSIT (DEBUG VERSION)
 // ========================================
 async function deposit() {
 
   const amount = prompt("Enter amount in EUR:");
   if (!amount || isNaN(amount)) return;
 
-  const response = await fetch(
-    `${SUPABASE_URL}/functions/v1/create-checkout`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY
-      },
-      body: JSON.stringify({
-        telegram_id: telegramId,
-        amount: Number(amount)
-      })
+  console.log("Creating checkout for:", telegramId, amount);
+
+  try {
+
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/create-checkout`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({
+          telegram_id: telegramId,
+          amount: Number(amount)
+        })
+      }
+    );
+
+    console.log("Response status:", response.status);
+
+    const text = await response.text();
+    console.log("Raw response:", text);
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      alert("Invalid JSON response");
+      return;
     }
-  );
 
-  const data = await response.json();
+    console.log("Parsed data:", data);
 
-  if (data.url) {
-    window.location.href = data.url;
-  } else {
-    alert("Checkout creation failed");
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Checkout creation failed");
+    }
+
+  } catch (err) {
+    console.log("Deposit error:", err);
+    alert("Deposit error");
   }
 }
 
@@ -128,11 +152,16 @@ async function deposit() {
 // ========================================
 async function loadBalance() {
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("wallets")
     .select("balance_points")
     .eq("telegram_id", telegramId)
     .single();
+
+  if (error) {
+    console.log("Balance error:", error);
+    return;
+  }
 
   if (data) {
     document.getElementById("balance").innerText =
@@ -148,6 +177,8 @@ async function logout() {
 }
 
 
+// ========================================
+// START APP
 // ========================================
 checkUserSession();
 
