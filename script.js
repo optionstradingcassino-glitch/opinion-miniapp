@@ -20,8 +20,6 @@ if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
   telegramId = "test_user";
 }
 
-console.log("Telegram ID:", telegramId);
-
 
 // ========================================
 // CHECK SESSION
@@ -41,99 +39,111 @@ async function checkUserSession() {
     document.getElementById("appBox").style.display = "block";
 
     await loadBalance();
-    subscribeToWallet(); // 🔥 Enable realtime
+    await loadMarkets();
+    subscribeToWallet();
   }
 }
 
 
 // ========================================
-// SIGNUP
+// LOAD MARKETS FROM EDGE FUNCTION
 // ========================================
-async function signup() {
+async function loadMarkets() {
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  try {
 
-  const { error } = await supabase.auth.signUp({
-    email,
-    password
-  });
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/get-markets`,
+      {
+        method: "GET",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      }
+    );
 
-  if (error) {
-    alert(error.message);
-    return;
+    const markets = await response.json();
+
+    const container = document.getElementById("markets");
+    container.innerHTML = "";
+
+    if (!markets || markets.length === 0) {
+      container.innerHTML = "No open markets";
+      return;
+    }
+
+    markets.forEach(market => {
+
+      const card = document.createElement("div");
+      card.id = "marketCard";
+
+      card.innerHTML = `
+        <h4>${market.question}</h4>
+        <p>YES Pool: ${market.yes_pool || 0}</p>
+        <p>NO Pool: ${market.no_pool || 0}</p>
+        <button class="yes" onclick="placeTrade('${market.id}','yes')">YES</button>
+        <button class="no" onclick="placeTrade('${market.id}','no')">NO</button>
+        <hr>
+      `;
+
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    console.log("Market load error:", err);
   }
-
-  alert("Signup successful");
-  checkUserSession();
 }
 
 
 // ========================================
-// LOGIN
+// PLACE TRADE (TEMP BASIC)
 // ========================================
-async function login() {
+async function placeTrade(marketId, option) {
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const amount = prompt("Enter amount in points:");
+  if (!amount || isNaN(amount)) return;
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  alert("Login successful");
-  checkUserSession();
+  alert(`Trade placed: ${option.toUpperCase()} - ${amount} pts (logic to be implemented next)`);
 }
 
 
 // ========================================
-// STRIPE DEPOSIT (Telegram Compatible)
+// STRIPE DEPOSIT
 // ========================================
 async function deposit() {
 
   const amount = prompt("Enter amount in EUR:");
   if (!amount || isNaN(amount)) return;
 
-  try {
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/create-checkout`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        telegram_id: telegramId,
+        amount: Number(amount)
+      })
+    }
+  );
 
-    const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/create-checkout`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          telegram_id: telegramId,
-          amount: Number(amount)
-        })
-      }
-    );
+  const data = await response.json();
 
-    const data = await response.json();
+  if (data.url) {
 
-    if (data.url) {
-
-      if (window.Telegram && Telegram.WebApp) {
-        Telegram.WebApp.openLink(data.url);
-      } else {
-        window.location.href = data.url;
-      }
-
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.openLink(data.url);
     } else {
-      alert("Checkout creation failed");
+      window.location.href = data.url;
     }
 
-  } catch (err) {
-    alert("Deposit error");
+  } else {
+    alert("Checkout creation failed");
   }
 }
 
@@ -143,16 +153,11 @@ async function deposit() {
 // ========================================
 async function loadBalance() {
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("wallets")
     .select("balance_points")
     .eq("telegram_id", telegramId)
     .single();
-
-  if (error) {
-    console.log("Balance error:", error);
-    return;
-  }
 
   if (data) {
     document.getElementById("balance").innerText =
@@ -162,7 +167,7 @@ async function loadBalance() {
 
 
 // ========================================
-// REALTIME WALLET SUBSCRIPTION
+// REALTIME WALLET
 // ========================================
 function subscribeToWallet() {
 
@@ -179,22 +184,44 @@ function subscribeToWallet() {
 
         if (payload.new.telegram_id === telegramId) {
 
-          console.log("Wallet updated in realtime:", payload.new.balance_points);
-
           document.getElementById("balance").innerText =
             payload.new.balance_points;
         }
       }
     )
     .subscribe();
-
-  console.log("Realtime wallet subscription enabled");
 }
 
 
 // ========================================
-// LOGOUT
-// ========================================
+async function signup() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabase.auth.signUp({ email, password });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  checkUserSession();
+}
+
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  checkUserSession();
+}
+
 async function logout() {
   await supabase.auth.signOut();
   location.reload();
@@ -202,11 +229,10 @@ async function logout() {
 
 
 // ========================================
-// START APP
-// ========================================
 checkUserSession();
 
 window.signup = signup;
 window.login = login;
-window.deposit = deposit;
 window.logout = logout;
+window.deposit = deposit;
+window.placeTrade = placeTrade;
