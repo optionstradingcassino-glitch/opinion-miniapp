@@ -2,12 +2,11 @@
 // SUPABASE CONFIG
 // ========================================
 const SUPABASE_URL = "https://liketekvzrazheolmfnj.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"; // <-- PUT YOUR REAL KEY HERE
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-window.supabase = supabase;
 
 
 // ========================================
@@ -42,6 +41,7 @@ async function checkUserSession() {
     document.getElementById("appBox").style.display = "block";
 
     await loadBalance();
+    subscribeToWallet(); // 🔥 Enable realtime
   }
 }
 
@@ -93,7 +93,7 @@ async function login() {
 
 
 // ========================================
-// STRIPE DEPOSIT (FINAL WORKING VERSION)
+// STRIPE DEPOSIT (Telegram Compatible)
 // ========================================
 async function deposit() {
 
@@ -122,7 +122,6 @@ async function deposit() {
 
     if (data.url) {
 
-      // 🔥 THIS IS THE FIX
       if (window.Telegram && Telegram.WebApp) {
         Telegram.WebApp.openLink(data.url);
       } else {
@@ -137,6 +136,7 @@ async function deposit() {
     alert("Deposit error");
   }
 }
+
 
 // ========================================
 // LOAD BALANCE
@@ -158,6 +158,37 @@ async function loadBalance() {
     document.getElementById("balance").innerText =
       data.balance_points;
   }
+}
+
+
+// ========================================
+// REALTIME WALLET SUBSCRIPTION
+// ========================================
+function subscribeToWallet() {
+
+  supabase
+    .channel('wallet-updates')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'wallets'
+      },
+      (payload) => {
+
+        if (payload.new.telegram_id === telegramId) {
+
+          console.log("Wallet updated in realtime:", payload.new.balance_points);
+
+          document.getElementById("balance").innerText =
+            payload.new.balance_points;
+        }
+      }
+    )
+    .subscribe();
+
+  console.log("Realtime wallet subscription enabled");
 }
 
 
