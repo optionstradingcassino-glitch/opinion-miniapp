@@ -14,200 +14,89 @@ window.supabase = supabase;
 // TELEGRAM DATA
 // ========================================
 let telegramId = null;
-let telegramUsername = null;
 
 if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
   telegramId = String(window.Telegram.WebApp.initDataUnsafe.user.id);
-  telegramUsername =
-    window.Telegram.WebApp.initDataUnsafe.user.username || null;
 } else {
   telegramId = "test_user";
-  telegramUsername = "test_username";
 }
 
-console.log("Telegram ID:", telegramId);
 
-
-// ========================================
-// CHECK SESSION ON LOAD
 // ========================================
 async function checkUserSession() {
 
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
-
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("appBox").style.display = "none";
-
   } else {
-
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("appBox").style.display = "block";
 
-    await linkUser(session.user);
-
-    // 🔥 LOAD BALANCE HERE
     await loadBalance();
-
-    // 🔥 LOAD MARKETS HERE
-    await loadMarkets();
   }
 }
 
 
 // ========================================
-// SIGNUP
+// DEPOSIT FUNCTION (REAL STRIPE)
 // ========================================
-async function signup() {
+async function deposit() {
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const amount = prompt("Enter amount in EUR:");
+  if (!amount || isNaN(amount)) return;
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password
-  });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  await linkUser(data.user);
-  checkUserSession();
-}
-
-
-// ========================================
-// LOGIN
-// ========================================
-async function login() {
-
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  await linkUser(data.user);
-  checkUserSession();
-}
-
-
-// ========================================
-// LINK USER + WALLET
-// ========================================
-async function linkUser(user) {
-
-  if (!user) return;
-
-  // Check if telegram_id already exists
-  const { data: existingTelegramUser } = await supabase
-    .from("users")
-    .select("*")
-    .eq("telegram_id", telegramId)
-    .maybeSingle();
-
-  if (!existingTelegramUser) {
-
-    await supabase
-      .from("users")
-      .insert({
-        id: user.id,
-        email: user.email,
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/create-checkout`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({
         telegram_id: telegramId,
-        username: telegramUsername
-      });
+        amount: Number(amount)
+      })
+    }
+  );
 
-    await supabase
-      .from("wallets")
-      .insert({
-        id: user.id,
-        telegram_id: telegramId,
-        balance_eur: 0,
-        balance_points: 0
-      });
+  const data = await response.json();
 
-    console.log("User + Wallet created");
+  if (data.url) {
+    window.location.href = data.url;
+  } else {
+    alert("Checkout creation failed");
   }
 }
 
 
 // ========================================
-// LOAD BALANCE (FIXED)
+// LOAD BALANCE
 // ========================================
 async function loadBalance() {
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("wallets")
     .select("balance_points")
     .eq("telegram_id", telegramId)
     .single();
 
-  if (error) {
-    console.error("Balance error:", error);
-    return;
+  if (data) {
+    document.getElementById("balance").innerText =
+      data.balance_points;
   }
-
-  // ⚠️ IMPORTANT: Only number here
-  document.getElementById("balance").innerText =
-    data.balance_points;
 }
 
 
-// ========================================
-// LOAD MARKETS
-// ========================================
-async function loadMarkets() {
-
-  const { data, error } = await supabase
-    .from("markets")
-    .select("*")
-    .eq("status", "open");
-
-  if (error) {
-    console.error("Markets error:", error);
-    return;
-  }
-
-  console.log("Markets:", data);
-}
-
-
-// ========================================
 async function logout() {
   await supabase.auth.signOut();
   location.reload();
 }
 
 
-// ========================================
-// START APP
-// ========================================
 checkUserSession();
 
-window.signup = signup;
-window.login = login;
-window.logout = logout;
-
-// ========================================
-// DEPOSIT (Placeholder for Stripe)
-// ========================================
-async function deposit() {
-
-  const amount = prompt("Enter amount in EUR:");
-
-  if (!amount) return;
-
-  alert("Deposit system will connect to Stripe here.\nAmount: " + amount + " EUR");
-}
-
 window.deposit = deposit;
+window.logout = logout;
