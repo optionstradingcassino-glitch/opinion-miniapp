@@ -121,8 +121,14 @@ async function deposit() {
     const data = await response.json();
 
     if (data.url) {
-      // IMPORTANT FIX HERE
-      window.top.location.href = data.url;
+
+      // 🔥 THIS IS THE FIX
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.openLink(data.url);
+      } else {
+        window.location.href = data.url;
+      }
+
     } else {
       alert("Checkout creation failed");
     }
@@ -131,7 +137,6 @@ async function deposit() {
     alert("Deposit error");
   }
 }
-
 
 // ========================================
 // LOAD BALANCE
