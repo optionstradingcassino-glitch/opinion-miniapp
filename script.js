@@ -13,17 +13,22 @@ console.log("Script Loaded");
 
 
 // ========================================
-// TELEGRAM USER ID
+// TELEGRAM USER DATA
 // ========================================
 let telegramId = null;
+let telegramUsername = null;
 
-if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
   telegramId = String(window.Telegram.WebApp.initDataUnsafe.user.id);
+  telegramUsername =
+    window.Telegram.WebApp.initDataUnsafe.user.username || null;
 } else {
-  telegramId = "test_user"; // browser testing fallback
+  telegramId = "test_user"; // browser fallback
+  telegramUsername = "test_username";
 }
 
 console.log("Telegram ID:", telegramId);
+console.log("Telegram Username:", telegramUsername);
 
 
 // ========================================
@@ -128,9 +133,10 @@ async function linkUser(user) {
     const { error: insertUserError } = await supabase
       .from("users")
       .insert({
-        id: user.id,               // MUST match auth.uid()
+        id: user.id,
         email: user.email,
-        telegram_id: telegramId
+        telegram_id: telegramId,
+        username: telegramUsername
       });
 
     if (insertUserError) {
@@ -139,8 +145,18 @@ async function linkUser(user) {
     }
 
     console.log("User created");
+
   } else {
-    console.log("User already exists");
+
+    // Update username if needed
+    await supabase
+      .from("users")
+      .update({
+        username: telegramUsername
+      })
+      .eq("id", user.id);
+
+    console.log("User updated");
   }
 
   // ---------------------------
@@ -157,7 +173,7 @@ async function linkUser(user) {
     const { error: walletError } = await supabase
       .from("wallets")
       .insert({
-        id: user.id,               // MUST match auth.uid()
+        id: user.id,
         telegram_id: telegramId,
         balance_eur: 0,
         balance_points: 0
