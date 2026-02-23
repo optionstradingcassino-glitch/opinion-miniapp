@@ -37,6 +37,7 @@
     .no{ background:#e74c3c; color:white; }
     .primary{ background:#3498db; color:white; }
     .logout{ background:#555; color:white; }
+    .deposit{ background:#f1c40f; color:black; }
 
     #marketCard{
       background:#1c1c1c;
@@ -69,9 +70,10 @@
 
   <h2>Opinion Trading</h2>
 
-  <div id="userEmail"></div>
+  <h3>Balance: <span id="balance">0</span> pts</h3>
 
-  <h3>Balance: <span id="balance">Loading...</span> pts</h3>
+  <!-- 🔥 NEW DEPOSIT BUTTON -->
+  <button class="deposit" onclick="deposit()">Deposit</button>
 
   <button class="logout" onclick="logout()">Logout</button>
 
