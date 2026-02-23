@@ -9,11 +9,9 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 window.supabase = supabase;
 
-console.log("Script Loaded");
-
 
 // ========================================
-// TELEGRAM USER DATA
+// TELEGRAM DATA
 // ========================================
 let telegramId = null;
 let telegramUsername = null;
@@ -23,37 +21,29 @@ if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
   telegramUsername =
     window.Telegram.WebApp.initDataUnsafe.user.username || null;
 } else {
-  telegramId = "test_user"; // browser fallback
+  telegramId = "test_user";
   telegramUsername = "test_username";
 }
 
 console.log("Telegram ID:", telegramId);
-console.log("Telegram Username:", telegramUsername);
 
 
 // ========================================
-// CHECK SESSION ON LOAD
+// CHECK SESSION
 // ========================================
 async function checkUserSession() {
 
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session) {
-
-    console.log("No session → show login");
-
     document.getElementById("loginBox").style.display = "block";
     document.getElementById("appBox").style.display = "none";
-
   } else {
-
-    console.log("Session found:", session.user.email);
 
     document.getElementById("loginBox").style.display = "none";
     document.getElementById("appBox").style.display = "block";
 
     await linkUser(session.user);
-
     await loadBalance();
     await loadMarkets();
   }
@@ -111,83 +101,60 @@ async function login() {
 
 
 // ========================================
-// CREATE OR VERIFY USER + WALLET
+// LINK USER (FIXED LOGIC)
 // ========================================
 async function linkUser(user) {
 
   if (!user) return;
 
-  console.log("Linking user...");
-
-  // ---------------------------
-  // CHECK IF USER EXISTS
-  // ---------------------------
-  const { data: existingUser } = await supabase
+  // 1️⃣ Check if telegram_id already exists
+  const { data: existingTelegramUser } = await supabase
     .from("users")
     .select("*")
-    .eq("id", user.id)
+    .eq("telegram_id", telegramId)
     .maybeSingle();
 
-  if (!existingUser) {
+  if (existingTelegramUser) {
 
-    const { error: insertUserError } = await supabase
-      .from("users")
-      .insert({
-        id: user.id,
-        email: user.email,
-        telegram_id: telegramId,
-        username: telegramUsername
-      });
+    console.log("Telegram user already exists");
 
-    if (insertUserError) {
-      alert(insertUserError.message);
-      return;
-    }
-
-    console.log("User created");
-
-  } else {
-
-    // Update username if needed
+    // Optional: update username if changed
     await supabase
       .from("users")
-      .update({
-        username: telegramUsername
-      })
-      .eq("id", user.id);
+      .update({ username: telegramUsername })
+      .eq("telegram_id", telegramId);
 
-    console.log("User updated");
+    return;
   }
 
-  // ---------------------------
-  // CHECK IF WALLET EXISTS
-  // ---------------------------
-  const { data: existingWallet } = await supabase
+  // 2️⃣ Insert new user
+  const { error: insertError } = await supabase
+    .from("users")
+    .insert({
+      id: user.id,
+      email: user.email,
+      telegram_id: telegramId,
+      username: telegramUsername
+    });
+
+  if (insertError) {
+    alert(insertError.message);
+    return;
+  }
+
+  console.log("User created");
+
+  // 3️⃣ Create wallet
+  await supabase
     .from("wallets")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
+    .insert({
+      id: user.id,
+      telegram_id: telegramId,
+      balance_eur: 0,
+      balance_points: 0
+    });
 
-  if (!existingWallet) {
-
-    const { error: walletError } = await supabase
-      .from("wallets")
-      .insert({
-        id: user.id,
-        telegram_id: telegramId,
-        balance_eur: 0,
-        balance_points: 0
-      });
-
-    if (walletError) {
-      alert(walletError.message);
-      return;
-    }
-
-    console.log("Wallet created");
-  } else {
-    console.log("Wallet already exists");
-  }
+  console.log("Wallet created");
 }
 
 
@@ -196,21 +163,16 @@ async function linkUser(user) {
 // ========================================
 async function loadBalance() {
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("wallets")
     .select("balance_points")
-    .eq("id", user.id)
+    .eq("telegram_id", telegramId)
     .single();
 
-  if (error) {
-    console.error("Balance error:", error);
-    return;
+  if (data) {
+    document.getElementById("balance").innerText =
+      data.balance_points + " pts";
   }
-
-  document.getElementById("balance").innerText =
-    data.balance_points + " pts";
 }
 
 
@@ -219,22 +181,15 @@ async function loadBalance() {
 // ========================================
 async function loadMarkets() {
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("markets")
     .select("*")
     .eq("status", "open");
 
-  if (error) {
-    console.error("Markets error:", error);
-    return;
-  }
-
-  console.log("Markets loaded:", data);
+  console.log("Markets:", data);
 }
 
 
-// ========================================
-// LOGOUT
 // ========================================
 async function logout() {
   await supabase.auth.signOut();
@@ -242,8 +197,6 @@ async function logout() {
 }
 
 
-// ========================================
-// START APP
 // ========================================
 checkUserSession();
 
