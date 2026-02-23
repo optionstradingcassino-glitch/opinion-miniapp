@@ -197,3 +197,17 @@ checkUserSession();
 window.signup = signup;
 window.login = login;
 window.logout = logout;
+
+// ========================================
+// DEPOSIT (Placeholder for Stripe)
+// ========================================
+async function deposit() {
+
+  const amount = prompt("Enter amount in EUR:");
+
+  if (!amount) return;
+
+  alert("Deposit system will connect to Stripe here.\nAmount: " + amount + " EUR");
+}
+
+window.deposit = deposit;
