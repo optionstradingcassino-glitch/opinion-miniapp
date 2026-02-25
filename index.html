@@ -1,95 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Opinion Trading</title>
+  <meta charset="UTF-8" />
+  <title>Cassino Trade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Telegram Mini App Script -->
+  <!-- Telegram WebApp Script -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    body{
-      font-family: Arial;
-      background:#111;
-      color:white;
-      text-align:center;
-      padding:20px;
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      padding: 20px;
     }
 
-    input{
-      padding:10px;
-      margin:5px;
-      width:220px;
-      border-radius:6px;
-      border:none;
+    h2 {
+      margin-top: 0;
     }
 
-    button{
-      padding:10px 15px;
-      margin:5px;
-      border:none;
-      border-radius:6px;
-      cursor:pointer;
-      font-weight:bold;
+    #balanceBox {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
     }
 
-    .yes{ background:#2ecc71; color:black; }
-    .no{ background:#e74c3c; color:white; }
-    .primary{ background:#3498db; color:white; }
-    .logout{ background:#555; color:white; }
-    .deposit{ background:#f1c40f; color:black; }
+    #markets div {
+      background: #1e293b;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
 
-    #marketCard{
-      background:#1c1c1c;
-      margin:15px auto;
-      padding:15px;
-      border-radius:10px;
-      max-width:420px;
+    button {
+      padding: 8px 12px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .yes {
+      background: #16a34a;
+      color: white;
+    }
+
+    .no {
+      background: #dc2626;
+      color: white;
+    }
+
+    .deposit {
+      background: #2563eb;
+      color: white;
     }
   </style>
 </head>
 
 <body>
 
-<!-- ================= LOGIN BOX ================= -->
-<div id="loginBox">
+  <h2>🎯 Cassino Trade</h2>
 
-  <h2>Login / Signup</h2>
-
-  <input id="email" placeholder="Email"><br>
-  <input id="password" type="password" placeholder="Password"><br>
-
-  <button class="primary" onclick="signup()">Sign Up</button>
-  <button class="primary" onclick="login()">Login</button>
-
-</div>
-
-
-<!-- ================= MAIN APP ================= -->
-<div id="appBox" style="display:none;">
-
-  <h2>Opinion Trading</h2>
-
-  <h3>Balance: <span id="balance">0</span> pts</h3>
-
-  <!-- 🔥 NEW DEPOSIT BUTTON -->
-  <button class="deposit" onclick="deposit()">Deposit</button>
-
-  <button class="logout" onclick="logout()">Logout</button>
-
-  <hr>
-
-  <h3>Markets</h3>
+  <div id="balanceBox">
+    💰 Balance: <span id="balance">Loading...</span> pts
+    <button class="deposit" onclick="deposit()">Deposit</button>
+  </div>
 
   <div id="markets">
     Loading markets...
   </div>
 
-</div>
-
-
-<!-- ================= LOAD SCRIPT ================= -->
-<script type="module" src="script.js"></script>
-
+  <script type="module" src="script.js"></script>
 </body>
 </html>
