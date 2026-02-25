@@ -12,11 +12,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let telegramId = null;
 
 // ========================================
-// SECURE TELEGRAM LOGIN
+// SECURE TELEGRAM LOGIN (DEBUG VERSION)
 // ========================================
 async function secureTelegramLogin() {
 
+  console.log("secureTelegramLogin started");
+
   if (!window.Telegram || !window.Telegram.WebApp) {
+    console.log("Telegram WebApp not found");
     alert("Open this app inside Telegram.");
     return null;
   }
@@ -27,35 +30,52 @@ async function secureTelegramLogin() {
   const initData = tg.initData;
   const initDataUnsafe = tg.initDataUnsafe;
 
+  console.log("initData:", initData);
+  console.log("initDataUnsafe:", initDataUnsafe);
+
   if (!initData) {
+    console.log("No initData");
     alert("No Telegram authentication data.");
     return null;
   }
 
-  const response = await fetch(
-    `${SUPABASE_URL}/functions/v1/telegram-login`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain"
-      },
-      body: initData
-    }
-  );
+  console.log("Calling telegram-login function...");
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    alert("Login failed: " + errorText);
+  try {
+
+    const response = await fetch(
+      `${SUPABASE_URL}/functions/v1/telegram-login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain"
+        },
+        body: initData
+      }
+    );
+
+    console.log("Response status:", response.status);
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.log("Response error:", text);
+      alert("Login failed: " + text);
+      return null;
+    }
+
+    const wallet = await response.json();
+    console.log("Wallet received:", wallet);
+
+    telegramId = String(initDataUnsafe.user.id);
+
+    return wallet;
+
+  } catch (err) {
+    console.log("FETCH ERROR:", err);
+    alert("Fetch failed. Check console.");
     return null;
   }
-
-  const wallet = await response.json();
-
-  telegramId = String(initDataUnsafe.user.id);
-
-  return wallet;
 }
-
 // ========================================
 // LOAD BALANCE
 // ========================================
