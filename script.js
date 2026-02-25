@@ -2,15 +2,12 @@
 // SUPABASE CONFIG
 // ========================================
 const SUPABASE_URL = "https://liketekvzrazheolmfnj.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE"; // keep this public key only
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ========================================
-// GLOBAL VERIFIED USER
-// ========================================
 let telegramId = null;
 
 // ========================================
@@ -145,13 +142,12 @@ async function loadMarkets() {
       <h4>${market.question}</h4>
       <p>YES Pool: ${yesPool} (x${yesOdds})</p>
       <p>NO Pool: ${noPool} (x${noOdds})</p>
-      <button onclick="placeTrade('${market.id}','yes')">
+      <button class="yes" onclick="placeTrade('${market.id}','yes')">
         YES @ x${yesOdds}
       </button>
-      <button onclick="placeTrade('${market.id}','no')">
+      <button class="no" onclick="placeTrade('${market.id}','no')">
         NO @ x${noOdds}
       </button>
-      <hr>
     `;
 
     container.appendChild(card);
@@ -218,13 +214,11 @@ async function deposit() {
   const data = await response.json();
 
   if (data.url) {
-
     if (window.Telegram?.WebApp) {
       window.Telegram.WebApp.openLink(data.url);
     } else {
       window.location.href = data.url;
     }
-
   } else {
     alert("Checkout creation failed");
   }
@@ -236,7 +230,6 @@ async function deposit() {
 document.addEventListener("DOMContentLoaded", async () => {
 
   const wallet = await secureTelegramLogin();
-
   if (!wallet) return;
 
   document.getElementById("balance").innerText =
