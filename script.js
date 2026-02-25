@@ -230,7 +230,12 @@ async function deposit() {
 // ========================================
 document.addEventListener("DOMContentLoaded", async () => {
 
+  console.log("DOM LOADED");
+
   const wallet = await secureTelegramLogin();
+
+  console.log("Login result:", wallet);
+
   if (!wallet) return;
 
   document.getElementById("balance").innerText =
