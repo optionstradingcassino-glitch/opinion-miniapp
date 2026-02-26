@@ -12,7 +12,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let telegramId = null;
 
 // ========================================
-// SECURE TELEGRAM LOGIN (DEBUG VERSION)
+// SECURE TELEGRAM LOGIN
 // ========================================
 async function secureTelegramLogin() {
 
@@ -76,6 +76,7 @@ async function secureTelegramLogin() {
     return null;
   }
 }
+
 // ========================================
 // LOAD BALANCE
 // ========================================
@@ -88,8 +89,7 @@ async function loadBalance() {
     .single();
 
   if (data) {
-    document.getElementById("balance").innerText =
-      data.balance_points;
+    document.getElementById("balance").innerText = data.balance_points;
   }
 }
 
@@ -108,7 +108,6 @@ function subscribeToWallet() {
         table: 'wallets'
       },
       (payload) => {
-
         if (payload.new.telegram_id === telegramId) {
           document.getElementById("balance").innerText =
             payload.new.balance_points;
@@ -183,6 +182,10 @@ async function placeTrade(marketId, option) {
   const amount = prompt("Enter amount in points:");
   if (!amount || isNaN(amount) || Number(amount) <= 0) return;
 
+  // ✅ Get Telegram's signed proof of who this user is
+  // This is what the backend uses to verify identity
+  const initData = window.Telegram.WebApp.initData;
+
   const response = await fetch(
     `${SUPABASE_URL}/functions/v1/place-trade`,
     {
@@ -191,9 +194,11 @@ async function placeTrade(marketId, option) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
+        initData: initData,   // ✅ NEW: backend verifies this to know WHO you are
         market_id: marketId,
         choice: option,
         stake: Number(amount)
+        // ❌ REMOVED: telegram_id — we no longer trust what the user sends
       })
     }
   );
@@ -258,8 +263,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!wallet) return;
 
-  document.getElementById("balance").innerText =
-    wallet.balance_points;
+  document.getElementById("balance").innerText = wallet.balance_points;
 
   await loadMarkets();
   subscribeToWallet();
