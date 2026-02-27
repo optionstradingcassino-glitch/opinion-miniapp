@@ -783,10 +783,10 @@ function renderMarkets() {
   }
 
   el.innerHTML = markets.map(m => {
-    // Calculate odds using the same formula as the backend
-    const yes = m.yes_pool || 0;
-    const no  = m.no_pool  || 0;
-    const { yesOdds, noOdds } = calcOdds(yes, no);
+    // Use server-provided odds (yes_pool/no_pool are NOT sent by the API)
+    // Server calculates odds and sends yes_odds / no_odds only
+    const yesOdds = m.yes_odds || 1.80;
+    const noOdds  = m.no_odds  || 1.80;
 
     // Probability bar width is based on implied probability of YES
     // Implied prob = 1 / odds. We normalize so both add up to 100%.
@@ -891,11 +891,12 @@ function calcPayout() {
   }
   if (stake <= 0) { document.getElementById("ppAmt").innerText = "—"; return; }
 
-  // Calculate odds after this bet is added to the pool
-  const newYes = (activeMkt.yes_pool || 0) + (choice === "YES" ? stake : 0);
-  const newNo  = (activeMkt.no_pool  || 0) + (choice === "NO"  ? stake : 0);
-  const { yesOdds, noOdds } = calcOdds(newYes, newNo);
-  const odds   = choice === "YES" ? yesOdds : noOdds;
+  // Use the server-provided odds (pool amounts are hidden — not sent by API)
+  // These odds are a snapshot from when the market last loaded.
+  // The real final odds are locked in server-side when the trade is placed.
+  const odds = choice === "YES"
+    ? (activeMkt.yes_odds || START_ODDS)
+    : (activeMkt.no_odds  || START_ODDS);
 
   const gross  = Math.floor(stake * odds);
   const fee    = Math.floor(gross * 0.05); // 5% fee preview (free tier)
