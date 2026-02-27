@@ -370,7 +370,7 @@ window.deposit = async function() {
   const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount: Number(amount) })
+    body: JSON.stringify({ amount: Number(amount), initData: window.Telegram?.WebApp?.initData })
   });
 
   const data = await response.json();
@@ -382,6 +382,6 @@ window.deposit = async function() {
       window.location.href = data.url;
     }
   } else {
-    alert("Checkout creation failed");
+    alert(data.error || "Checkout creation failed");
   }
 };
