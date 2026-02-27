@@ -1024,11 +1024,20 @@ function wdCalc() {
   document.getElementById("wdHint").innerText = `≈ €${(pts / PTS_PER_EUR).toFixed(2)}`;
 }
 
+  // ═══════════════════════════════════════════════════════════════
+// HOW TO USE THIS FILE:
+// 1. Open your mini-app index.html
+// 2. Find the old doWithdraw function (search for "async function doWithdraw")
+// 3. Delete the entire old function
+// 4. Paste this new one in its place
+// ═══════════════════════════════════════════════════════════════
+
 async function doWithdraw() {
   const pts  = parseInt(document.getElementById("wdAmt").value);
   const iban = document.getElementById("wdIban").value.trim().replace(/\s+/g, ""); // strip spaces from IBAN
   setErr("wdErr", "");
 
+  // Basic validation checks — like a bouncer at the door
   if (!pts || pts < 1000)  return setErr("wdErr", "Minimum withdrawal is 1,000 pts (€100).");
   if (!iban)               return setErr("wdErr", "Please enter your IBAN.");
   if (pts > balance)       return setErr("wdErr", "Insufficient balance.");
@@ -1037,8 +1046,39 @@ async function doWithdraw() {
   btn.disabled = true; btn.innerText = "Submitting...";
 
   try {
-    // Save the request with all needed info so admin can process it
-    const { error } = await db.from("withdrawals").insert({
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 1: Deduct the points from the wallet FIRST
+    // ✅ FIX (Critical Bug #3): The old code NEVER deducted points!
+    // A user could request a withdrawal and keep trading with the
+    // same points — like paying with a cheque and still having
+    // the money in your account.
+    // We subtract BEFORE inserting the withdrawal row so that
+    // if something goes wrong below, the deduction already happened
+    // and we don't accidentally pay out twice.
+    // ─────────────────────────────────────────────────────────────
+    const newBalance = balance - pts;
+
+    const { error: balanceError } = await _db
+      .from("wallets")
+      .update({ balance_points: newBalance })
+      .eq("telegram_id", tgId);
+
+    // If the balance update fails, stop here — don't create the withdrawal row
+    if (balanceError) {
+      return setErr("wdErr", "Failed to lock funds. Please try again.");
+    }
+
+    // Update the balance shown on screen immediately
+    // (the realtime subscription will also catch this, but this is instant)
+    balance = newBalance;
+    updateBalUI();
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 2: Now insert the withdrawal request row
+    // Status is "pending" — admin will review and pay via bank
+    // ─────────────────────────────────────────────────────────────
+    const { error: withdrawError } = await _db.from("withdrawals").insert({
       telegram_id:    tgId,
       amount_eur:     parseFloat((pts / PTS_PER_EUR).toFixed(2)), // e.g. 100.00
       amount_points:  pts,     // e.g. 1000 pts
@@ -1046,15 +1086,48 @@ async function doWithdraw() {
       status:         "pending"
     });
 
-    if (error) return setErr("wdErr", "Failed to submit. Try again.");
+    if (withdrawError) {
+      // ─────────────────────────────────────────────────────────
+      // SAFETY NET: If saving the withdrawal row fails,
+      // give the points BACK to the user so they're not lost!
+      // This is called a "rollback" — like an undo button.
+      // ─────────────────────────────────────────────────────────
+      await _db
+        .from("wallets")
+        .update({ balance_points: balance + pts })  // restore original balance
+        .eq("telegram_id", tgId);
 
+      balance = balance + pts; // restore in memory too
+      updateBalUI();
+
+      return setErr("wdErr", "Failed to submit withdrawal. Your points have been returned.");
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 3: Write to the ledger so there's an audit trail
+    // This lets the admin see "user withdrew 1000 pts" in the Ledger tab
+    // ─────────────────────────────────────────────────────────────
+    await _db.rpc("write_ledger", {
+      p_telegram_id:  tgId,
+      p_amount:       -pts,                       // negative = money going out
+      p_type:         "withdrawal_request",
+      p_reference_id: null,
+      p_note:         "Withdrawal request: " + pts + " pts (€" + (pts / PTS_PER_EUR).toFixed(2) + ")"
+    });
+
+    // All done! Show success message and reset the form
     showToast("Withdrawal requested ✅ We'll process within 2–5 days", "ok");
     document.getElementById("wdAmt").value  = "";
     document.getElementById("wdIban").value = "";
     document.getElementById("wdHint").innerText = "≈ €0.00";
     goBack();
-  } catch { setErr("wdErr", "Connection error. Try again."); }
-  finally { btn.disabled = false; btn.innerText = "Request Withdrawal"; }
+
+  } catch (err) {
+    console.error("Withdrawal error:", err);
+    setErr("wdErr", "Connection error. Try again.");
+  } finally {
+    btn.disabled = false; btn.innerText = "Request Withdrawal";
+  }
 }
 
 // ── TOAST ─────────────────────────────────
