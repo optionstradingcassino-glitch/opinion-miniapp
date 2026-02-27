@@ -1,222 +1,1060 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Cassino Trade</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      padding: 20px;
-      margin: 0;
+    :root {
+      --bg:      #06070b;
+      --surface: #0c0e15;
+      --card:    #101420;
+      --border:  #1c2035;
+      --gold:    #f0c040;
+      --green:   #00e57a;
+      --red:     #ff3d5a;
+      --blue:    #4d8fff;
+      --text:    #dde0f0;
+      --muted:   #485070;
+      --r: 14px;
     }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); }
+    body { font-family: 'Outfit', sans-serif; color: var(--text); font-size: 15px; }
 
-    h2 { margin-top: 0; }
+    /* ── APP SHELL ── */
+    #authWrap { position: fixed; inset: 0; z-index: 500; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    #appShell { display: none; position: fixed; inset: 0; flex-direction: column; }
+    #appShell.show { display: flex; }
 
-    /* ── AUTH SCREEN ── */
-    #authScreen {
-      display: none;
-      max-width: 380px;
-      margin: 40px auto;
-    }
+    /* ── VIEWS ── */
+    .view { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 80px; }
+    .view.active { display: block; }
 
-    .auth-box {
-      background: #1e293b;
-      border-radius: 14px;
-      padding: 28px 24px;
-    }
+    /* ── AUTH ── */
+    .auth-box { width: 100%; max-width: 370px; }
+    .auth-logo { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; text-align: center; color: var(--gold); margin-bottom: 4px; letter-spacing: 1px; }
+    .auth-sub  { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+    .tab-row   { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 24px; }
+    .tab-btn   { padding: 10px; border: none; background: transparent; color: var(--muted); font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; border-radius: 9px; cursor: pointer; transition: all .2s; }
+    .tab-btn.on { background: var(--gold); color: #000; }
+    .f         { margin-bottom: 14px; }
+    .f label   { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+    .f input   { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; padding: 13px 16px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; outline: none; transition: border-color .2s; }
+    .f input:focus { border-color: var(--gold); }
+    .err-box   { background: rgba(255,61,90,.1); color: var(--red); border: 1px solid rgba(255,61,90,.25); border-radius: 10px; padding: 11px 14px; font-size: 13px; text-align: center; margin-bottom: 14px; display: none; }
+    .btn-gold  { width: 100%; padding: 14px; background: var(--gold); color: #000; border: none; border-radius: 11px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
+    .btn-gold:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-gold:active   { opacity: .8; }
 
-    .auth-box h2 {
-      text-align: center;
-      margin-bottom: 4px;
-      font-size: 20px;
-      color: #f0b429;
-    }
+    /* ── BOTTOM NAV ── */
+    #bottomNav { flex-shrink: 0; display: flex; background: var(--surface); border-top: 1px solid var(--border); padding: 6px 0 max(10px, env(safe-area-inset-bottom)); }
+    .nav-btn   { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 0; border: none; background: transparent; color: var(--muted); font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer; transition: color .2s; }
+    .nav-btn.on { color: var(--gold); }
+    .nav-btn svg { width: 21px; height: 21px; }
 
-    .auth-box p {
-      text-align: center;
-      color: #94a3b8;
-      font-size: 13px;
-      margin-bottom: 24px;
-    }
+    /* ── TOPBAR ── */
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; position: sticky; top: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 10; }
+    .topbar-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+    .back-btn { background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; padding: 0 8px 0 0; line-height: 1; }
+    .bal-chip { background: rgba(240,192,64,.12); color: var(--gold); border: 1px solid rgba(240,192,64,.2); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700; }
 
-    /* Tabs: Signup / Login */
-    .auth-tabs {
-      display: flex;
-      background: #0f172a;
-      border-radius: 8px;
-      padding: 4px;
-      margin-bottom: 20px;
-    }
+    /* ── SHARED ── */
+    .section-head { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 18px 20px 10px; }
+    .notice { margin: 0 20px 20px; background: rgba(240,192,64,.07); border: 1px solid rgba(240,192,64,.2); border-radius: 12px; padding: 14px 16px; display: flex; gap: 12px; }
+    .notice-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .notice-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .notice-text strong { color: var(--gold); font-weight: 700; }
+    .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; margin: 44px auto; display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty { text-align: center; padding: 52px 20px; color: var(--muted); }
+    .empty .ei { font-size: 36px; margin-bottom: 14px; }
+    .empty p { font-size: 14px; line-height: 1.6; }
 
-    .auth-tab {
-      flex: 1;
-      padding: 9px;
-      border: none;
-      background: transparent;
-      color: #64748b;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
+    /* ── MARKETS VIEW ── */
+    .balance-hero { margin: 16px 20px; background: linear-gradient(135deg, #0f1220 0%, var(--card) 100%); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; position: relative; overflow: hidden; }
+    .balance-hero::after { content: ''; position: absolute; top: -40px; right: -40px; width: 130px; height: 130px; background: radial-gradient(circle, rgba(240,192,64,.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+    .bh-label  { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .bh-amount { font-family: 'Syne', sans-serif; font-size: 46px; font-weight: 800; color: var(--gold); line-height: 1.1; margin: 4px 0; }
+    .bh-sub    { font-size: 12px; color: var(--muted); }
+    .bh-btns   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .bh-btn    { padding: 11px; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .bh-btn:active { opacity: .8; }
+    .bh-dep { background: var(--gold); color: #000; }
+    .bh-wd  { background: var(--card); color: var(--text); border: 1px solid var(--border); }
 
-    .auth-tab.active {
-      background: #f0b429;
-      color: #000;
-    }
+    /* Market card */
+    .mkt-list { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
+    .mkt-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
+    .mkt-top  { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+    .mkt-q    { font-size: 15px; font-weight: 600; line-height: 1.45; flex: 1; }
+    .status-chip { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0; }
+    .sc-open    { background: rgba(0,229,122,.1);   color: var(--green); }
+    .sc-closed  { background: rgba(255,61,90,.1);   color: var(--red); }
+    .sc-settled { background: rgba(72,80,112,.15);  color: var(--muted); }
+    .pools      { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .pool       { background: var(--surface); border-radius: 10px; padding: 11px 14px; }
+    .pool-name  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 5px; }
+    .p-yes .pool-name { color: var(--green); }
+    .p-no  .pool-name { color: var(--red); }
+    .pool-val  { font-size: 18px; font-weight: 700; }
+    .pool-odds { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .mkt-bar   { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+    .mkt-bar-inner { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--green), var(--red)); }
+    .mkt-btns  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-yes, .btn-no { padding: 12px; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity .15s; }
+    .btn-yes { background: rgba(0,229,122,.1); color: var(--green); border: 1px solid rgba(0,229,122,.2); }
+    .btn-no  { background: rgba(255,61,90,.1); color: var(--red);   border: 1px solid rgba(255,61,90,.2); }
+    .btn-yes:active, .btn-no:active { opacity: .7; }
+    .mkt-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+    .mkt-timer  { font-size: 11px; color: var(--muted); }
+    .mkt-result { font-size: 12px; font-weight: 700; }
 
-    .auth-form { display: none; }
-    .auth-form.active { display: block; }
+    /* ── TRADE MODAL ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 300; align-items: flex-end; }
+    .overlay.open { display: flex; }
+    .sheet { width: 100%; max-width: 480px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 0 20px 40px; animation: slideUp .22s ease; }
+    @keyframes slideUp { from { transform: translateY(100%); } }
+    .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 14px auto 22px; }
+    .sheet-title  { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .sheet-q      { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+    .choice-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .choice-btn   { padding: 15px; border-radius: 12px; background: var(--surface); border: 2px solid transparent; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .15s; }
+    .choice-btn.yes { color: var(--green); }
+    .choice-btn.no  { color: var(--red); }
+    .choice-btn.yes.sel { border-color: var(--green); background: rgba(0,229,122,.08); }
+    .choice-btn.no.sel  { border-color: var(--red);   background: rgba(255,61,90,.08); }
+    .stake-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .stake-in  { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; padding: 14px 16px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; outline: none; transition: border-color .2s; margin-bottom: 10px; }
+    .stake-in:focus { border-color: var(--gold); }
+    .quick-row { display: flex; gap: 8px; margin-bottom: 18px; }
+    .q-btn { flex: 1; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .q-btn:active { background: rgba(240,192,64,.12); color: var(--gold); }
+    .payout-preview { background: var(--surface); border-radius: 12px; padding: 15px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
+    .pp-left .pp-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+    .pp-left .pp-odds  { font-size: 12px; color: var(--muted); }
+    .pp-amount { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--green); }
+    .cancel-btn { width: 100%; margin-top: 10px; padding: 12px; background: none; border: none; color: var(--muted); font-family: 'Outfit', sans-serif; font-size: 14px; cursor: pointer; }
 
-    .auth-form label {
-      display: block;
-      font-size: 12px;
-      color: #94a3b8;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+    /* ── PORTFOLIO ── */
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 16px 20px 0; }
+    .stat-box  { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+    .stat-val  { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--gold); }
+    .stat-lbl  { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; margin-top: 4px; }
+    .trade-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+    .trade-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 15px 16px; }
+    .tc-q      { font-size: 13px; font-weight: 600; line-height: 1.4; margin-bottom: 10px; }
+    .tc-row    { display: flex; justify-content: space-between; align-items: center; }
+    .tc-left   { display: flex; gap: 8px; align-items: center; }
+    .tc-badge  { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; }
+    .tcb-yes { background: rgba(0,229,122,.1); color: var(--green); }
+    .tcb-no  { background: rgba(255,61,90,.1); color: var(--red); }
+    .tc-stake  { font-size: 12px; color: var(--muted); }
+    .tc-payout { font-size: 14px; font-weight: 700; }
+    .tp-won    { color: var(--green); }
+    .tp-lost   { color: var(--red); }
+    .tp-active { color: var(--gold); }
 
-    .auth-form input {
-      width: 100%;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 11px 14px;
-      color: white;
-      font-size: 14px;
-      margin-bottom: 16px;
-      box-sizing: border-box;
-      outline: none;
-    }
+    /* ── PROFILE ── */
+    .profile-card { margin: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; text-align: center; }
+    .avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--gold) 0%, #c07000 100%); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #000; margin: 0 auto 14px; }
+    .prof-name  { font-size: 18px; font-weight: 700; margin-bottom: 3px; }
+    .prof-email { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+    .tier-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .tb-free  { background: rgba(72,80,112,.2);  color: var(--muted); }
+    .tb-basic { background: rgba(77,143,255,.12); color: var(--blue); }
+    .tb-pro   { background: rgba(240,192,64,.12); color: var(--gold); }
+    .tb-elite { background: rgba(0,229,122,.12);  color: var(--green); }
+    .menu-list { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+    .menu-row  { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 15px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: border-color .15s; }
+    .menu-row:active { border-color: rgba(240,192,64,.4); }
+    .menu-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .mi-gold  { background: rgba(240,192,64,.12); color: var(--gold); }
+    .mi-green { background: rgba(0,229,122,.1);   color: var(--green); }
+    .mi-blue  { background: rgba(77,143,255,.1);  color: var(--blue); }
+    .mi-red   { background: rgba(255,61,90,.1);   color: var(--red); }
+    .menu-info { flex: 1; }
+    .mi-title { font-size: 14px; font-weight: 600; }
+    .mi-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .mi-arrow { color: var(--muted); font-size: 20px; line-height: 1; }
 
-    .auth-form input:focus { border-color: #f0b429; }
+    /* ── MEMBERSHIP ── */
+    .mem-intro { padding: 16px 20px 0; font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .tier-list  { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
+    .tier-card  { border: 1px solid var(--border); border-radius: var(--r); padding: 22px; position: relative; overflow: hidden; }
+    .tc-pro { border-color: rgba(240,192,64,.35); }
+    .hot-tag { position: absolute; top: 14px; right: 14px; background: var(--gold); color: #000; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 3px 9px; border-radius: 4px; }
+    .tier-glow { position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; pointer-events: none; }
+    .t-basic .tier-glow { background: radial-gradient(circle, rgba(77,143,255,.1) 0%, transparent 70%); }
+    .t-pro   .tier-glow { background: radial-gradient(circle, rgba(240,192,64,.12) 0%, transparent 70%); }
+    .t-elite .tier-glow { background: radial-gradient(circle, rgba(0,229,122,.1) 0%, transparent 70%); }
+    .tier-name  { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; }
+    .t-basic .tier-name { color: var(--blue); }
+    .t-pro   .tier-name { color: var(--gold); }
+    .t-elite .tier-name { color: var(--green); }
+    .tier-price { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+    .perks      { display: flex; flex-direction: column; gap: 9px; margin-bottom: 20px; }
+    .perk       { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .perk-dot   { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .t-basic .perk-dot { background: var(--blue); }
+    .t-pro   .perk-dot { background: var(--gold); }
+    .t-elite .perk-dot { background: var(--green); }
+    .tier-btn   { width: 100%; padding: 13px; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .tier-btn:active { opacity: .8; }
+    .tbt-basic { background: rgba(77,143,255,.15); color: var(--blue); border: 1px solid rgba(77,143,255,.3); }
+    .tbt-pro   { background: var(--gold); color: #000; }
+    .tbt-elite { background: rgba(0,229,122,.12); color: var(--green); border: 1px solid rgba(0,229,122,.25); }
 
-    .auth-btn {
-      width: 100%;
-      padding: 12px;
-      background: #f0b429;
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 4px;
-    }
+    /* ── SUBMIT ── */
+    .form-wrap { padding: 0 20px; }
+    .ff        { margin-bottom: 16px; }
+    .ff label  { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .ff textarea { width: 100%; background: var(--card); border: 1.5px solid var(--border); border-radius: 11px; padding: 14px 16px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; resize: none; outline: none; line-height: 1.5; transition: border-color .2s; }
+    .ff textarea:focus { border-color: var(--gold); }
+    .char-c  { font-size: 11px; color: var(--muted); text-align: right; margin-top: 5px; }
+    .sub-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .sub-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+    .sub-q    { font-size: 13px; font-weight: 600; line-height: 1.4; margin-bottom: 8px; }
+    .sub-foot { display: flex; justify-content: space-between; align-items: center; }
+    .ss-pending  { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--gold); }
+    .ss-approved { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--green); }
+    .ss-rejected { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--red); }
+    .sub-pts  { font-size: 12px; color: var(--muted); }
 
-    .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    /* ── WITHDRAW ── */
+    .wd-wrap    { padding: 0 20px; }
+    .wd-card    { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; margin-bottom: 20px; text-align: center; }
+    .wd-label   { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .wd-pts     { font-family: 'Syne', sans-serif; font-size: 44px; font-weight: 800; color: var(--gold); line-height: 1; }
+    .wd-eur     { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .wf-input   { width: 100%; background: var(--card); border: 1.5px solid var(--border); border-radius: 11px; padding: 14px 16px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600; outline: none; transition: border-color .2s; margin-bottom: 6px; }
+    .wf-input:focus { border-color: var(--gold); }
+    .wf-hint    { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
 
-    #authError {
-      display: none;
-      background: rgba(239,68,68,0.15);
-      color: #ef4444;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    /* ── MAIN APP ── */
-    #mainApp { display: none; }
-
-    #balanceBox {
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    #markets div {
-      background: #1e293b;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-    }
-
-    button {
-      padding: 8px 12px;
-      margin-right: 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .yes     { background: #16a34a; color: white; }
-    .no      { background: #dc2626; color: white; }
-    .deposit { background: #2563eb; color: white; }
+    /* ── TOAST ── */
+    #toast { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 11px 20px; font-size: 13px; font-weight: 600; white-space: nowrap; z-index: 999; opacity: 0; transition: all .25s; pointer-events: none; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.ok  { border-color: rgba(0,229,122,.4);  color: var(--green); }
+    #toast.bad { border-color: rgba(255,61,90,.4);  color: var(--red); }
   </style>
 </head>
 <body>
 
-  <!-- ══ AUTH SCREEN (shown first if no email linked) ══ -->
-  <div id="authScreen">
-    <div class="auth-box">
-      <h2>⚡ Cassino Trade</h2>
-      <p>Create an account or login to start trading</p>
+<!-- ══ AUTH ══ -->
+<div id="authWrap">
+  <div class="auth-box">
+    <div class="auth-logo">CASSINO TRADE</div>
+    <div class="auth-sub">Predict markets · Trade points · Win big</div>
 
-      <!-- Tabs -->
-      <div class="auth-tabs">
-        <button class="auth-tab active" id="tabSignup" onclick="showTab('signup')">Sign Up</button>
-        <button class="auth-tab"        id="tabLogin"  onclick="showTab('login')">Login</button>
+    <div class="tab-row">
+      <button class="tab-btn on" id="tabSU" onclick="authTab('su')">Sign Up</button>
+      <button class="tab-btn"    id="tabLI" onclick="authTab('li')">Login</button>
+    </div>
+
+    <div class="err-box" id="authErr"></div>
+
+    <div id="formSU">
+      <div class="f"><label>Email</label><input type="email"    id="suEmail" placeholder="you@email.com"/></div>
+      <div class="f"><label>Password</label><input type="password" id="suPass"  placeholder="Min 6 characters"/></div>
+      <div class="f"><label>Confirm Password</label><input type="password" id="suConf"  placeholder="Repeat password"/></div>
+      <button class="btn-gold" id="suBtn" onclick="doSignup()">Create Account</button>
+    </div>
+
+    <div id="formLI" style="display:none">
+      <div class="f"><label>Email</label><input type="email"    id="liEmail" placeholder="you@email.com"/></div>
+      <div class="f"><label>Password</label><input type="password" id="liPass"  placeholder="Your password"/></div>
+      <button class="btn-gold" id="liBtn" onclick="doLogin()">Login</button>
+    </div>
+      <div style="text-align:center;margin-top:14px"><button onclick="doForgotPassword()" style="background:none;border:none;color:var(--muted);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">Forgot password?</button></div>
+    </div>
+    <div id="formFP" style="display:none">
+      <div style="text-align:center;margin-bottom:20px"><div style="font-size:16px;font-weight:700;margin-bottom:6px">Reset Password</div><div style="font-size:13px;color:var(--muted)">We will send a reset link to your email</div></div>
+      <div class="f"><label>Email</label><input type="email" id="fpEmail" placeholder="you@email.com"/></div>
+      <div class="err-box" id="fpErr"></div>
+      <div class="err-box" style="background:rgba(0,229,122,.1);color:var(--green);border-color:rgba(0,229,122,.25);display:none" id="fpOk"></div>
+      <button class="btn-gold" id="fpBtn" onclick="sendReset()">Send Reset Link</button>
+      <div style="text-align:center;margin-top:14px"><button onclick="authTab('li')" style="background:none;border:none;color:var(--muted);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">Back to login</button></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="appShell">
+
+  <!-- MARKETS -->
+  <div class="view active" id="vMarkets">
+    <div class="topbar">
+      <div class="topbar-title">Markets</div>
+      <div class="bal-chip">⚡ <span id="topBal">0</span> pts</div>
+    </div>
+    <div class="balance-hero">
+      <div class="bh-label">Balance</div>
+      <div class="bh-amount" id="heroBal">0</div>
+      <div class="bh-sub">points · €1 = 10 pts</div>
+      <div class="bh-btns">
+        <button class="bh-btn bh-dep" onclick="openDeposit()">＋ Deposit</button>
+        <button class="bh-btn bh-wd"  onclick="goTo('withdraw')">Withdraw</button>
       </div>
+    </div>
+    <div class="section-head">Live Markets</div>
+    <div class="mkt-list" id="mktList"><div class="spinner"></div></div>
+  </div>
 
-      <!-- Error message -->
-      <div id="authError"></div>
+  <!-- PORTFOLIO -->
+  <div class="view" id="vPortfolio">
+    <div class="topbar"><div class="topbar-title">My Trades</div></div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-val" id="stTotal">—</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-box"><div class="stat-val" id="stWon">—</div><div class="stat-lbl">Won</div></div>
+      <div class="stat-box"><div class="stat-val" id="stPts">—</div><div class="stat-lbl">Pts Won</div></div>
+    </div>
+    <div class="section-head">Trade History</div>
+    <div class="trade-list" id="tradeList"><div class="spinner"></div></div>
+  </div>
 
-      <!-- SIGNUP FORM -->
-      <div class="auth-form active" id="signupForm">
-        <label>Email</label>
-        <input type="email" id="signupEmail" placeholder="your@email.com" />
-
-        <label>Password</label>
-        <input type="password" id="signupPassword" placeholder="Min 6 characters" />
-
-        <label>Confirm Password</label>
-        <input type="password" id="signupConfirm" placeholder="Repeat password" />
-
-        <button class="auth-btn" id="authSubmitBtn" onclick="signup()">Create Account</button>
+  <!-- SUBMIT -->
+  <div class="view" id="vSubmit">
+    <div class="topbar"><div class="topbar-title">Submit Question</div></div>
+    <div class="notice">
+      <div class="notice-icon">💡</div>
+      <div class="notice-text">
+        Propose a market for the community to trade on.
+        Costs <strong>100 pts</strong> — refunded if rejected.
+        We review within 24 hours.
       </div>
-
-      <!-- LOGIN FORM -->
-      <div class="auth-form" id="loginForm">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="your@email.com" />
-
-        <label>Password</label>
-        <input type="password" id="loginPassword" placeholder="Your password" />
-
-        <button class="auth-btn" id="loginSubmitBtn" onclick="login()">Login</button>
+    </div>
+    <div class="section-head">Your Question</div>
+    <div class="form-wrap">
+      <div class="ff">
+        <label>Question <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(min 10 chars)</span></label>
+        <textarea id="sqQ" rows="4" maxlength="200"
+          placeholder="e.g. Will Bitcoin hit $100k before June 2025?"
+          oninput="document.getElementById('sqC').innerText=this.value.length+'/200'"></textarea>
+        <div class="char-c" id="sqC">0/200</div>
       </div>
+      <div class="ff">
+        <label>Context <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <textarea id="sqCtx" rows="2" maxlength="300" placeholder="Any background info..."></textarea>
+      </div>
+      <div class="err-box" id="sqErr"></div>
+      <button class="btn-gold" id="sqBtn" onclick="doSubmit()">Submit · 100 pts</button>
+    </div>
+    <div class="section-head" style="margin-top:24px">My Submissions</div>
+    <div class="sub-list" id="subList"><div class="spinner"></div></div>
+  </div>
 
+  <!-- PROFILE -->
+  <div class="view" id="vProfile">
+    <div class="topbar"><div class="topbar-title">Profile</div></div>
+    <div class="profile-card">
+      <div class="avatar" id="profAv">?</div>
+      <div class="prof-name"  id="profName">—</div>
+      <div class="prof-email" id="profEmail">—</div>
+      <div class="tier-badge tb-free" id="profTier">Free</div>
+    </div>
+    <div class="menu-list">
+      <div class="menu-row" onclick="goTo('membership')">
+        <div class="menu-icon mi-gold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div class="menu-info"><div class="mi-title">Membership</div><div class="mi-sub">Upgrade for better limits & perks</div></div>
+        <div class="mi-arrow">›</div>
+      </div>
+      <div class="menu-row" onclick="goTo('portfolio')">
+        <div class="menu-icon mi-blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="menu-info"><div class="mi-title">Trade History</div><div class="mi-sub">See all your past bets</div></div>
+        <div class="mi-arrow">›</div>
+      </div>
+      <div class="menu-row" onclick="openDeposit()">
+        <div class="menu-icon mi-green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+        <div class="menu-info"><div class="mi-title">Deposit</div><div class="mi-sub">Add points · €1 = 10 pts</div></div>
+        <div class="mi-arrow">›</div>
+      </div>
+      <div class="menu-row" onclick="goTo('withdraw')">
+        <div class="menu-icon mi-red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+        <div class="menu-info"><div class="mi-title">Withdraw</div><div class="mi-sub">Cash out your winnings</div></div>
+        <div class="mi-arrow">›</div>
+      </div>
+    </div>
+    <div style="text-align:center;color:var(--muted);font-size:11px;padding:0 0 20px">Telegram ID: <span id="profTgId">—</span></div>
+  </div>
+
+  <!-- MEMBERSHIP (sub-page, no nav) -->
+  <div class="view" id="vMembership">
+    <div class="topbar">
+      <button class="back-btn" onclick="goBack()">‹</button>
+      <div class="topbar-title">Membership</div>
+      <div style="width:30px"></div>
+    </div>
+    <div class="mem-intro">Unlock higher limits, lower fees, and early market access with a monthly membership.</div>
+    <div class="section-head">Choose a Plan</div>
+    <div class="tier-list">
+      <div class="tier-card t-basic" onclick="doSubscribe('basic')">
+        <div class="tier-glow"></div>
+        <div class="tier-name">Basic</div>
+        <div class="tier-price">Prices coming soon · Monthly</div>
+        <div class="perks">
+          <div class="perk"><div class="perk-dot"></div>Max stake: 50,000 pts per trade</div>
+          <div class="perk"><div class="perk-dot"></div>4% platform fee (free = 5%)</div>
+          <div class="perk"><div class="perk-dot"></div>100 pts welcome bonus</div>
+        </div>
+        <button class="tier-btn tbt-basic">Get Basic</button>
+      </div>
+      <div class="tier-card t-pro tc-pro" onclick="doSubscribe('pro')">
+        <div class="tier-glow"></div>
+        <div class="hot-tag">Popular</div>
+        <div class="tier-name">Pro</div>
+        <div class="tier-price">Prices coming soon · Monthly</div>
+        <div class="perks">
+          <div class="perk"><div class="perk-dot"></div>Max stake: 200,000 pts per trade</div>
+          <div class="perk"><div class="perk-dot"></div>3% platform fee</div>
+          <div class="perk"><div class="perk-dot"></div>2 hrs early market access</div>
+          <div class="perk"><div class="perk-dot"></div>500 pts welcome bonus</div>
+        </div>
+        <button class="tier-btn tbt-pro">Get Pro</button>
+      </div>
+      <div class="tier-card t-elite" onclick="doSubscribe('elite')">
+        <div class="tier-glow"></div>
+        <div class="tier-name">Elite</div>
+        <div class="tier-price">Prices coming soon · Monthly</div>
+        <div class="perks">
+          <div class="perk"><div class="perk-dot"></div>Unlimited stake per trade</div>
+          <div class="perk"><div class="perk-dot"></div>2% platform fee (lowest)</div>
+          <div class="perk"><div class="perk-dot"></div>6 hrs early market access</div>
+          <div class="perk"><div class="perk-dot"></div>2,000 pts welcome bonus</div>
+        </div>
+        <button class="tier-btn tbt-elite">Get Elite</button>
+      </div>
+    </div>
+    <div style="height:24px"></div>
+  </div>
+
+  <!-- WITHDRAW (sub-page, no nav) -->
+  <div class="view" id="vWithdraw">
+    <div class="topbar">
+      <button class="back-btn" onclick="goBack()">‹</button>
+      <div class="topbar-title">Withdraw</div>
+      <div style="width:30px"></div>
+    </div>
+    <div class="wd-wrap">
+      <div class="wd-card">
+        <div class="wd-label">Available Balance</div>
+        <div class="wd-pts" id="wdBal">0</div>
+        <div class="wd-eur" id="wdBalEur">≈ €0.00</div>
+      </div>
+      <div class="notice" style="margin:0 0 20px">
+        <div class="notice-icon">ℹ️</div>
+        <div class="notice-text">Minimum <strong>1,000 pts (€100)</strong>. Processed via bank transfer in 2–5 business days.</div>
+      </div>
+      <div class="ff" style="margin-bottom:8px">
+        <label>Amount in Points</label>
+        <input type="number" class="wf-input" id="wdAmt" placeholder="e.g. 1000" min="1000" oninput="wdCalc()"/>
+        <div class="wf-hint" id="wdHint">≈ €0.00</div>
+      </div>
+      <div class="ff">
+        <label>Bank IBAN</label>
+        <input type="text" class="wf-input" id="wdIban" placeholder="IT60 X054 2811 1010 0000 0123 456"/>
+      </div>
+      <div class="err-box" id="wdErr"></div>
+      <button class="btn-gold" onclick="doWithdraw()">Request Withdrawal</button>
     </div>
   </div>
 
-  <!-- ══ MAIN APP (shown after login) ══ -->
-  <div id="mainApp">
+  <!-- BOTTOM NAV -->
+  <nav id="bottomNav">
+    <button class="nav-btn on" id="nb-markets"   onclick="goTo('markets')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Markets
+    </button>
+    <button class="nav-btn" id="nb-portfolio" onclick="goTo('portfolio')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Trades
+    </button>
+    <button class="nav-btn" id="nb-submit"    onclick="goTo('submit')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Submit
+    </button>
+    <button class="nav-btn" id="nb-profile"   onclick="goTo('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </button>
+  </nav>
+</div>
 
-    <h2>🎯 Cassino Trade</h2>
-
-    <div id="balanceBox">
-      <span>💰 Balance: <span id="balance">Loading...</span> pts</span>
-      <button class="deposit" onclick="deposit()">Deposit</button>
+<!-- ══ TRADE MODAL ══ -->
+<div class="overlay" id="tradeOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Place Trade</div>
+    <div class="sheet-q" id="sheetQ"></div>
+    <div class="choice-row">
+      <button class="choice-btn yes" id="chYes" onclick="pick('YES')">✅ YES</button>
+      <button class="choice-btn no"  id="chNo"  onclick="pick('NO')">❌ NO</button>
     </div>
-
-    <div id="markets">
-      Loading markets...
+    <div class="stake-lbl">Stake (points)</div>
+    <input class="stake-in" id="stakeIn" type="number" placeholder="Enter amount" oninput="calcPayout()" min="1"/>
+    <div class="quick-row">
+      <button class="q-btn" onclick="qs(100)">100</button>
+      <button class="q-btn" onclick="qs(500)">500</button>
+      <button class="q-btn" onclick="qs(1000)">1K</button>
+      <button class="q-btn" onclick="qs(5000)">5K</button>
+      <button class="q-btn" onclick="qs(10000)">10K</button>
     </div>
-
+    <div class="payout-preview">
+      <div class="pp-left">
+        <div class="pp-label">Potential payout</div>
+        <div class="pp-odds" id="ppOdds">Pick YES or NO first</div>
+      </div>
+      <div class="pp-amount" id="ppAmt">—</div>
+    </div>
+    <button class="btn-gold" id="tradeBtn" onclick="placeTrade()">Confirm Trade</button>
+    <button class="cancel-btn" onclick="closeModal()">Cancel</button>
   </div>
+</div>
 
-  <script type="module" src="script.js"></script>
+<div id="toast"></div>
+
+<!-- ══ SCRIPT ══ -->
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+// ── CONFIG ──────────────────────────────
+const SUPA_URL  = "https://liketekvzrazheolmfnj.supabase.co";
+const SUPA_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
+const PTS_PER_EUR = 10; // €1 = 10 pts
+
+const db = createClient(SUPA_URL, SUPA_KEY);
+window._db = db; // expose so onclick handlers can reach it
+
+// ── STATE ───────────────────────────────
+let tgId       = null;
+let tgInitData = null;
+let balance    = 0;
+let markets    = [];
+let activeMkt  = null;
+let choice     = null;
+let prevView   = "markets";
+
+// ── EXPOSE TO HTML ───────────────────────
+Object.assign(window, {
+  doForgotPassword, sendReset,
+  authTab, doSignup, doLogin,
+  goTo, goBack,
+  openDeposit,
+  openTradeModal, closeModal, pick, qs, calcPayout, placeTrade,
+  doSubmit,
+  doSubscribe,
+  wdCalc, doWithdraw,
+  showToast
+});
+
+// ── BOOT ────────────────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.expand(); tg.setBackgroundColor("#06070b"); }
+  tgInitData = tg?.initData || "";
+
+  const result = await telegramLogin();
+  if (!result) return;
+  tgId = String(tg?.initDataUnsafe?.user?.id || "");
+
+  if (result.email_linked) {
+    balance = result.balance_points || 0;
+    startApp();
+  } else {
+    document.getElementById("authWrap").style.display = "flex";
+  }
+});
+
+// ── TELEGRAM LOGIN ────────────────────────
+async function telegramLogin() {
+  try {
+    const res  = await fetch(`${SUPA_URL}/functions/v1/telegram-login`, {
+      method: "POST", headers: { "Content-Type": "text/plain" }, body: tgInitData
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+// ── AUTH ─────────────────────────────────
+function authTab(t) {
+  document.getElementById("formSU").style.display = t === "su" ? "block" : "none";
+  document.getElementById("formLI").style.display = t === "li" ? "block" : "none";
+  document.getElementById("tabSU").classList.toggle("on", t === "su");
+  document.getElementById("tabLI").classList.toggle("on", t === "li");
+  setErr("authErr", "");
+}
+
+function doForgotPassword() {
+  document.getElementById("formSU").style.display = "none";
+  document.getElementById("formLI").style.display = "none";
+  document.getElementById("formFP").style.display = "block";
+  const liEmail = document.getElementById("liEmail").value.trim();
+  if (liEmail) document.getElementById("fpEmail").value = liEmail;
+  setErr("authErr", "");
+}
+
+async function sendReset() {
+  // Uses fetch directly to call Supabase Auth REST API
+  // so it works even before the module db client is ready
+  const SUPA_URL = "https://liketekvzrazheolmfnj.supabase.co";
+  const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
+  const email = document.getElementById("fpEmail").value.trim();
+  const errEl = document.getElementById("fpErr");
+  const okEl  = document.getElementById("fpOk");
+  errEl.style.display = "none";
+  okEl.style.display  = "none";
+  if (!email) { errEl.innerText = "Enter your email first."; errEl.style.display = "block"; return; }
+  const btn = document.getElementById("fpBtn");
+  btn.disabled = true; btn.innerText = "Sending...";
+  try {
+    const res = await fetch(`${SUPA_URL}/auth/v1/recover`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPA_KEY
+      },
+      body: JSON.stringify({
+        email: email,
+        redirect_to: "https://opinion-miniapp.vercel.app"
+      })
+    });
+    // Supabase returns 200 even if email not found (security), so we just show success
+    okEl.innerText = "If that email exists, a reset link has been sent. Check your inbox and spam folder.";
+    okEl.style.display = "block";
+  } catch(e) { errEl.innerText = "Connection error. Try again."; errEl.style.display = "block"; }
+  finally { btn.disabled = false; btn.innerText = "Send Reset Link"; }
+}
+
+function setErr(id, msg) {
+  const el = document.getElementById(id);
+  el.innerText = msg;
+  el.style.display = msg ? "block" : "none";
+}
+
+async function doSignup() {
+  const email = document.getElementById("suEmail").value.trim();
+  const pass  = document.getElementById("suPass").value;
+  const conf  = document.getElementById("suConf").value;
+  if (!email || !pass)  return setErr("authErr", "Fill in all fields.");
+  if (pass !== conf)    return setErr("authErr", "Passwords don't match.");
+  if (pass.length < 6)  return setErr("authErr", "Password must be 6+ chars.");
+  setErr("authErr", "");
+
+  const btn = document.getElementById("suBtn");
+  btn.disabled = true; btn.innerText = "Creating...";
+  try {
+    const res  = await fetch(`${SUPA_URL}/functions/v1/register`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password: pass, telegram_id: tgId,
+        username: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "" })
+    });
+    const data = await res.json();
+    if (!res.ok) return setErr("authErr", data.error || "Signup failed.");
+    balance = 0;
+    startApp();
+  } catch { setErr("authErr", "Connection error. Try again."); }
+  finally { btn.disabled = false; btn.innerText = "Create Account"; }
+}
+
+async function doLogin() {
+  const email = document.getElementById("liEmail").value.trim();
+  const pass  = document.getElementById("liPass").value;
+  if (!email || !pass) return setErr("authErr", "Fill in all fields.");
+  setErr("authErr", "");
+
+  const btn = document.getElementById("liBtn");
+  btn.disabled = true; btn.innerText = "Logging in...";
+  try {
+    const { data: auth, error } = await db.auth.signInWithPassword({ email, password: pass });
+    if (error) return setErr("authErr", "Login failed: " + (error.message || "Wrong email or password."));
+    // Link telegram_id to this account
+    await db.from("users").update({ telegram_id: tgId }).eq("auth_id", auth.user.id);
+    await db.from("wallets").upsert({ telegram_id: tgId, balance_points: 0, balance_eur: 0 }, { onConflict: "telegram_id", ignoreDuplicates: true });
+    const { data: w } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
+    balance = w?.balance_points || 0;
+    startApp();
+  } catch { setErr("authErr", "Connection error. Try again."); }
+  finally { btn.disabled = false; btn.innerText = "Login"; }
+}
+
+// ── START APP ─────────────────────────────
+function startApp() {
+  document.getElementById("authWrap").style.display = "none";
+  document.getElementById("appShell").classList.add("show");
+  updateBalUI();
+  loadMarkets();
+  loadProfile();
+  subscribeWallet();
+}
+
+// ── BALANCE ───────────────────────────────
+function updateBalUI() {
+  const f = balance.toLocaleString();
+  document.getElementById("topBal").innerText  = f;
+  document.getElementById("heroBal").innerText = f;
+  document.getElementById("wdBal").innerText   = f;
+  document.getElementById("wdBalEur").innerText = `≈ €${(balance / PTS_PER_EUR).toFixed(2)}`;
+}
+
+function subscribeWallet() {
+  db.channel("wallet-rt").on("postgres_changes",
+    { event: "UPDATE", schema: "public", table: "wallets" },
+    p => { if (p.new.telegram_id === tgId) { balance = p.new.balance_points; updateBalUI(); } }
+  ).subscribe();
+}
+
+// ── NAVIGATION ────────────────────────────
+const viewMap = {
+  markets:    "vMarkets",
+  portfolio:  "vPortfolio",
+  submit:     "vSubmit",
+  profile:    "vProfile",
+  membership: "vMembership",
+  withdraw:   "vWithdraw"
+};
+// Views that show the bottom nav
+const navViews = ["markets","portfolio","submit","profile"];
+
+function goTo(name) {
+  prevView = currentView();
+  Object.values(viewMap).forEach(id => document.getElementById(id)?.classList.remove("active"));
+  document.getElementById(viewMap[name])?.classList.add("active");
+
+  // Scroll to top
+  document.getElementById(viewMap[name]).scrollTop = 0;
+
+  // Nav highlight (only for main 4)
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("on"));
+  const nb = document.getElementById("nb-" + name);
+  if (nb) nb.classList.add("on");
+
+  // Lazy load data
+  if (name === "portfolio")  loadTrades();
+  if (name === "submit")     loadSubmissions();
+  if (name === "withdraw")   updateBalUI();
+}
+
+function currentView() {
+  for (const [k, v] of Object.entries(viewMap))
+    if (document.getElementById(v)?.classList.contains("active")) return k;
+  return "markets";
+}
+
+function goBack() { goTo(prevView || "profile"); }
+
+// ── MARKETS ───────────────────────────────
+async function loadMarkets() {
+  try {
+    const res = await fetch(`${SUPA_URL}/functions/v1/get-markets`, {
+      headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` }
+    });
+    markets = await res.json();
+    renderMarkets();
+  } catch {
+    document.getElementById("mktList").innerHTML =
+      `<div class="empty"><div class="ei">⚠️</div><p>Failed to load markets.<br>Pull to refresh.</p></div>`;
+  }
+}
+
+function renderMarkets() {
+  const el = document.getElementById("mktList");
+  if (!markets?.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">🎯</div><p>No open markets right now.<br>Check back soon!</p></div>`;
+    return;
+  }
+  el.innerHTML = markets.map(m => {
+    const yes = m.yes_pool || 0, no = m.no_pool || 0, total = yes + no;
+    const yO  = yes > 0 ? (total / yes).toFixed(2) : "—";
+    const nO  = no  > 0 ? (total / no).toFixed(2)  : "—";
+    const yPct = total > 0 ? Math.round(yes / total * 100) : 50;
+    const diff = new Date(m.closes_at) - Date.now();
+    const timer = diff <= 0 ? "Closed"
+      : diff < 3600000   ? `${Math.floor(diff/60000)}m left`
+      : diff < 86400000  ? `${Math.floor(diff/3600000)}h left`
+      : `${Math.floor(diff/86400000)}d left`;
+    const canTrade = m.status === "open" && diff > 0;
+    const chipClass = m.status === "open" ? "sc-open" : m.status === "closed" ? "sc-closed" : "sc-settled";
+
+    return `<div class="mkt-card">
+      <div class="mkt-top">
+        <div class="mkt-q">${m.question}</div>
+        <span class="status-chip ${chipClass}">${m.status}</span>
+      </div>
+      <div class="pools">
+        <div class="pool p-yes">
+          <div class="pool-name">YES</div>
+          <div class="pool-val" style="color:var(--green)">${yes.toLocaleString()}</div>
+          <div class="pool-odds">×${yO}</div>
+        </div>
+        <div class="pool p-no">
+          <div class="pool-name">NO</div>
+          <div class="pool-val" style="color:var(--red)">${no.toLocaleString()}</div>
+          <div class="pool-odds">×${nO}</div>
+        </div>
+      </div>
+      <div class="mkt-bar"><div class="mkt-bar-inner" style="width:${yPct}%"></div></div>
+      ${canTrade
+        ? `<div class="mkt-btns">
+            <button class="btn-yes" onclick="openTradeModal('${m.id}','YES')">YES ×${yO}</button>
+            <button class="btn-no"  onclick="openTradeModal('${m.id}','NO')">NO ×${nO}</button>
+           </div>`
+        : `<div style="text-align:center;font-size:12px;color:var(--muted);padding:4px 0">
+            ${m.result ? `Result: <strong style="color:${m.result==='yes'?'var(--green)':'var(--red)'}">${m.result.toUpperCase()}</strong>` : "Trading closed"}
+           </div>`}
+      <div class="mkt-footer">
+        <div class="mkt-timer">🕐 ${timer}</div>
+        <div style="font-size:11px;color:var(--muted)">${total.toLocaleString()} pts in pool</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ── TRADE MODAL ───────────────────────────
+function openTradeModal(id, c) {
+  activeMkt = markets.find(m => m.id === id);
+  if (!activeMkt) return;
+  choice = null;
+  document.getElementById("sheetQ").innerText = activeMkt.question;
+  document.getElementById("stakeIn").value    = "";
+  document.getElementById("ppAmt").innerText  = "—";
+  document.getElementById("ppOdds").innerText = "Pick YES or NO first";
+  document.getElementById("chYes").classList.remove("sel");
+  document.getElementById("chNo").classList.remove("sel");
+  document.getElementById("tradeOverlay").classList.add("open");
+  if (c) pick(c);
+}
+
+function closeModal() {
+  document.getElementById("tradeOverlay").classList.remove("open");
+  activeMkt = null; choice = null;
+}
+
+function pick(c) {
+  choice = c;
+  document.getElementById("chYes").classList.toggle("sel", c === "YES");
+  document.getElementById("chNo").classList.toggle("sel",  c === "NO");
+  calcPayout();
+}
+
+function qs(n) {
+  document.getElementById("stakeIn").value = n;
+  calcPayout();
+}
+
+function calcPayout() {
+  if (!activeMkt || !choice) return;
+  const stake = parseInt(document.getElementById("stakeIn").value) || 0;
+  if (stake <= 0) { document.getElementById("ppAmt").innerText = "—"; return; }
+
+  const yes   = activeMkt.yes_pool || 0;
+  const no    = activeMkt.no_pool  || 0;
+  const newY  = choice === "YES" ? yes + stake : yes;
+  const newN  = choice === "NO"  ? no  + stake : no;
+  const total = newY + newN;
+  const pool  = choice === "YES" ? newY : newN;
+  const odds  = pool > 0 ? (total / pool) : 1;
+  const payout = Math.floor(stake * odds * 0.95); // 5% fee preview
+
+  document.getElementById("ppAmt").innerText  = payout.toLocaleString() + " pts";
+  document.getElementById("ppOdds").innerText = `×${odds.toFixed(2)} odds · 5% fee applied`;
+}
+
+async function placeTrade() {
+  if (!choice)           return showToast("Select YES or NO", "bad");
+  const stake = parseInt(document.getElementById("stakeIn").value);
+  if (!stake || stake <= 0) return showToast("Enter a valid stake", "bad");
+  if (stake > balance)      return showToast("Insufficient balance", "bad");
+
+  const btn = document.getElementById("tradeBtn");
+  btn.disabled = true; btn.innerText = "Placing...";
+  try {
+    const res  = await fetch(`${SUPA_URL}/functions/v1/place-trade`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tgInitData, market_id: activeMkt.id, choice, stake })
+    });
+    const data = await res.json();
+    if (!res.ok) return showToast(data.error || "Trade failed", "bad");
+    showToast("Trade placed! 🎯", "ok");
+    closeModal();
+    await loadBalance();
+    await loadMarkets();
+  } catch { showToast("Connection error", "bad"); }
+  finally { btn.disabled = false; btn.innerText = "Confirm Trade"; }
+}
+
+async function loadBalance() {
+  const { data } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
+  if (data) { balance = data.balance_points; updateBalUI(); }
+}
+
+// ── PORTFOLIO ─────────────────────────────
+async function loadTrades() {
+  const el = document.getElementById("tradeList");
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  const { data } = await db.from("trades").select("*").eq("telegram_id", tgId)
+    .order("created_at", { ascending: false }).limit(100);
+
+  if (!data?.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">📊</div><p>No trades yet.<br>Go place your first bet!</p></div>`;
+    document.getElementById("stTotal").innerText = "0";
+    document.getElementById("stWon").innerText   = "0";
+    document.getElementById("stPts").innerText   = "0";
+    return;
+  }
+
+  const won  = data.filter(t => t.status === "won");
+  const pts  = won.reduce((s, t) => s + (t.payout_points || 0), 0);
+  document.getElementById("stTotal").innerText = data.length;
+  document.getElementById("stWon").innerText   = won.length;
+  document.getElementById("stPts").innerText   = pts.toLocaleString();
+
+  el.innerHTML = data.map(t => {
+    const cls     = t.status === "won" ? "tp-won" : t.status === "lost" ? "tp-lost" : "tp-active";
+    const payout  = t.status === "won"  ? `+${t.payout_points?.toLocaleString()} pts`
+                  : t.status === "lost" ? "Lost"
+                  : "Pending";
+    const optCls  = t.option === "YES" ? "tcb-yes" : "tcb-no";
+    return `<div class="trade-card">
+      <div class="tc-q">${t.question || "Market"}</div>
+      <div class="tc-row">
+        <div class="tc-left">
+          <span class="tc-badge ${optCls}">${t.option}</span>
+          <span class="tc-stake">${t.amount_points?.toLocaleString()} pts</span>
+        </div>
+        <div class="tc-payout ${cls}">${payout}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ── PROFILE ───────────────────────────────
+async function loadProfile() {
+  const { data } = await db.from("users")
+    .select("username, full_name, email, membership_tier")
+    .eq("telegram_id", tgId).single();
+  if (!data) return;
+
+  const name = data.full_name || data.username || data.email?.split("@")[0] || "Trader";
+  document.getElementById("profAv").innerText    = name[0].toUpperCase();
+  document.getElementById("profName").innerText  = name;
+  document.getElementById("profEmail").innerText = data.email || "—";
+  document.getElementById("profTgId").innerText  = tgId;
+
+  const tier = data.membership_tier || "free";
+  const tb   = document.getElementById("profTier");
+  tb.innerText   = tier.charAt(0).toUpperCase() + tier.slice(1);
+  tb.className   = `tier-badge tb-${tier}`;
+}
+
+// ── DEPOSIT ───────────────────────────────
+async function openDeposit() {
+  const euros = prompt("Deposit amount in EUR (€1 = 10 pts):");
+  if (!euros || isNaN(euros) || Number(euros) < 1) return;
+
+  showToast("Opening Stripe...", "ok");
+  try {
+    const res  = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: Number(euros), initData: tgInitData })
+    });
+    const data = await res.json();
+    if (data.url) window.Telegram?.WebApp?.openLink(data.url) || (window.location.href = data.url);
+    else showToast(data.error || "Checkout failed", "bad");
+  } catch { showToast("Connection error", "bad"); }
+}
+
+// ── SUBMIT QUESTION ───────────────────────
+async function doSubmit() {
+  const q   = document.getElementById("sqQ").value.trim();
+  const ctx = document.getElementById("sqCtx").value.trim();
+  setErr("sqErr", "");
+
+  if (q.length < 10)  return setErr("sqErr", "Question must be at least 10 characters.");
+  if (balance < 100)  return setErr("sqErr", "You need at least 100 pts to submit.");
+
+  const btn = document.getElementById("sqBtn");
+  btn.disabled = true; btn.innerText = "Submitting...";
+  try {
+    const res  = await fetch(`${SUPA_URL}/functions/v1/submit-question`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tgInitData, question: q, context: ctx })
+    });
+    const data = await res.json();
+    if (!res.ok) return setErr("sqErr", data.error || "Submission failed.");
+    showToast("Submitted! We'll review within 24h 🙌", "ok");
+    document.getElementById("sqQ").value   = "";
+    document.getElementById("sqCtx").value = "";
+    document.getElementById("sqC").innerText = "0/200";
+    await loadBalance();
+    await loadSubmissions();
+  } catch { setErr("sqErr", "Connection error."); }
+  finally { btn.disabled = false; btn.innerText = "Submit · 100 pts"; }
+}
+
+async function loadSubmissions() {
+  const el = document.getElementById("subList");
+  const { data } = await db.from("question_submissions")
+    .select("*").eq("telegram_id", tgId)
+    .order("created_at", { ascending: false });
+
+  if (!data?.length) {
+    el.innerHTML = `<div class="empty" style="padding:24px 0"><div class="ei">📝</div><p>No submissions yet</p></div>`;
+    return;
+  }
+  el.innerHTML = data.map(s => `
+    <div class="sub-item">
+      <div class="sub-q">${s.question}</div>
+      <div class="sub-foot">
+        <span class="ss-${s.status}">${s.status}</span>
+        <span class="sub-pts">${s.refunded ? "100 pts refunded" : "100 pts charged"}</span>
+      </div>
+    </div>`).join("");
+}
+
+// ── MEMBERSHIP ────────────────────────────
+async function doSubscribe(slug) {
+  showToast("Prices coming soon — stay tuned!", "bad");
+}
+
+// ── WITHDRAW ──────────────────────────────
+function wdCalc() {
+  const pts = parseInt(document.getElementById("wdAmt").value) || 0;
+  document.getElementById("wdHint").innerText = `≈ €${(pts / PTS_PER_EUR).toFixed(2)}`;
+}
+
+async function doWithdraw() {
+  const pts  = parseInt(document.getElementById("wdAmt").value);
+  const iban = document.getElementById("wdIban").value.trim();
+  setErr("wdErr", "");
+
+  if (!pts || pts < 1000)  return setErr("wdErr", "Minimum withdrawal is 1,000 pts.");
+  if (!iban)               return setErr("wdErr", "Please enter your IBAN.");
+  if (pts > balance)       return setErr("wdErr", "Insufficient balance.");
+
+  const { error } = await db.from("withdrawals").insert({
+    telegram_id: tgId,
+    amount_eur:  (pts / PTS_PER_EUR).toFixed(2),
+    status:      "pending"
+  });
+  if (error) return setErr("wdErr", "Failed to submit. Try again.");
+
+  showToast("Withdrawal requested ✅", "ok");
+  document.getElementById("wdAmt").value  = "";
+  document.getElementById("wdIban").value = "";
+  goBack();
+}
+
+// ── TOAST ─────────────────────────────────
+function showToast(msg, type = "ok") {
+  const t = document.getElementById("toast");
+  t.innerText  = msg;
+  t.className  = `show ${type}`;
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.className = "", 3000);
+}
+</script>
+
 </body>
 </html>
