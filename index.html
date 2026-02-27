@@ -24,16 +24,14 @@
     html, body { height: 100%; overflow: hidden; background: var(--bg); }
     body { font-family: 'Outfit', sans-serif; color: var(--text); font-size: 15px; }
 
-    /* ── APP SHELL ── */
     #authWrap { position: fixed; inset: 0; z-index: 500; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 24px; }
     #appShell { display: none; position: fixed; inset: 0; flex-direction: column; }
     #appShell.show { display: flex; }
 
-    /* ── VIEWS ── */
     .view { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 80px; }
     .view.active { display: block; }
 
-    /* ── AUTH ── */
+    /* AUTH */
     .auth-box { width: 100%; max-width: 370px; }
     .auth-logo { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; text-align: center; color: var(--gold); margin-bottom: 4px; letter-spacing: 1px; }
     .auth-sub  { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 32px; }
@@ -49,19 +47,19 @@
     .btn-gold:disabled { opacity: .45; cursor: not-allowed; }
     .btn-gold:active   { opacity: .8; }
 
-    /* ── BOTTOM NAV ── */
+    /* BOTTOM NAV */
     #bottomNav { flex-shrink: 0; display: flex; background: var(--surface); border-top: 1px solid var(--border); padding: 6px 0 max(10px, env(safe-area-inset-bottom)); }
     .nav-btn   { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 0; border: none; background: transparent; color: var(--muted); font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer; transition: color .2s; }
     .nav-btn.on { color: var(--gold); }
     .nav-btn svg { width: 21px; height: 21px; }
 
-    /* ── TOPBAR ── */
+    /* TOPBAR */
     .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; position: sticky; top: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 10; }
     .topbar-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
     .back-btn { background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; padding: 0 8px 0 0; line-height: 1; }
     .bal-chip { background: rgba(240,192,64,.12); color: var(--gold); border: 1px solid rgba(240,192,64,.2); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700; }
 
-    /* ── SHARED ── */
+    /* SHARED */
     .section-head { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 18px 20px 10px; }
     .notice { margin: 0 20px 20px; background: rgba(240,192,64,.07); border: 1px solid rgba(240,192,64,.2); border-radius: 12px; padding: 14px 16px; display: flex; gap: 12px; }
     .notice-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
@@ -73,7 +71,7 @@
     .empty .ei { font-size: 36px; margin-bottom: 14px; }
     .empty p { font-size: 14px; line-height: 1.6; }
 
-    /* ── MARKETS VIEW ── */
+    /* MARKETS VIEW */
     .balance-hero { margin: 16px 20px; background: linear-gradient(135deg, #0f1220 0%, var(--card) 100%); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; position: relative; overflow: hidden; }
     .balance-hero::after { content: ''; position: absolute; top: -40px; right: -40px; width: 130px; height: 130px; background: radial-gradient(circle, rgba(240,192,64,.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
     .bh-label  { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
@@ -85,24 +83,37 @@
     .bh-dep { background: var(--gold); color: #000; }
     .bh-wd  { background: var(--card); color: var(--text); border: 1px solid var(--border); }
 
-    /* Market card */
+    /* ── MARKET CARD ──
+       KEY CHANGE: Pools are now HIDDEN from users.
+       We only show YES odds and NO odds.
+       This is like a real bookmaker — you see the price, not the book's exposure.
+    */
     .mkt-list { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
     .mkt-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
-    .mkt-top  { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+    .mkt-top  { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
     .mkt-q    { font-size: 15px; font-weight: 600; line-height: 1.45; flex: 1; }
     .status-chip { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0; }
     .sc-open    { background: rgba(0,229,122,.1);   color: var(--green); }
     .sc-closed  { background: rgba(255,61,90,.1);   color: var(--red); }
     .sc-settled { background: rgba(72,80,112,.15);  color: var(--muted); }
-    .pools      { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-    .pool       { background: var(--surface); border-radius: 10px; padding: 11px 14px; }
-    .pool-name  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 5px; }
-    .p-yes .pool-name { color: var(--green); }
-    .p-no  .pool-name { color: var(--red); }
-    .pool-val  { font-size: 18px; font-weight: 700; }
-    .pool-odds { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .mkt-bar   { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
-    .mkt-bar-inner { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--green), var(--red)); }
+
+    /* Odds display — two big boxes side by side */
+    .odds-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .odds-box  { border-radius: 10px; padding: 14px; text-align: center; }
+    .ob-yes    { background: rgba(0,229,122,.06); border: 1px solid rgba(0,229,122,.15); }
+    .ob-no     { background: rgba(255,61,90,.06);  border: 1px solid rgba(255,61,90,.15); }
+    .ob-label  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
+    .ob-yes .ob-label { color: var(--green); }
+    .ob-no  .ob-label { color: var(--red); }
+    .ob-odds   { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; line-height: 1; }
+    .ob-yes .ob-odds { color: var(--green); }
+    .ob-no  .ob-odds { color: var(--red); }
+    .ob-sub    { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* Probability bar — visual only, no numbers */
+    .prob-bar  { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+    .prob-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--green), var(--red)); transition: width .5s ease; }
+
     .mkt-btns  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .btn-yes, .btn-no { padding: 12px; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity .15s; }
     .btn-yes { background: rgba(0,229,122,.1); color: var(--green); border: 1px solid rgba(0,229,122,.2); }
@@ -111,16 +122,16 @@
     .mkt-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
     .mkt-timer  { font-size: 11px; color: var(--muted); }
 
-    /* ── TRADE MODAL ── */
+    /* TRADE MODAL */
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 300; align-items: flex-end; }
     .overlay.open { display: flex; }
     .sheet { width: 100%; max-width: 480px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 0 20px 40px; animation: slideUp .22s ease; }
     @keyframes slideUp { from { transform: translateY(100%); } }
-    .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 14px auto 22px; }
-    .sheet-title  { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
-    .sheet-q      { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
-    .choice-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-    .choice-btn   { padding: 15px; border-radius: 12px; background: var(--surface); border: 2px solid transparent; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .15s; }
+    .sheet-handle  { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 14px auto 22px; }
+    .sheet-title   { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .sheet-q       { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+    .choice-row    { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .choice-btn    { padding: 15px; border-radius: 12px; background: var(--surface); border: 2px solid transparent; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .15s; }
     .choice-btn.yes { color: var(--green); }
     .choice-btn.no  { color: var(--red); }
     .choice-btn.yes.sel { border-color: var(--green); background: rgba(0,229,122,.08); }
@@ -128,6 +139,8 @@
     .stake-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
     .stake-in  { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; padding: 14px 16px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; outline: none; transition: border-color .2s; margin-bottom: 10px; }
     .stake-in:focus { border-color: var(--gold); }
+    /* Minimum bet hint shown below the input */
+    .min-bet-hint { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
     .quick-row { display: flex; gap: 8px; margin-bottom: 18px; }
     .q-btn { flex: 1; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
     .q-btn:active { background: rgba(240,192,64,.12); color: var(--gold); }
@@ -137,7 +150,7 @@
     .pp-amount { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--green); }
     .cancel-btn { width: 100%; margin-top: 10px; padding: 12px; background: none; border: none; color: var(--muted); font-family: 'Outfit', sans-serif; font-size: 14px; cursor: pointer; }
 
-    /* ── PORTFOLIO ── */
+    /* PORTFOLIO */
     .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 16px 20px 0; }
     .stat-box  { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
     .stat-val  { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--gold); }
@@ -156,7 +169,7 @@
     .tp-lost   { color: var(--red); }
     .tp-active { color: var(--gold); }
 
-    /* ── PROFILE ── */
+    /* PROFILE */
     .profile-card { margin: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; text-align: center; }
     .avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--gold) 0%, #c07000 100%); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #000; margin: 0 auto 14px; }
     .prof-name  { font-size: 18px; font-weight: 700; margin-bottom: 3px; }
@@ -179,7 +192,7 @@
     .mi-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .mi-arrow { color: var(--muted); font-size: 20px; line-height: 1; }
 
-    /* ── MEMBERSHIP ── */
+    /* MEMBERSHIP */
     .mem-intro { padding: 16px 20px 0; font-size: 13px; color: var(--muted); line-height: 1.65; }
     .tier-list  { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
     .tier-card  { border: 1px solid var(--border); border-radius: var(--r); padding: 22px; position: relative; overflow: hidden; }
@@ -206,7 +219,7 @@
     .tbt-pro   { background: var(--gold); color: #000; }
     .tbt-elite { background: rgba(0,229,122,.12); color: var(--green); border: 1px solid rgba(0,229,122,.25); }
 
-    /* ── SUBMIT ── */
+    /* SUBMIT */
     .form-wrap { padding: 0 20px; }
     .ff        { margin-bottom: 16px; }
     .ff label  { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
@@ -222,7 +235,7 @@
     .ss-rejected { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--red); }
     .sub-pts  { font-size: 12px; color: var(--muted); }
 
-    /* ── WITHDRAW ── */
+    /* WITHDRAW */
     .wd-wrap    { padding: 0 20px; }
     .wd-card    { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; margin-bottom: 20px; text-align: center; }
     .wd-label   { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
@@ -232,7 +245,7 @@
     .wf-input:focus { border-color: var(--gold); }
     .wf-hint    { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
 
-    /* ── TOAST ── */
+    /* TOAST */
     #toast { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 11px 20px; font-size: 13px; font-weight: 600; white-space: nowrap; z-index: 999; opacity: 0; transition: all .25s; pointer-events: none; }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     #toast.ok  { border-color: rgba(0,229,122,.4);  color: var(--green); }
@@ -241,40 +254,34 @@
 </head>
 <body>
 
-<!-- ══ AUTH ══ -->
+<!-- AUTH -->
 <div id="authWrap">
   <div class="auth-box">
     <div class="auth-logo">CASSINO TRADE</div>
     <div class="auth-sub">Predict markets · Trade points · Win big</div>
-
     <div class="tab-row">
       <button class="tab-btn on" id="tabSU" onclick="authTab('su')">Sign Up</button>
       <button class="tab-btn"    id="tabLI" onclick="authTab('li')">Login</button>
     </div>
-
     <div class="err-box" id="authErr"></div>
-
     <div id="formSU">
       <div class="f"><label>Email</label><input type="email"    id="suEmail" placeholder="you@email.com"/></div>
       <div class="f"><label>Password</label><input type="password" id="suPass"  placeholder="Min 6 characters"/></div>
       <div class="f"><label>Confirm Password</label><input type="password" id="suConf"  placeholder="Repeat password"/></div>
       <button class="btn-gold" id="suBtn" onclick="doSignup()">Create Account</button>
     </div>
-
     <div id="formLI" style="display:none">
       <div class="f"><label>Email</label><input type="email"    id="liEmail" placeholder="you@email.com"/></div>
       <div class="f"><label>Password</label><input type="password" id="liPass"  placeholder="Your password"/></div>
       <button class="btn-gold" id="liBtn" onclick="doLogin()">Login</button>
     </div>
-
     <div style="text-align:center;margin-top:14px">
       <button onclick="doForgotPassword()" style="background:none;border:none;color:var(--muted);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">Forgot password?</button>
     </div>
-
     <div id="formFP" style="display:none">
       <div style="text-align:center;margin-bottom:20px">
         <div style="font-size:16px;font-weight:700;margin-bottom:6px">Reset Password</div>
-        <div style="font-size:13px;color:var(--muted)">We will send a reset link to your email</div>
+        <div style="font-size:13px;color:var(--muted)">We'll send a reset link to your email</div>
       </div>
       <div class="f"><label>Email</label><input type="email" id="fpEmail" placeholder="you@email.com"/></div>
       <div class="err-box" id="fpErr"></div>
@@ -287,7 +294,7 @@
   </div>
 </div>
 
-<!-- ══ APP ══ -->
+<!-- APP -->
 <div id="appShell">
 
   <!-- MARKETS -->
@@ -326,19 +333,13 @@
     <div class="topbar"><div class="topbar-title">Submit Question</div></div>
     <div class="notice">
       <div class="notice-icon">💡</div>
-      <div class="notice-text">
-        Propose a market for the community to trade on.
-        Costs <strong>100 pts</strong> — refunded if rejected.
-        We review within 24 hours.
-      </div>
+      <div class="notice-text">Propose a market for the community to trade on. Costs <strong>100 pts</strong> — refunded if rejected. We review within 24 hours.</div>
     </div>
     <div class="section-head">Your Question</div>
     <div class="form-wrap">
       <div class="ff">
         <label>Question <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(min 10 chars)</span></label>
-        <textarea id="sqQ" rows="4" maxlength="200"
-          placeholder="e.g. Will Bitcoin hit $100k before June 2025?"
-          oninput="document.getElementById('sqC').innerText=this.value.length+'/200'"></textarea>
+        <textarea id="sqQ" rows="4" maxlength="200" placeholder="e.g. Will Bitcoin hit $100k before June 2025?" oninput="document.getElementById('sqC').innerText=this.value.length+'/200'"></textarea>
         <div class="char-c" id="sqC">0/200</div>
       </div>
       <div class="ff">
@@ -364,7 +365,7 @@
     <div class="menu-list">
       <div class="menu-row" onclick="goTo('membership')">
         <div class="menu-icon mi-gold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-        <div class="menu-info"><div class="mi-title">Membership</div><div class="mi-sub">Upgrade for better limits & perks</div></div>
+        <div class="menu-info"><div class="mi-title">Membership</div><div class="mi-sub">Upgrade for better limits &amp; perks</div></div>
         <div class="mi-arrow">›</div>
       </div>
       <div class="menu-row" onclick="goTo('portfolio')">
@@ -374,12 +375,12 @@
       </div>
       <div class="menu-row" onclick="openDeposit()">
         <div class="menu-icon mi-green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
-        <div class="menu-info"><div class="mi-title">Deposit</div><div class="mi-sub">Add points · €1 = 10 pts</div></div>
+        <div class="menu-info"><div class="mi-title">Deposit</div><div class="mi-sub">Add points · min €10 · €1 = 10 pts</div></div>
         <div class="mi-arrow">›</div>
       </div>
       <div class="menu-row" onclick="goTo('withdraw')">
         <div class="menu-icon mi-red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
-        <div class="menu-info"><div class="mi-title">Withdraw</div><div class="mi-sub">Cash out your winnings</div></div>
+        <div class="menu-info"><div class="mi-title">Withdraw</div><div class="mi-sub">Cash out · min €20</div></div>
         <div class="mi-arrow">›</div>
       </div>
     </div>
@@ -449,13 +450,14 @@
         <div class="wd-pts" id="wdBal">0</div>
         <div class="wd-eur" id="wdBalEur">≈ €0.00</div>
       </div>
+      <!-- Updated notice: min withdraw is now €20 = 200 pts -->
       <div class="notice" style="margin:0 0 20px">
         <div class="notice-icon">ℹ️</div>
-        <div class="notice-text">Minimum <strong>1,000 pts (€100)</strong>. Processed via bank transfer in 2–5 business days.</div>
+        <div class="notice-text">Minimum <strong>200 pts (€20)</strong>. Processed via bank transfer in 2–5 business days.</div>
       </div>
       <div class="ff" style="margin-bottom:8px">
         <label>Amount in Points</label>
-        <input type="number" class="wf-input" id="wdAmt" placeholder="e.g. 1000" min="1000" oninput="wdCalc()"/>
+        <input type="number" class="wf-input" id="wdAmt" placeholder="e.g. 200" min="200" oninput="wdCalc()"/>
         <div class="wf-hint" id="wdHint">≈ €0.00</div>
       </div>
       <div class="ff">
@@ -488,7 +490,7 @@
   </nav>
 </div>
 
-<!-- ══ TRADE MODAL ══ -->
+<!-- TRADE MODAL -->
 <div class="overlay" id="tradeOverlay">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -499,8 +501,11 @@
       <button class="choice-btn no"  id="chNo"  onclick="pick('NO')">❌ NO</button>
     </div>
     <div class="stake-lbl">Stake (points)</div>
-    <input class="stake-in" id="stakeIn" type="number" placeholder="Enter amount" oninput="calcPayout()" min="1"/>
+    <input class="stake-in" id="stakeIn" type="number" placeholder="Min 100 pts" oninput="calcPayout()" min="100"/>
+    <!-- Hint shown below input reminding user of minimum -->
+    <div class="min-bet-hint">Minimum bet: 100 pts</div>
     <div class="quick-row">
+      <!-- Quick-pick buttons start at 100 (the minimum) -->
       <button class="q-btn" onclick="qs(100)">100</button>
       <button class="q-btn" onclick="qs(500)">500</button>
       <button class="q-btn" onclick="qs(1000)">1K</button>
@@ -524,16 +529,23 @@
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// ── CONFIG ──────────────────────────────────────────────────────
-const SUPA_URL      = "https://liketekvzrazheolmfnj.supabase.co";
-const SUPA_KEY      = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
-const PTS_PER_EUR   = 10;    // €1 = 10 pts
-const MIN_DEPOSIT   = 5;     // ✅ FIX #9: minimum €5 deposit
+// ── CONFIG ──────────────────────────────────────────────────────────────
+const SUPA_URL    = "https://liketekvzrazheolmfnj.supabase.co";
+const SUPA_KEY    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
+const PTS_PER_EUR  = 10;   // €1 = 10 pts
+const MIN_STAKE    = 100;  // minimum bet in points
+const MIN_DEPOSIT  = 10;   // minimum deposit in euros
+const MIN_WITHDRAW = 200;  // minimum withdrawal in points (= €20)
+
+// Virtual pool size used for odds anchoring at 1.80 when market is empty.
+// Higher = odds stay near 1.80 longer before shifting. Lower = shifts faster.
+const VIRTUAL_POOL = 1000;
+const START_ODDS   = 1.80;
 
 const db = createClient(SUPA_URL, SUPA_KEY);
-window._db = db;  // expose for doWithdraw which is outside module scope
+window._db = db;
 
-// ── STATE ────────────────────────────────────────────────────────
+// ── STATE ────────────────────────────────────────────────────────────────
 let tgId       = null;
 let tgInitData = null;
 let balance    = 0;
@@ -542,7 +554,7 @@ let activeMkt  = null;
 let choice     = null;
 let prevView   = "markets";
 
-// ── EXPOSE FUNCTIONS TO HTML onclick HANDLERS ────────────────────
+// ── EXPOSE FUNCTIONS TO HTML onclick ────────────────────────────────────
 Object.assign(window, {
   doForgotPassword, sendReset,
   authTab, doSignup, doLogin,
@@ -555,7 +567,7 @@ Object.assign(window, {
   showToast
 });
 
-// ── BOOT — runs when page loads ──────────────────────────────────
+// ── BOOT ─────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.expand(); tg.setBackgroundColor("#06070b"); }
@@ -573,7 +585,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// ── TELEGRAM LOGIN ────────────────────────────────────────────────
 async function telegramLogin() {
   try {
     const res = await fetch(`${SUPA_URL}/functions/v1/telegram-login`, {
@@ -584,7 +595,7 @@ async function telegramLogin() {
   } catch { return null; }
 }
 
-// ── AUTH TABS ────────────────────────────────────────────────────
+// ── AUTH ──────────────────────────────────────────────────────────────────
 function authTab(t) {
   document.getElementById("formSU").style.display = t === "su" ? "block" : "none";
   document.getElementById("formLI").style.display = t === "li" ? "block" : "none";
@@ -630,7 +641,6 @@ function setErr(id, msg) {
   el.style.display = msg ? "block" : "none";
 }
 
-// ── SIGN UP ──────────────────────────────────────────────────────
 async function doSignup() {
   const email = document.getElementById("suEmail").value.trim();
   const pass  = document.getElementById("suPass").value;
@@ -639,24 +649,13 @@ async function doSignup() {
   if (pass !== conf)    return setErr("authErr", "Passwords don't match.");
   if (pass.length < 6)  return setErr("authErr", "Password must be 6+ chars.");
   setErr("authErr", "");
-
   const btn = document.getElementById("suBtn");
   btn.disabled = true; btn.innerText = "Creating...";
   try {
-    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-
-    const res = await fetch(`${SUPA_URL}/functions/v1/register`, {
+    const res  = await fetch(`${SUPA_URL}/functions/v1/register`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        password: pass,
-        telegram_id: tgId,
-        username: tgUser?.username || "",
-        // ✅ FIX #7: Send the user's real Telegram name to the server
-        // We join first_name + last_name into a single full_name string
-        // e.g. "Marco" + "Rossi" = "Marco Rossi"
-        full_name: [tgUser?.first_name || "", tgUser?.last_name || ""].join(" ").trim()
-      })
+      body: JSON.stringify({ email, password: pass, telegram_id: tgId,
+        username: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "" })
     });
     const data = await res.json();
     if (!res.ok) return setErr("authErr", data.error || "Signup failed.");
@@ -666,13 +665,11 @@ async function doSignup() {
   finally { btn.disabled = false; btn.innerText = "Create Account"; }
 }
 
-// ── LOGIN ────────────────────────────────────────────────────────
 async function doLogin() {
   const email = document.getElementById("liEmail").value.trim();
   const pass  = document.getElementById("liPass").value;
   if (!email || !pass) return setErr("authErr", "Fill in all fields.");
   setErr("authErr", "");
-
   const btn = document.getElementById("liBtn");
   btn.disabled = true; btn.innerText = "Logging in...";
   try {
@@ -687,7 +684,7 @@ async function doLogin() {
   finally { btn.disabled = false; btn.innerText = "Login"; }
 }
 
-// ── START APP ────────────────────────────────────────────────────
+// ── START APP ─────────────────────────────────────────────────────────────
 function startApp() {
   document.getElementById("authWrap").style.display = "none";
   document.getElementById("appShell").classList.add("show");
@@ -697,7 +694,7 @@ function startApp() {
   subscribeWallet();
 }
 
-// ── BALANCE UI ───────────────────────────────────────────────────
+// ── BALANCE ───────────────────────────────────────────────────────────────
 function updateBalUI() {
   const f = balance.toLocaleString();
   document.getElementById("topBal").innerText   = f;
@@ -713,14 +710,10 @@ function subscribeWallet() {
   ).subscribe();
 }
 
-// ── NAVIGATION ───────────────────────────────────────────────────
+// ── NAVIGATION ────────────────────────────────────────────────────────────
 const viewMap = {
-  markets:    "vMarkets",
-  portfolio:  "vPortfolio",
-  submit:     "vSubmit",
-  profile:    "vProfile",
-  membership: "vMembership",
-  withdraw:   "vWithdraw"
+  markets: "vMarkets", portfolio: "vPortfolio", submit: "vSubmit",
+  profile: "vProfile", membership: "vMembership", withdraw: "vWithdraw"
 };
 
 function goTo(name) {
@@ -731,9 +724,9 @@ function goTo(name) {
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("on"));
   const nb = document.getElementById("nb-" + name);
   if (nb) nb.classList.add("on");
-  if (name === "portfolio")  loadTrades();
-  if (name === "submit")     loadSubmissions();
-  if (name === "withdraw")   updateBalUI();
+  if (name === "portfolio") loadTrades();
+  if (name === "submit")    loadSubmissions();
+  if (name === "withdraw")  updateBalUI();
 }
 
 function currentView() {
@@ -744,7 +737,31 @@ function currentView() {
 
 function goBack() { goTo(prevView || "profile"); }
 
-// ── MARKETS ──────────────────────────────────────────────────────
+// ── ODDS CALCULATION (matches backend logic) ──────────────────────────────
+// When market is empty: both sides show START_ODDS (1.80)
+// As bets come in: popular side odds go DOWN, unpopular side goes UP
+// Uses a "virtual pool" blending technique to smooth early swings
+function calcOdds(yesPool, noPool) {
+  const total = yesPool + noPool;
+  if (total === 0) return { yesOdds: START_ODDS, noOdds: START_ODDS };
+
+  // Raw parimutuel odds
+  const rawYes = yesPool > 0 ? total / yesPool : START_ODDS * 2;
+  const rawNo  = noPool  > 0 ? total / noPool  : START_ODDS * 2;
+
+  // Blend with virtual pool anchored to START_ODDS
+  // As real bets grow, virtual pool influence shrinks
+  const V = VIRTUAL_POOL;
+  const anchoredYes = (yesPool * rawYes + V * START_ODDS) / (yesPool + V);
+  const anchoredNo  = (noPool  * rawNo  + V * START_ODDS) / (noPool  + V);
+
+  return {
+    yesOdds: Math.max(1.01, parseFloat(anchoredYes.toFixed(2))),
+    noOdds:  Math.max(1.01, parseFloat(anchoredNo.toFixed(2)))
+  };
+}
+
+// ── MARKETS ───────────────────────────────────────────────────────────────
 async function loadMarkets() {
   try {
     const res = await fetch(`${SUPA_URL}/functions/v1/get-markets`, {
@@ -764,17 +781,26 @@ function renderMarkets() {
     el.innerHTML = `<div class="empty"><div class="ei">🎯</div><p>No open markets right now.<br>Check back soon!</p></div>`;
     return;
   }
+
   el.innerHTML = markets.map(m => {
-    const yes = m.yes_pool || 0, no = m.no_pool || 0, total = yes + no;
-    const yO  = yes > 0 ? (total / yes).toFixed(2) : "—";
-    const nO  = no  > 0 ? (total / no).toFixed(2)  : "—";
-    const yPct = total > 0 ? Math.round(yes / total * 100) : 50;
+    // Calculate odds using the same formula as the backend
+    const yes = m.yes_pool || 0;
+    const no  = m.no_pool  || 0;
+    const { yesOdds, noOdds } = calcOdds(yes, no);
+
+    // Probability bar width is based on implied probability of YES
+    // Implied prob = 1 / odds. We normalize so both add up to 100%.
+    const impliedYes = 1 / yesOdds;
+    const impliedNo  = 1 / noOdds;
+    const yesPct = Math.round((impliedYes / (impliedYes + impliedNo)) * 100);
+
     const diff = new Date(m.closes_at) - Date.now();
     const timer = diff <= 0 ? "Closed"
-      : diff < 3600000   ? `${Math.floor(diff/60000)}m left`
-      : diff < 86400000  ? `${Math.floor(diff/3600000)}h left`
+      : diff < 3600000  ? `${Math.floor(diff/60000)}m left`
+      : diff < 86400000 ? `${Math.floor(diff/3600000)}h left`
       : `${Math.floor(diff/86400000)}d left`;
-    const canTrade = m.status === "open" && diff > 0;
+
+    const canTrade  = m.status === "open" && diff > 0;
     const chipClass = m.status === "open" ? "sc-open" : m.status === "closed" ? "sc-closed" : "sc-settled";
 
     return `<div class="mkt-card">
@@ -782,44 +808,54 @@ function renderMarkets() {
         <div class="mkt-q">${m.question}</div>
         <span class="status-chip ${chipClass}">${m.status}</span>
       </div>
-      <div class="pools">
-        <div class="pool p-yes">
-          <div class="pool-name">YES</div>
-          <div class="pool-val" style="color:var(--green)">${yes.toLocaleString()}</div>
-          <div class="pool-odds">×${yO}</div>
+
+      <!-- ODDS BOXES — we show odds only, NOT pool amounts -->
+      <div class="odds-row">
+        <div class="odds-box ob-yes">
+          <div class="ob-label">YES</div>
+          <div class="ob-odds">×${yesOdds}</div>
+          <div class="ob-sub">if you win</div>
         </div>
-        <div class="pool p-no">
-          <div class="pool-name">NO</div>
-          <div class="pool-val" style="color:var(--red)">${no.toLocaleString()}</div>
-          <div class="pool-odds">×${nO}</div>
+        <div class="odds-box ob-no">
+          <div class="ob-label">NO</div>
+          <div class="ob-odds">×${noOdds}</div>
+          <div class="ob-sub">if you win</div>
         </div>
       </div>
-      <div class="mkt-bar"><div class="mkt-bar-inner" style="width:${yPct}%"></div></div>
+
+      <!-- Probability bar — visual only, no numbers shown -->
+      <div class="prob-bar">
+        <div class="prob-fill" style="width:${yesPct}%"></div>
+      </div>
+
       ${canTrade
         ? `<div class="mkt-btns">
-            <button class="btn-yes" onclick="openTradeModal('${m.id}','YES')">YES ×${yO}</button>
-            <button class="btn-no"  onclick="openTradeModal('${m.id}','NO')">NO ×${nO}</button>
+            <button class="btn-yes" onclick="openTradeModal('${m.id}','YES')">Bet YES ×${yesOdds}</button>
+            <button class="btn-no"  onclick="openTradeModal('${m.id}','NO')">Bet NO ×${noOdds}</button>
            </div>`
         : `<div style="text-align:center;font-size:12px;color:var(--muted);padding:4px 0">
-            ${m.result ? `Result: <strong style="color:${m.result==='yes'?'var(--green)':'var(--red)'}">${m.result.toUpperCase()}</strong>` : "Trading closed"}
+            ${m.result
+              ? `Result: <strong style="color:${m.result==='yes'?'var(--green)':'var(--red)'}">${m.result.toUpperCase()}</strong>`
+              : "Trading closed"}
            </div>`}
+
       <div class="mkt-footer">
         <div class="mkt-timer">🕐 ${timer}</div>
-        <div style="font-size:11px;color:var(--muted)">${total.toLocaleString()} pts in pool</div>
+        <div style="font-size:11px;color:var(--muted)">min bet: 100 pts</div>
       </div>
     </div>`;
   }).join("");
 }
 
-// ── TRADE MODAL ──────────────────────────────────────────────────
+// ── TRADE MODAL ───────────────────────────────────────────────────────────
 function openTradeModal(id, c) {
   activeMkt = markets.find(m => m.id === id);
   if (!activeMkt) return;
   choice = null;
-  document.getElementById("sheetQ").innerText = activeMkt.question;
-  document.getElementById("stakeIn").value    = "";
-  document.getElementById("ppAmt").innerText  = "—";
-  document.getElementById("ppOdds").innerText = "Pick YES or NO first";
+  document.getElementById("sheetQ").innerText   = activeMkt.question;
+  document.getElementById("stakeIn").value      = "";
+  document.getElementById("ppAmt").innerText    = "—";
+  document.getElementById("ppOdds").innerText   = "Pick YES or NO first";
   document.getElementById("chYes").classList.remove("sel");
   document.getElementById("chNo").classList.remove("sel");
   document.getElementById("tradeOverlay").classList.add("open");
@@ -846,24 +882,35 @@ function qs(n) {
 function calcPayout() {
   if (!activeMkt || !choice) return;
   const stake = parseInt(document.getElementById("stakeIn").value) || 0;
+
+  // Show error hint if below minimum
+  if (stake > 0 && stake < MIN_STAKE) {
+    document.getElementById("ppAmt").innerText  = "—";
+    document.getElementById("ppOdds").innerText = `Minimum bet is ${MIN_STAKE} pts`;
+    return;
+  }
   if (stake <= 0) { document.getElementById("ppAmt").innerText = "—"; return; }
-  const yes   = activeMkt.yes_pool || 0;
-  const no    = activeMkt.no_pool  || 0;
-  const newY  = choice === "YES" ? yes + stake : yes;
-  const newN  = choice === "NO"  ? no  + stake : no;
-  const total = newY + newN;
-  const pool  = choice === "YES" ? newY : newN;
-  const odds  = pool > 0 ? (total / pool) : 1;
-  const payout = Math.floor(stake * odds * 0.95);
+
+  // Calculate odds after this bet is added to the pool
+  const newYes = (activeMkt.yes_pool || 0) + (choice === "YES" ? stake : 0);
+  const newNo  = (activeMkt.no_pool  || 0) + (choice === "NO"  ? stake : 0);
+  const { yesOdds, noOdds } = calcOdds(newYes, newNo);
+  const odds   = choice === "YES" ? yesOdds : noOdds;
+
+  const gross  = Math.floor(stake * odds);
+  const fee    = Math.floor(gross * 0.05); // 5% fee preview (free tier)
+  const payout = gross - fee;
+
   document.getElementById("ppAmt").innerText  = payout.toLocaleString() + " pts";
-  document.getElementById("ppOdds").innerText = `×${odds.toFixed(2)} odds · 5% fee applied`;
+  document.getElementById("ppOdds").innerText = `×${odds} odds · 5% fee applied`;
 }
 
 async function placeTrade() {
-  if (!choice)              return showToast("Select YES or NO", "bad");
+  if (!choice) return showToast("Select YES or NO", "bad");
   const stake = parseInt(document.getElementById("stakeIn").value);
-  if (!stake || stake <= 0) return showToast("Enter a valid stake", "bad");
-  if (stake > balance)      return showToast("Insufficient balance", "bad");
+  if (!stake || stake <= 0)     return showToast("Enter a valid stake", "bad");
+  if (stake < MIN_STAKE)        return showToast(`Minimum bet is ${MIN_STAKE} pts`, "bad");
+  if (stake > balance)          return showToast("Insufficient balance", "bad");
 
   const btn = document.getElementById("tradeBtn");
   btn.disabled = true; btn.innerText = "Placing...";
@@ -887,7 +934,7 @@ async function loadBalance() {
   if (data) { balance = data.balance_points; updateBalUI(); }
 }
 
-// ── PORTFOLIO ────────────────────────────────────────────────────
+// ── PORTFOLIO ─────────────────────────────────────────────────────────────
 async function loadTrades() {
   const el = document.getElementById("tradeList");
   el.innerHTML = `<div class="spinner"></div>`;
@@ -900,8 +947,8 @@ async function loadTrades() {
     document.getElementById("stPts").innerText   = "0";
     return;
   }
-  const won  = data.filter(t => t.status === "won");
-  const pts  = won.reduce((s, t) => s + (t.payout_points || 0), 0);
+  const won = data.filter(t => t.status === "won");
+  const pts = won.reduce((s, t) => s + (t.payout_points || 0), 0);
   document.getElementById("stTotal").innerText = data.length;
   document.getElementById("stWon").innerText   = won.length;
   document.getElementById("stPts").innerText   = pts.toLocaleString();
@@ -924,44 +971,32 @@ async function loadTrades() {
   }).join("");
 }
 
-// ── PROFILE ──────────────────────────────────────────────────────
+// ── PROFILE ───────────────────────────────────────────────────────────────
 async function loadProfile() {
   const { data } = await db.from("users")
     .select("username, full_name, email, membership_tier")
     .eq("telegram_id", tgId).single();
   if (!data) return;
-
-  // ✅ FIX #7 + #8: Use full_name if available, fall back to username or email prefix
-  const name = data.full_name?.trim() || data.username || data.email?.split("@")[0] || "Trader";
-
-  // ✅ FIX #8: Old code did name[0].toUpperCase() which crashes if name is ""
-  // Now we safely check before taking the first character
-  const avatarLetter = (name && name.length > 0) ? name[0].toUpperCase() : "?";
-
-  document.getElementById("profAv").innerText    = avatarLetter;
+  const name = data.full_name || data.username || data.email?.split("@")[0] || "Trader";
+  document.getElementById("profAv").innerText    = name[0].toUpperCase();
   document.getElementById("profName").innerText  = name;
   document.getElementById("profEmail").innerText = data.email || "—";
   document.getElementById("profTgId").innerText  = tgId;
-
   const tier = data.membership_tier || "free";
   const tb   = document.getElementById("profTier");
-  tb.innerText  = tier.charAt(0).toUpperCase() + tier.slice(1);
-  tb.className  = `tier-badge tb-${tier}`;
+  tb.innerText = tier.charAt(0).toUpperCase() + tier.slice(1);
+  tb.className = `tier-badge tb-${tier}`;
 }
 
-// ── DEPOSIT ──────────────────────────────────────────────────────
+// ── DEPOSIT ───────────────────────────────────────────────────────────────
 async function openDeposit() {
-  // ✅ FIX #9: Added minimum deposit check — €5 minimum
-  // Before: accepted any amount even €0.01 which wastes Stripe fees
-  // Now: shows a clear error if amount is below the minimum
-  const euros = prompt(`Deposit amount in EUR (minimum €${MIN_DEPOSIT}):`);
-  if (!euros || isNaN(euros)) return;
-
+  // Minimum deposit is €10
+  const euros = prompt(`Deposit amount in EUR (minimum €${MIN_DEPOSIT}, €1 = 10 pts):`);
+  if (euros === null) return; // user cancelled
   const amount = Number(euros);
-  if (amount < MIN_DEPOSIT) {
+  if (!euros || isNaN(amount) || amount < MIN_DEPOSIT) {
     return showToast(`Minimum deposit is €${MIN_DEPOSIT}`, "bad");
   }
-
   showToast("Opening Stripe...", "ok");
   try {
     const res  = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
@@ -969,22 +1004,18 @@ async function openDeposit() {
       body: JSON.stringify({ amount, initData: tgInitData })
     });
     const data = await res.json();
-    if (data.url) {
-      window.Telegram?.WebApp?.openLink(data.url) || (window.location.href = data.url);
-    } else {
-      showToast(data.error || "Checkout failed", "bad");
-    }
+    if (data.url) window.Telegram?.WebApp?.openLink(data.url) || (window.location.href = data.url);
+    else showToast(data.error || "Checkout failed", "bad");
   } catch { showToast("Connection error", "bad"); }
 }
 
-// ── SUBMIT QUESTION ───────────────────────────────────────────────
+// ── SUBMIT QUESTION ───────────────────────────────────────────────────────
 async function doSubmit() {
   const q   = document.getElementById("sqQ").value.trim();
   const ctx = document.getElementById("sqCtx").value.trim();
   setErr("sqErr", "");
-  if (q.length < 10)  return setErr("sqErr", "Question must be at least 10 characters.");
-  if (balance < 100)  return setErr("sqErr", "You need at least 100 pts to submit.");
-
+  if (q.length < 10) return setErr("sqErr", "Question must be at least 10 characters.");
+  if (balance < 100) return setErr("sqErr", "You need at least 100 pts to submit.");
   const btn = document.getElementById("sqBtn");
   btn.disabled = true; btn.innerText = "Submitting...";
   try {
@@ -1023,12 +1054,12 @@ async function loadSubmissions() {
     </div>`).join("");
 }
 
-// ── MEMBERSHIP ────────────────────────────────────────────────────
+// ── MEMBERSHIP ────────────────────────────────────────────────────────────
 async function doSubscribe(slug) {
   showToast("Prices coming soon — stay tuned!", "bad");
 }
 
-// ── WITHDRAW ─────────────────────────────────────────────────────
+// ── WITHDRAW ──────────────────────────────────────────────────────────────
 function wdCalc() {
   const pts = parseInt(document.getElementById("wdAmt").value) || 0;
   document.getElementById("wdHint").innerText = `≈ €${(pts / PTS_PER_EUR).toFixed(2)}`;
@@ -1039,59 +1070,43 @@ async function doWithdraw() {
   const iban = document.getElementById("wdIban").value.trim().replace(/\s+/g, "");
   setErr("wdErr", "");
 
-  if (!pts || pts < 1000)  return setErr("wdErr", "Minimum withdrawal is 1,000 pts (€100).");
-  if (!iban)               return setErr("wdErr", "Please enter your IBAN.");
-  if (pts > balance)       return setErr("wdErr", "Insufficient balance.");
+  // Minimum withdrawal is 200 pts = €20
+  if (!pts || pts < MIN_WITHDRAW) return setErr("wdErr", `Minimum withdrawal is ${MIN_WITHDRAW} pts (€${MIN_WITHDRAW / PTS_PER_EUR}).`);
+  if (!iban)                       return setErr("wdErr", "Please enter your IBAN.");
+  if (pts > balance)               return setErr("wdErr", "Insufficient balance.");
 
   const btn = document.querySelector("#vWithdraw .btn-gold");
   btn.disabled = true; btn.innerText = "Submitting...";
-
   try {
-    // ─────────────────────────────────────────────────────────────
-    // ✅ FIX #3 (Critical Bug): DEDUCT POINTS FIRST
-    // Old code never removed points from wallet — users could
-    // request a withdrawal AND keep betting with the same points!
-    // Now we subtract immediately before creating the request.
-    // ─────────────────────────────────────────────────────────────
+    // Deduct points immediately from wallet
     const newBalance = balance - pts;
-
-    const { error: balanceError } = await db
-      .from("wallets")
+    const { error: balErr } = await _db.from("wallets")
       .update({ balance_points: newBalance })
       .eq("telegram_id", tgId);
+    if (balErr) return setErr("wdErr", "Failed to lock funds. Please try again.");
 
-    if (balanceError) {
-      return setErr("wdErr", "Failed to lock funds. Please try again.");
-    }
-
-    // Update balance on screen immediately
     balance = newBalance;
     updateBalUI();
 
-    // Now insert the withdrawal request for admin to process
-    const { error: withdrawError } = await db.from("withdrawals").insert({
+    // Insert withdrawal request
+    const { error: wdErr } = await _db.from("withdrawals").insert({
       telegram_id:   tgId,
       amount_eur:    parseFloat((pts / PTS_PER_EUR).toFixed(2)),
       amount_points: pts,
-      iban:          iban,
+      iban,
       status:        "pending"
     });
 
-    if (withdrawError) {
-      // ─────────────────────────────────────────────────────────
-      // SAFETY NET: If saving fails, give the points BACK
-      // so the user doesn't lose money due to a server error
-      // ─────────────────────────────────────────────────────────
-      await db.from("wallets")
-        .update({ balance_points: balance + pts })
-        .eq("telegram_id", tgId);
+    if (wdErr) {
+      // Rollback — give points back if insert failed
+      await _db.from("wallets").update({ balance_points: balance + pts }).eq("telegram_id", tgId);
       balance = balance + pts;
       updateBalUI();
-      return setErr("wdErr", "Failed to submit. Your points have been returned.");
+      return setErr("wdErr", "Failed to submit withdrawal. Your points have been returned.");
     }
 
-    // Write to ledger for audit trail
-    await db.rpc("write_ledger", {
+    // Write ledger entry
+    await _db.rpc("write_ledger", {
       p_telegram_id:  tgId,
       p_amount:       -pts,
       p_type:         "withdrawal_request",
@@ -1099,12 +1114,11 @@ async function doWithdraw() {
       p_note:         `Withdrawal request: ${pts} pts (€${(pts / PTS_PER_EUR).toFixed(2)})`
     });
 
-    showToast("Withdrawal requested ✅ We'll process within 2–5 days", "ok");
-    document.getElementById("wdAmt").value  = "";
-    document.getElementById("wdIban").value = "";
+    showToast("Withdrawal requested ✅ 2–5 business days", "ok");
+    document.getElementById("wdAmt").value      = "";
+    document.getElementById("wdIban").value     = "";
     document.getElementById("wdHint").innerText = "≈ €0.00";
     goBack();
-
   } catch (err) {
     console.error("Withdrawal error:", err);
     setErr("wdErr", "Connection error. Try again.");
@@ -1113,7 +1127,7 @@ async function doWithdraw() {
   }
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────
+// ── TOAST ─────────────────────────────────────────────────────────────────
 function showToast(msg, type = "ok") {
   const t = document.getElementById("toast");
   t.innerText = msg;
@@ -1122,6 +1136,5 @@ function showToast(msg, type = "ok") {
   t._t = setTimeout(() => t.className = "", 3000);
 }
 </script>
-
 </body>
 </html>
