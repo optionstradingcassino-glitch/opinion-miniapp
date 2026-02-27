@@ -110,7 +110,6 @@
     .btn-yes:active, .btn-no:active { opacity: .7; }
     .mkt-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
     .mkt-timer  { font-size: 11px; color: var(--muted); }
-    .mkt-result { font-size: 12px; font-weight: 700; }
 
     /* ── TRADE MODAL ── */
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 300; align-items: flex-end; }
@@ -267,15 +266,24 @@
       <div class="f"><label>Password</label><input type="password" id="liPass"  placeholder="Your password"/></div>
       <button class="btn-gold" id="liBtn" onclick="doLogin()">Login</button>
     </div>
-      <div style="text-align:center;margin-top:14px"><button onclick="doForgotPassword()" style="background:none;border:none;color:var(--muted);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">Forgot password?</button></div>
+
+    <div style="text-align:center;margin-top:14px">
+      <button onclick="doForgotPassword()" style="background:none;border:none;color:var(--muted);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">Forgot password?</button>
     </div>
+
     <div id="formFP" style="display:none">
-      <div style="text-align:center;margin-bottom:20px"><div style="font-size:16px;font-weight:700;margin-bottom:6px">Reset Password</div><div style="font-size:13px;color:var(--muted)">We will send a reset link to your email</div></div>
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px">Reset Password</div>
+        <div style="font-size:13px;color:var(--muted)">We will send a reset link to your email</div>
+      </div>
       <div class="f"><label>Email</label><input type="email" id="fpEmail" placeholder="you@email.com"/></div>
       <div class="err-box" id="fpErr"></div>
       <div class="err-box" style="background:rgba(0,229,122,.1);color:var(--green);border-color:rgba(0,229,122,.25);display:none" id="fpOk"></div>
       <button class="btn-gold" id="fpBtn" onclick="sendReset()">Send Reset Link</button>
-      <div style="text-align:center;margin-top:14px"><button onclick="authTab('li')" style="background:none;border:none;color:var(--muted);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">Back to login</button></div>
+      <div style="text-align:center;margin-top:14px">
+        <button onclick="authTab('li')" style="background:none;border:none;color:var(--muted);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">Back to login</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -378,7 +386,7 @@
     <div style="text-align:center;color:var(--muted);font-size:11px;padding:0 0 20px">Telegram ID: <span id="profTgId">—</span></div>
   </div>
 
-  <!-- MEMBERSHIP (sub-page, no nav) -->
+  <!-- MEMBERSHIP -->
   <div class="view" id="vMembership">
     <div class="topbar">
       <button class="back-btn" onclick="goBack()">‹</button>
@@ -428,7 +436,7 @@
     <div style="height:24px"></div>
   </div>
 
-  <!-- WITHDRAW (sub-page, no nav) -->
+  <!-- WITHDRAW -->
   <div class="view" id="vWithdraw">
     <div class="topbar">
       <button class="back-btn" onclick="goBack()">‹</button>
@@ -513,19 +521,19 @@
 
 <div id="toast"></div>
 
-<!-- ══ SCRIPT ══ -->
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// ── CONFIG ──────────────────────────────
-const SUPA_URL  = "https://liketekvzrazheolmfnj.supabase.co";
-const SUPA_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
-const PTS_PER_EUR = 10; // €1 = 10 pts
+// ── CONFIG ──────────────────────────────────────────────────────
+const SUPA_URL      = "https://liketekvzrazheolmfnj.supabase.co";
+const SUPA_KEY      = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
+const PTS_PER_EUR   = 10;    // €1 = 10 pts
+const MIN_DEPOSIT   = 5;     // ✅ FIX #9: minimum €5 deposit
 
 const db = createClient(SUPA_URL, SUPA_KEY);
-window._db = db; // expose so onclick handlers can reach it
+window._db = db;  // expose for doWithdraw which is outside module scope
 
-// ── STATE ───────────────────────────────
+// ── STATE ────────────────────────────────────────────────────────
 let tgId       = null;
 let tgInitData = null;
 let balance    = 0;
@@ -534,7 +542,7 @@ let activeMkt  = null;
 let choice     = null;
 let prevView   = "markets";
 
-// ── EXPOSE TO HTML ───────────────────────
+// ── EXPOSE FUNCTIONS TO HTML onclick HANDLERS ────────────────────
 Object.assign(window, {
   doForgotPassword, sendReset,
   authTab, doSignup, doLogin,
@@ -547,7 +555,7 @@ Object.assign(window, {
   showToast
 });
 
-// ── BOOT ────────────────────────────────
+// ── BOOT — runs when page loads ──────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.expand(); tg.setBackgroundColor("#06070b"); }
@@ -565,10 +573,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// ── TELEGRAM LOGIN ────────────────────────
+// ── TELEGRAM LOGIN ────────────────────────────────────────────────
 async function telegramLogin() {
   try {
-    const res  = await fetch(`${SUPA_URL}/functions/v1/telegram-login`, {
+    const res = await fetch(`${SUPA_URL}/functions/v1/telegram-login`, {
       method: "POST", headers: { "Content-Type": "text/plain" }, body: tgInitData
     });
     if (!res.ok) return null;
@@ -576,10 +584,11 @@ async function telegramLogin() {
   } catch { return null; }
 }
 
-// ── AUTH ─────────────────────────────────
+// ── AUTH TABS ────────────────────────────────────────────────────
 function authTab(t) {
   document.getElementById("formSU").style.display = t === "su" ? "block" : "none";
   document.getElementById("formLI").style.display = t === "li" ? "block" : "none";
+  document.getElementById("formFP").style.display = "none";
   document.getElementById("tabSU").classList.toggle("on", t === "su");
   document.getElementById("tabLI").classList.toggle("on", t === "li");
   setErr("authErr", "");
@@ -595,10 +604,6 @@ function doForgotPassword() {
 }
 
 async function sendReset() {
-  // Uses fetch directly to call Supabase Auth REST API
-  // so it works even before the module db client is ready
-  const SUPA_URL = "https://liketekvzrazheolmfnj.supabase.co";
-  const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
   const email = document.getElementById("fpEmail").value.trim();
   const errEl = document.getElementById("fpErr");
   const okEl  = document.getElementById("fpOk");
@@ -608,21 +613,14 @@ async function sendReset() {
   const btn = document.getElementById("fpBtn");
   btn.disabled = true; btn.innerText = "Sending...";
   try {
-    const res = await fetch(`${SUPA_URL}/auth/v1/recover`, {
+    await fetch(`${SUPA_URL}/auth/v1/recover`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPA_KEY
-      },
-      body: JSON.stringify({
-        email: email,
-        redirect_to: "https://opinion-miniapp.vercel.app"
-      })
+      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY },
+      body: JSON.stringify({ email, redirect_to: "https://opinion-miniapp.vercel.app" })
     });
-    // Supabase returns 200 even if email not found (security), so we just show success
     okEl.innerText = "If that email exists, a reset link has been sent. Check your inbox and spam folder.";
     okEl.style.display = "block";
-  } catch(e) { errEl.innerText = "Connection error. Try again."; errEl.style.display = "block"; }
+  } catch { errEl.innerText = "Connection error. Try again."; errEl.style.display = "block"; }
   finally { btn.disabled = false; btn.innerText = "Send Reset Link"; }
 }
 
@@ -632,6 +630,7 @@ function setErr(id, msg) {
   el.style.display = msg ? "block" : "none";
 }
 
+// ── SIGN UP ──────────────────────────────────────────────────────
 async function doSignup() {
   const email = document.getElementById("suEmail").value.trim();
   const pass  = document.getElementById("suPass").value;
@@ -644,10 +643,20 @@ async function doSignup() {
   const btn = document.getElementById("suBtn");
   btn.disabled = true; btn.innerText = "Creating...";
   try {
-    const res  = await fetch(`${SUPA_URL}/functions/v1/register`, {
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+    const res = await fetch(`${SUPA_URL}/functions/v1/register`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password: pass, telegram_id: tgId,
-        username: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "" })
+      body: JSON.stringify({
+        email,
+        password: pass,
+        telegram_id: tgId,
+        username: tgUser?.username || "",
+        // ✅ FIX #7: Send the user's real Telegram name to the server
+        // We join first_name + last_name into a single full_name string
+        // e.g. "Marco" + "Rossi" = "Marco Rossi"
+        full_name: [tgUser?.first_name || "", tgUser?.last_name || ""].join(" ").trim()
+      })
     });
     const data = await res.json();
     if (!res.ok) return setErr("authErr", data.error || "Signup failed.");
@@ -657,6 +666,7 @@ async function doSignup() {
   finally { btn.disabled = false; btn.innerText = "Create Account"; }
 }
 
+// ── LOGIN ────────────────────────────────────────────────────────
 async function doLogin() {
   const email = document.getElementById("liEmail").value.trim();
   const pass  = document.getElementById("liPass").value;
@@ -668,7 +678,6 @@ async function doLogin() {
   try {
     const { data: auth, error } = await db.auth.signInWithPassword({ email, password: pass });
     if (error) return setErr("authErr", "Login failed: " + (error.message || "Wrong email or password."));
-    // Link telegram_id to this account
     await db.from("users").update({ telegram_id: tgId }).eq("auth_id", auth.user.id);
     await db.from("wallets").upsert({ telegram_id: tgId, balance_points: 0, balance_eur: 0 }, { onConflict: "telegram_id", ignoreDuplicates: true });
     const { data: w } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
@@ -678,7 +687,7 @@ async function doLogin() {
   finally { btn.disabled = false; btn.innerText = "Login"; }
 }
 
-// ── START APP ─────────────────────────────
+// ── START APP ────────────────────────────────────────────────────
 function startApp() {
   document.getElementById("authWrap").style.display = "none";
   document.getElementById("appShell").classList.add("show");
@@ -688,12 +697,12 @@ function startApp() {
   subscribeWallet();
 }
 
-// ── BALANCE ───────────────────────────────
+// ── BALANCE UI ───────────────────────────────────────────────────
 function updateBalUI() {
   const f = balance.toLocaleString();
-  document.getElementById("topBal").innerText  = f;
-  document.getElementById("heroBal").innerText = f;
-  document.getElementById("wdBal").innerText   = f;
+  document.getElementById("topBal").innerText   = f;
+  document.getElementById("heroBal").innerText  = f;
+  document.getElementById("wdBal").innerText    = f;
   document.getElementById("wdBalEur").innerText = `≈ €${(balance / PTS_PER_EUR).toFixed(2)}`;
 }
 
@@ -704,7 +713,7 @@ function subscribeWallet() {
   ).subscribe();
 }
 
-// ── NAVIGATION ────────────────────────────
+// ── NAVIGATION ───────────────────────────────────────────────────
 const viewMap = {
   markets:    "vMarkets",
   portfolio:  "vPortfolio",
@@ -713,23 +722,15 @@ const viewMap = {
   membership: "vMembership",
   withdraw:   "vWithdraw"
 };
-// Views that show the bottom nav
-const navViews = ["markets","portfolio","submit","profile"];
 
 function goTo(name) {
   prevView = currentView();
   Object.values(viewMap).forEach(id => document.getElementById(id)?.classList.remove("active"));
   document.getElementById(viewMap[name])?.classList.add("active");
-
-  // Scroll to top
   document.getElementById(viewMap[name]).scrollTop = 0;
-
-  // Nav highlight (only for main 4)
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("on"));
   const nb = document.getElementById("nb-" + name);
   if (nb) nb.classList.add("on");
-
-  // Lazy load data
   if (name === "portfolio")  loadTrades();
   if (name === "submit")     loadSubmissions();
   if (name === "withdraw")   updateBalUI();
@@ -743,7 +744,7 @@ function currentView() {
 
 function goBack() { goTo(prevView || "profile"); }
 
-// ── MARKETS ───────────────────────────────
+// ── MARKETS ──────────────────────────────────────────────────────
 async function loadMarkets() {
   try {
     const res = await fetch(`${SUPA_URL}/functions/v1/get-markets`, {
@@ -810,7 +811,7 @@ function renderMarkets() {
   }).join("");
 }
 
-// ── TRADE MODAL ───────────────────────────
+// ── TRADE MODAL ──────────────────────────────────────────────────
 function openTradeModal(id, c) {
   activeMkt = markets.find(m => m.id === id);
   if (!activeMkt) return;
@@ -846,7 +847,6 @@ function calcPayout() {
   if (!activeMkt || !choice) return;
   const stake = parseInt(document.getElementById("stakeIn").value) || 0;
   if (stake <= 0) { document.getElementById("ppAmt").innerText = "—"; return; }
-
   const yes   = activeMkt.yes_pool || 0;
   const no    = activeMkt.no_pool  || 0;
   const newY  = choice === "YES" ? yes + stake : yes;
@@ -854,14 +854,13 @@ function calcPayout() {
   const total = newY + newN;
   const pool  = choice === "YES" ? newY : newN;
   const odds  = pool > 0 ? (total / pool) : 1;
-  const payout = Math.floor(stake * odds * 0.95); // 5% fee preview
-
+  const payout = Math.floor(stake * odds * 0.95);
   document.getElementById("ppAmt").innerText  = payout.toLocaleString() + " pts";
   document.getElementById("ppOdds").innerText = `×${odds.toFixed(2)} odds · 5% fee applied`;
 }
 
 async function placeTrade() {
-  if (!choice)           return showToast("Select YES or NO", "bad");
+  if (!choice)              return showToast("Select YES or NO", "bad");
   const stake = parseInt(document.getElementById("stakeIn").value);
   if (!stake || stake <= 0) return showToast("Enter a valid stake", "bad");
   if (stake > balance)      return showToast("Insufficient balance", "bad");
@@ -888,14 +887,12 @@ async function loadBalance() {
   if (data) { balance = data.balance_points; updateBalUI(); }
 }
 
-// ── PORTFOLIO ─────────────────────────────
+// ── PORTFOLIO ────────────────────────────────────────────────────
 async function loadTrades() {
   const el = document.getElementById("tradeList");
   el.innerHTML = `<div class="spinner"></div>`;
-
   const { data } = await db.from("trades").select("*").eq("telegram_id", tgId)
     .order("created_at", { ascending: false }).limit(100);
-
   if (!data?.length) {
     el.innerHTML = `<div class="empty"><div class="ei">📊</div><p>No trades yet.<br>Go place your first bet!</p></div>`;
     document.getElementById("stTotal").innerText = "0";
@@ -903,19 +900,17 @@ async function loadTrades() {
     document.getElementById("stPts").innerText   = "0";
     return;
   }
-
   const won  = data.filter(t => t.status === "won");
   const pts  = won.reduce((s, t) => s + (t.payout_points || 0), 0);
   document.getElementById("stTotal").innerText = data.length;
   document.getElementById("stWon").innerText   = won.length;
   document.getElementById("stPts").innerText   = pts.toLocaleString();
-
   el.innerHTML = data.map(t => {
-    const cls     = t.status === "won" ? "tp-won" : t.status === "lost" ? "tp-lost" : "tp-active";
-    const payout  = t.status === "won"  ? `+${t.payout_points?.toLocaleString()} pts`
-                  : t.status === "lost" ? "Lost"
-                  : "Pending";
-    const optCls  = t.option === "YES" ? "tcb-yes" : "tcb-no";
+    const cls    = t.status === "won" ? "tp-won" : t.status === "lost" ? "tp-lost" : "tp-active";
+    const payout = t.status === "won"  ? `+${t.payout_points?.toLocaleString()} pts`
+                 : t.status === "lost" ? "Lost"
+                 : "Pending";
+    const optCls = t.option === "YES" ? "tcb-yes" : "tcb-no";
     return `<div class="trade-card">
       <div class="tc-q">${t.question || "Market"}</div>
       <div class="tc-row">
@@ -929,48 +924,64 @@ async function loadTrades() {
   }).join("");
 }
 
-// ── PROFILE ───────────────────────────────
+// ── PROFILE ──────────────────────────────────────────────────────
 async function loadProfile() {
   const { data } = await db.from("users")
     .select("username, full_name, email, membership_tier")
     .eq("telegram_id", tgId).single();
   if (!data) return;
 
-  const name = data.full_name || data.username || data.email?.split("@")[0] || "Trader";
-  document.getElementById("profAv").innerText    = name[0].toUpperCase();
+  // ✅ FIX #7 + #8: Use full_name if available, fall back to username or email prefix
+  const name = data.full_name?.trim() || data.username || data.email?.split("@")[0] || "Trader";
+
+  // ✅ FIX #8: Old code did name[0].toUpperCase() which crashes if name is ""
+  // Now we safely check before taking the first character
+  const avatarLetter = (name && name.length > 0) ? name[0].toUpperCase() : "?";
+
+  document.getElementById("profAv").innerText    = avatarLetter;
   document.getElementById("profName").innerText  = name;
   document.getElementById("profEmail").innerText = data.email || "—";
   document.getElementById("profTgId").innerText  = tgId;
 
   const tier = data.membership_tier || "free";
   const tb   = document.getElementById("profTier");
-  tb.innerText   = tier.charAt(0).toUpperCase() + tier.slice(1);
-  tb.className   = `tier-badge tb-${tier}`;
+  tb.innerText  = tier.charAt(0).toUpperCase() + tier.slice(1);
+  tb.className  = `tier-badge tb-${tier}`;
 }
 
-// ── DEPOSIT ───────────────────────────────
+// ── DEPOSIT ──────────────────────────────────────────────────────
 async function openDeposit() {
-  const euros = prompt("Deposit amount in EUR (€1 = 10 pts):");
-  if (!euros || isNaN(euros) || Number(euros) < 1) return;
+  // ✅ FIX #9: Added minimum deposit check — €5 minimum
+  // Before: accepted any amount even €0.01 which wastes Stripe fees
+  // Now: shows a clear error if amount is below the minimum
+  const euros = prompt(`Deposit amount in EUR (minimum €${MIN_DEPOSIT}):`);
+  if (!euros || isNaN(euros)) return;
+
+  const amount = Number(euros);
+  if (amount < MIN_DEPOSIT) {
+    return showToast(`Minimum deposit is €${MIN_DEPOSIT}`, "bad");
+  }
 
   showToast("Opening Stripe...", "ok");
   try {
     const res  = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: Number(euros), initData: tgInitData })
+      body: JSON.stringify({ amount, initData: tgInitData })
     });
     const data = await res.json();
-    if (data.url) window.Telegram?.WebApp?.openLink(data.url) || (window.location.href = data.url);
-    else showToast(data.error || "Checkout failed", "bad");
+    if (data.url) {
+      window.Telegram?.WebApp?.openLink(data.url) || (window.location.href = data.url);
+    } else {
+      showToast(data.error || "Checkout failed", "bad");
+    }
   } catch { showToast("Connection error", "bad"); }
 }
 
-// ── SUBMIT QUESTION ───────────────────────
+// ── SUBMIT QUESTION ───────────────────────────────────────────────
 async function doSubmit() {
   const q   = document.getElementById("sqQ").value.trim();
   const ctx = document.getElementById("sqCtx").value.trim();
   setErr("sqErr", "");
-
   if (q.length < 10)  return setErr("sqErr", "Question must be at least 10 characters.");
   if (balance < 100)  return setErr("sqErr", "You need at least 100 pts to submit.");
 
@@ -984,8 +995,8 @@ async function doSubmit() {
     const data = await res.json();
     if (!res.ok) return setErr("sqErr", data.error || "Submission failed.");
     showToast("Submitted! We'll review within 24h 🙌", "ok");
-    document.getElementById("sqQ").value   = "";
-    document.getElementById("sqCtx").value = "";
+    document.getElementById("sqQ").value    = "";
+    document.getElementById("sqCtx").value  = "";
     document.getElementById("sqC").innerText = "0/200";
     await loadBalance();
     await loadSubmissions();
@@ -998,7 +1009,6 @@ async function loadSubmissions() {
   const { data } = await db.from("question_submissions")
     .select("*").eq("telegram_id", tgId)
     .order("created_at", { ascending: false });
-
   if (!data?.length) {
     el.innerHTML = `<div class="empty" style="padding:24px 0"><div class="ei">📝</div><p>No submissions yet</p></div>`;
     return;
@@ -1013,31 +1023,22 @@ async function loadSubmissions() {
     </div>`).join("");
 }
 
-// ── MEMBERSHIP ────────────────────────────
+// ── MEMBERSHIP ────────────────────────────────────────────────────
 async function doSubscribe(slug) {
   showToast("Prices coming soon — stay tuned!", "bad");
 }
 
-// ── WITHDRAW ──────────────────────────────
+// ── WITHDRAW ─────────────────────────────────────────────────────
 function wdCalc() {
   const pts = parseInt(document.getElementById("wdAmt").value) || 0;
   document.getElementById("wdHint").innerText = `≈ €${(pts / PTS_PER_EUR).toFixed(2)}`;
 }
 
-  // ═══════════════════════════════════════════════════════════════
-// HOW TO USE THIS FILE:
-// 1. Open your mini-app index.html
-// 2. Find the old doWithdraw function (search for "async function doWithdraw")
-// 3. Delete the entire old function
-// 4. Paste this new one in its place
-// ═══════════════════════════════════════════════════════════════
-
 async function doWithdraw() {
   const pts  = parseInt(document.getElementById("wdAmt").value);
-  const iban = document.getElementById("wdIban").value.trim().replace(/\s+/g, ""); // strip spaces from IBAN
+  const iban = document.getElementById("wdIban").value.trim().replace(/\s+/g, "");
   setErr("wdErr", "");
 
-  // Basic validation checks — like a bouncer at the door
   if (!pts || pts < 1000)  return setErr("wdErr", "Minimum withdrawal is 1,000 pts (€100).");
   if (!iban)               return setErr("wdErr", "Please enter your IBAN.");
   if (pts > balance)       return setErr("wdErr", "Insufficient balance.");
@@ -1046,76 +1047,58 @@ async function doWithdraw() {
   btn.disabled = true; btn.innerText = "Submitting...";
 
   try {
-
     // ─────────────────────────────────────────────────────────────
-    // STEP 1: Deduct the points from the wallet FIRST
-    // ✅ FIX (Critical Bug #3): The old code NEVER deducted points!
-    // A user could request a withdrawal and keep trading with the
-    // same points — like paying with a cheque and still having
-    // the money in your account.
-    // We subtract BEFORE inserting the withdrawal row so that
-    // if something goes wrong below, the deduction already happened
-    // and we don't accidentally pay out twice.
+    // ✅ FIX #3 (Critical Bug): DEDUCT POINTS FIRST
+    // Old code never removed points from wallet — users could
+    // request a withdrawal AND keep betting with the same points!
+    // Now we subtract immediately before creating the request.
     // ─────────────────────────────────────────────────────────────
     const newBalance = balance - pts;
 
-    const { error: balanceError } = await _db
+    const { error: balanceError } = await db
       .from("wallets")
       .update({ balance_points: newBalance })
       .eq("telegram_id", tgId);
 
-    // If the balance update fails, stop here — don't create the withdrawal row
     if (balanceError) {
       return setErr("wdErr", "Failed to lock funds. Please try again.");
     }
 
-    // Update the balance shown on screen immediately
-    // (the realtime subscription will also catch this, but this is instant)
+    // Update balance on screen immediately
     balance = newBalance;
     updateBalUI();
 
-    // ─────────────────────────────────────────────────────────────
-    // STEP 2: Now insert the withdrawal request row
-    // Status is "pending" — admin will review and pay via bank
-    // ─────────────────────────────────────────────────────────────
-    const { error: withdrawError } = await _db.from("withdrawals").insert({
-      telegram_id:    tgId,
-      amount_eur:     parseFloat((pts / PTS_PER_EUR).toFixed(2)), // e.g. 100.00
-      amount_points:  pts,     // e.g. 1000 pts
-      iban:           iban,    // user's bank IBAN
-      status:         "pending"
+    // Now insert the withdrawal request for admin to process
+    const { error: withdrawError } = await db.from("withdrawals").insert({
+      telegram_id:   tgId,
+      amount_eur:    parseFloat((pts / PTS_PER_EUR).toFixed(2)),
+      amount_points: pts,
+      iban:          iban,
+      status:        "pending"
     });
 
     if (withdrawError) {
       // ─────────────────────────────────────────────────────────
-      // SAFETY NET: If saving the withdrawal row fails,
-      // give the points BACK to the user so they're not lost!
-      // This is called a "rollback" — like an undo button.
+      // SAFETY NET: If saving fails, give the points BACK
+      // so the user doesn't lose money due to a server error
       // ─────────────────────────────────────────────────────────
-      await _db
-        .from("wallets")
-        .update({ balance_points: balance + pts })  // restore original balance
+      await db.from("wallets")
+        .update({ balance_points: balance + pts })
         .eq("telegram_id", tgId);
-
-      balance = balance + pts; // restore in memory too
+      balance = balance + pts;
       updateBalUI();
-
-      return setErr("wdErr", "Failed to submit withdrawal. Your points have been returned.");
+      return setErr("wdErr", "Failed to submit. Your points have been returned.");
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // STEP 3: Write to the ledger so there's an audit trail
-    // This lets the admin see "user withdrew 1000 pts" in the Ledger tab
-    // ─────────────────────────────────────────────────────────────
-    await _db.rpc("write_ledger", {
+    // Write to ledger for audit trail
+    await db.rpc("write_ledger", {
       p_telegram_id:  tgId,
-      p_amount:       -pts,                       // negative = money going out
+      p_amount:       -pts,
       p_type:         "withdrawal_request",
       p_reference_id: null,
-      p_note:         "Withdrawal request: " + pts + " pts (€" + (pts / PTS_PER_EUR).toFixed(2) + ")"
+      p_note:         `Withdrawal request: ${pts} pts (€${(pts / PTS_PER_EUR).toFixed(2)})`
     });
 
-    // All done! Show success message and reset the form
     showToast("Withdrawal requested ✅ We'll process within 2–5 days", "ok");
     document.getElementById("wdAmt").value  = "";
     document.getElementById("wdIban").value = "";
@@ -1130,11 +1113,11 @@ async function doWithdraw() {
   }
 }
 
-// ── TOAST ─────────────────────────────────
+// ── TOAST ─────────────────────────────────────────────────────────
 function showToast(msg, type = "ok") {
   const t = document.getElementById("toast");
-  t.innerText  = msg;
-  t.className  = `show ${type}`;
+  t.innerText = msg;
+  t.className = `show ${type}`;
   clearTimeout(t._t);
   t._t = setTimeout(() => t.className = "", 3000);
 }
