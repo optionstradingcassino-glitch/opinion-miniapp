@@ -1026,24 +1026,35 @@ function wdCalc() {
 
 async function doWithdraw() {
   const pts  = parseInt(document.getElementById("wdAmt").value);
-  const iban = document.getElementById("wdIban").value.trim();
+  const iban = document.getElementById("wdIban").value.trim().replace(/\s+/g, ""); // strip spaces from IBAN
   setErr("wdErr", "");
 
-  if (!pts || pts < 1000)  return setErr("wdErr", "Minimum withdrawal is 1,000 pts.");
+  if (!pts || pts < 1000)  return setErr("wdErr", "Minimum withdrawal is 1,000 pts (€100).");
   if (!iban)               return setErr("wdErr", "Please enter your IBAN.");
   if (pts > balance)       return setErr("wdErr", "Insufficient balance.");
 
-  const { error } = await db.from("withdrawals").insert({
-    telegram_id: tgId,
-    amount_eur:  (pts / PTS_PER_EUR).toFixed(2),
-    status:      "pending"
-  });
-  if (error) return setErr("wdErr", "Failed to submit. Try again.");
+  const btn = document.querySelector("#vWithdraw .btn-gold");
+  btn.disabled = true; btn.innerText = "Submitting...";
 
-  showToast("Withdrawal requested ✅", "ok");
-  document.getElementById("wdAmt").value  = "";
-  document.getElementById("wdIban").value = "";
-  goBack();
+  try {
+    // Save the request with all needed info so admin can process it
+    const { error } = await db.from("withdrawals").insert({
+      telegram_id:    tgId,
+      amount_eur:     parseFloat((pts / PTS_PER_EUR).toFixed(2)), // e.g. 100.00
+      amount_points:  pts,     // e.g. 1000 pts
+      iban:           iban,    // user's bank IBAN
+      status:         "pending"
+    });
+
+    if (error) return setErr("wdErr", "Failed to submit. Try again.");
+
+    showToast("Withdrawal requested ✅ We'll process within 2–5 days", "ok");
+    document.getElementById("wdAmt").value  = "";
+    document.getElementById("wdIban").value = "";
+    document.getElementById("wdHint").innerText = "≈ €0.00";
+    goBack();
+  } catch { setErr("wdErr", "Connection error. Try again."); }
+  finally { btn.disabled = false; btn.innerText = "Request Withdrawal"; }
 }
 
 // ── TOAST ─────────────────────────────────
