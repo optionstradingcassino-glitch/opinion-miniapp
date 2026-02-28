@@ -610,7 +610,7 @@
           <div class="perk"><div class="perk-dot"></div>4% platform fee (free = 5%)</div>
           <div class="perk"><div class="perk-dot"></div>100 pts welcome bonus</div>
         </div>
-        <button class="tier-btn tbt-basic">Get Basic · €8.99/mo</button>
+        <button class="tier-btn tbt-basic" id="membBtn-basic">Get Basic · €8.99/mo</button>
       </div>
       <div class="tier-card t-pro tc-pro" onclick="doSubscribe('pro')">
         <div class="tier-glow"></div>
@@ -623,7 +623,7 @@
           <div class="perk"><div class="perk-dot"></div>2 hrs early market access</div>
           <div class="perk"><div class="perk-dot"></div>500 pts welcome bonus</div>
         </div>
-        <button class="tier-btn tbt-pro">Get Pro · €26.99/mo</button>
+        <button class="tier-btn tbt-pro" id="membBtn-pro">Get Pro · €26.99/mo</button>
       </div>
       <div class="tier-card t-elite" onclick="doSubscribe('elite')">
         <div class="tier-glow"></div>
@@ -635,7 +635,7 @@
           <div class="perk"><div class="perk-dot"></div>6 hrs early market access</div>
           <div class="perk"><div class="perk-dot"></div>2,000 pts welcome bonus</div>
         </div>
-        <button class="tier-btn tbt-elite">Get Elite · €53.99/mo</button>
+        <button class="tier-btn tbt-elite" id="membBtn-elite">Get Elite · €53.99/mo</button>
       </div>
     </div>
     <div style="height:24px"></div>
@@ -769,6 +769,7 @@ window._db = db; // expose to withdrawal code
 
 // ── APP STATE ─────────────────────────────────────────────────────────────────
 let tgId       = null;  // telegram user ID
+let currentTier = "free"; // user's current membership tier
 let tgInitData = null;  // telegram auth data (proves who the user is)
 let balance    = 0;     // current points balance
 let markets    = [];    // loaded markets array
@@ -1001,11 +1002,12 @@ function goTo(name) {
   const nb = document.getElementById("nb-" + name);
   if (nb) nb.classList.add("on");
   // Load data for specific pages when navigating to them
-  if (name === "portfolio") loadTrades();
-  if (name === "submit")    loadSubmissions();
-  if (name === "withdraw")  updateBalUI();
-  if (name === "referrals") loadReferrals();
-  if (name === "history")   loadHistory("dep"); // NEW — load deposits by default
+  if (name === "portfolio")  loadTrades();
+  if (name === "submit")     loadSubmissions();
+  if (name === "withdraw")   updateBalUI();
+  if (name === "referrals")  loadReferrals();
+  if (name === "history")    loadHistory("dep");
+  if (name === "membership") updateMembershipUI(); // refresh button states
 }
 
 function currentView() {
@@ -1254,6 +1256,7 @@ async function loadProfile() {
   }
 
   const tier = data.membership_tier || "free";
+  currentTier = tier; // track globally so doSubscribe can check it
   const tb   = document.getElementById("profTier");
   tb.innerText = tier.charAt(0).toUpperCase() + tier.slice(1);
   tb.className = `tier-badge tb-${tier}`;
@@ -1447,8 +1450,65 @@ async function loadSubmissions() {
 }
 
 // ── MEMBERSHIP ────────────────────────────────────────────────────────────────
+// ── MEMBERSHIP UI ─────────────────────────────────────────────────────────────
+// Updates the membership page buttons to reflect the user's current plan
+function updateMembershipUI() {
+  const tiers = ["basic", "pro", "elite"];
+  const labels = {
+    basic: "Get Basic · €8.99/mo",
+    pro:   "Get Pro · €26.99/mo",
+    elite: "Get Elite · €53.99/mo"
+  };
+  tiers.forEach(t => {
+    const btn = document.getElementById("membBtn-" + t);
+    if (!btn) return;
+    if (t === currentTier) {
+      // User already has this tier — show "Current Plan" on the button
+      btn.innerText = "✓ Current Plan";
+      btn.style.opacity = "0.5";
+      btn.style.cursor  = "default";
+    } else {
+      btn.innerText = labels[t];
+      btn.style.opacity = "1";
+      btn.style.cursor  = "pointer";
+    }
+  });
+}
+
 async function doSubscribe(slug) {
-  showToast("Prices coming soon — stay tuned!", "bad");
+  // Show what the user is about to subscribe to
+  const names = { basic: "Basic €8.99/mo", pro: "Pro €26.99/mo", elite: "Elite €53.99/mo" };
+  const name  = names[slug] || slug;
+
+  // If they already have this tier, tell them
+  if (currentTier === slug) {
+    return showToast("You already have " + name + "!", "bad");
+  }
+
+  showToast("Opening Stripe checkout...", "ok");
+
+  try {
+    const res = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type:     "membership",  // tells the function this is a subscription
+        tier:     slug,          // "basic", "pro", or "elite"
+        initData: tgInitData     // proves who the user is
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      // Open Stripe checkout in Telegram browser
+      window.Telegram?.WebApp?.openLink(data.url) || (window.location.href = data.url);
+    } else {
+      showToast(data.error || "Checkout failed", "bad");
+    }
+  } catch {
+    showToast("Connection error. Try again.", "bad");
+  }
 }
 
 // ── WITHDRAW ─────────────────────────────────────────────────────────────────
