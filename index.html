@@ -567,21 +567,27 @@
       </div>
     </div>
 
-    <!-- Badge progress — like a video game achievement system -->
+    <!-- How it works box -->
+    <div class="ref-how">
+      <div class="ref-how-title">How It Works</div>
+      <div class="ref-how-step">
+        <strong>1.</strong> Share your code with friends<br>
+        <strong>2.</strong> Friend signs up using your code<br>
+        <strong>3.</strong> Friend places their first trade<br>
+        <strong>4. You BOTH get +100 pts instantly! 🎯</strong>
+      </div>
+    </div>
+
+    <!-- Badge progress — like video game achievements -->
     <div class="section-head">Badge Progress</div>
     <div class="badge-wrap" id="badgeWrap">
       <div class="spinner"></div>
     </div>
 
-    <!-- Simple explanation of how it all works -->
-    <div class="ref-how">
-      <div class="ref-how-title">How It Works</div>
-      <div class="ref-how-step">
-        <strong>1.</strong> Share your code with friends<br>
-        <strong>2.</strong> Friend signs up with your code<br>
-        <strong>3.</strong> Friend places their first trade<br>
-        <strong>4. You both get +100 pts instantly! 🎯</strong>
-      </div>
+    <!-- Per-person list — every friend who used the code with their reward status -->
+    <div class="section-head">People Who Used Your Code</div>
+    <div id="refPeopleList" style="padding:0 20px 24px;display:flex;flex-direction:column;gap:10px">
+      <div class="spinner"></div>
     </div>
   </div>
 
@@ -1293,9 +1299,9 @@ async function loadReferrals() {
   const currentBadge = user?.referral_badge;
 
   document.getElementById("badgeWrap").innerHTML = badges.map(b => {
-    const done  = count >= b.need; // have they unlocked this badge?
-    const pct   = Math.min(100, Math.floor((count / b.need) * 100)); // progress %
-    const isCur = currentBadge === b.slug; // is this their current badge?
+    const done  = count >= b.need;
+    const pct   = Math.min(100, Math.floor((count / b.need) * 100));
+    const isCur = currentBadge === b.slug;
     return `<div class="badge-row">
       <div class="badge-top">
         <span class="badge-name" style="color:${done ? b.color : 'var(--muted)'}">
@@ -1308,6 +1314,53 @@ async function loadReferrals() {
       </div>
     </div>`;
   }).join("");
+
+  // ── PER-PERSON LIST ────────────────────────────────────────────────────────
+  // Shows every single person who used your referral code, with:
+  //   - their username (or telegram ID if no username)
+  //   - when they signed up
+  //   - whether they have placed a trade yet (= "active")
+  //   - whether YOU received your 100 pts reward for them
+  const listEl = document.getElementById("refPeopleList");
+  if (!all.length) {
+    listEl.innerHTML = `<div class="empty" style="padding:16px 0"><div class="ei">👥</div><p>Nobody has used your code yet.<br>Share it with friends!</p></div>`;
+  } else {
+    listEl.innerHTML = all.map(r => {
+      // Work out display name — referrals table stores referee_id (their telegram id)
+      // We show their username if we have it, otherwise show a masked telegram ID
+      const name     = r.referee_username ? "@" + r.referee_username : "User " + String(r.referee_id).slice(-4);
+      const joinDate = new Date(r.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+      const isActive = r.status === "completed"; // they placed their first trade
+      // Did YOU get your reward yet?
+      const rewardReceived = r.referrer_rewarded === true;
+
+      return `<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:3px">${name}</div>
+          <div style="font-size:11px;color:var(--muted)">Joined ${joinDate}</div>
+          <div style="margin-top:6px;display:flex;gap:6px;align-items:center">
+            <!-- Has the friend placed a trade? -->
+            <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;
+              background:${isActive ? 'rgba(0,229,122,.1)' : 'rgba(72,80,112,.15)'};
+              color:${isActive ? 'var(--green)' : 'var(--muted)'}">
+              ${isActive ? "✅ Active" : "⏳ Not traded yet"}
+            </span>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <!-- Did the referrer (you) get your 100 pts bonus? -->
+          ${rewardReceived
+            ? `<div style="font-size:13px;font-weight:800;color:var(--gold)">+100 pts</div>
+               <div style="font-size:10px;color:var(--muted);margin-top:2px">Reward received ✓</div>`
+            : isActive
+              ? `<div style="font-size:13px;font-weight:800;color:var(--gold)">+100 pts</div>
+                 <div style="font-size:10px;color:var(--muted);margin-top:2px">Processing...</div>`
+              : `<div style="font-size:13px;font-weight:700;color:var(--muted)">+100 pts</div>
+                 <div style="font-size:10px;color:var(--muted);margin-top:2px">Pending trade</div>`}
+        </div>
+      </div>`;
+    }).join("");
+  }
 }
 
 // Opens the Telegram share sheet with a pre-written message containing the referral code
