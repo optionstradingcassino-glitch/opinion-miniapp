@@ -215,44 +215,6 @@
     .tbt-pro   { background: var(--gold); color: #000; }
     .tbt-elite { background: rgba(0,229,122,.12); color: var(--green); border: 1px solid rgba(0,229,122,.25); }
 
-    /* ── ACTIVE MEMBERSHIP BANNER ──
-       Shows at the top of the membership page when user already has a plan.
-       Green border, shows their tier name, fee%, and how many pts they saved. */
-    .active-mem-banner {
-      margin: 16px 20px 0;
-      background: linear-gradient(135deg, rgba(34,192,99,.07) 0%, rgba(34,192,99,.03) 100%);
-      border: 1px solid rgba(34,192,99,.3);
-      border-radius: var(--r);
-      padding: 18px 20px;
-    }
-    .amb-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-    .amb-icon { font-size: 28px; }
-    .amb-info { flex: 1; }
-    .amb-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--gold); }
-    .amb-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    /* Two stats inside the banner: your fee% and total pts saved */
-    .amb-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .amb-stat { background: rgba(255,255,255,.04); border-radius: 10px; padding: 12px; text-align: center; }
-    .amb-stat-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--gold); }
-    .amb-stat-lbl { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; margin-top: 3px; }
-
-    /* ── SAVINGS BREAKDOWN CARD ──
-       Shows exactly how many pts were saved vs the free 5% fee.
-       Think of it like a receipt: "you would have paid X, you paid Y, saved Z" */
-    .savings-section {
-      margin: 12px 20px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 16px 18px;
-    }
-    .savings-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
-    .savings-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; font-size: 13px; }
-    .savings-row:last-child { margin-bottom: 0; padding-top: 10px; border-top: 1px solid var(--border); }
-    .savings-label { color: var(--muted); }
-    .savings-value { font-weight: 700; color: var(--text); }
-    .savings-highlight { color: var(--gold); font-family: 'Syne', sans-serif; font-size: 17px; }
-
     /* ── SUBMIT ── */
     .form-wrap { padding: 0 20px; }
     .ff        { margin-bottom: 16px; }
@@ -636,52 +598,7 @@
       <div class="topbar-title">Membership</div>
       <div style="width:30px"></div>
     </div>
-    <!-- ACTIVE MEMBERSHIP BANNER — hidden by default, shown by JS when user has a plan -->
-    <div id="activeMembSection" style="display:none">
-      <!-- Big banner showing their plan name + fee + pts saved -->
-      <div class="active-mem-banner">
-        <div class="amb-top">
-          <div class="amb-icon" id="ambIcon">⭐</div>
-          <div class="amb-info">
-            <div class="amb-title" id="ambTierName">Pro Member</div>
-            <div class="amb-sub" id="ambSub">Active membership</div>
-          </div>
-        </div>
-        <!-- Two boxes: their fee % and total pts saved compared to free tier -->
-        <div class="amb-stats">
-          <div class="amb-stat">
-            <div class="amb-stat-val" id="ambFee">3%</div>
-            <div class="amb-stat-lbl">Your fee</div>
-          </div>
-          <div class="amb-stat">
-            <div class="amb-stat-val" id="ambSaved">—</div>
-            <div class="amb-stat-lbl">Pts saved</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Savings breakdown — like a receipt showing what you saved vs free tier -->
-      <div class="savings-section">
-        <div class="savings-title">💰 Fee Savings vs Free (5%)</div>
-        <div class="savings-row">
-          <div class="savings-label">Free tier fee would have been</div>
-          <div class="savings-value" id="savFree">—</div>
-        </div>
-        <div class="savings-row">
-          <div class="savings-label" id="savMemberLabel">Your fee paid (3%)</div>
-          <div class="savings-value" id="savMember">—</div>
-        </div>
-        <!-- Bottom row: the difference = your savings, highlighted in gold -->
-        <div class="savings-row">
-          <div class="savings-label" style="color:var(--gold);font-weight:700">✅ You saved</div>
-          <div class="savings-value savings-highlight" id="savTotal">—</div>
-        </div>
-      </div>
-
-      <div class="section-head" style="padding-top:8px">Change Plan</div>
-    </div>
-
-    <div class="mem-intro" id="memIntro">Unlock higher limits, lower fees, and early market access with a monthly membership.</div>
+    <div class="mem-intro">Unlock higher limits, lower fees, and early market access with a monthly membership.</div>
     <div class="section-head">Choose a Plan</div>
     <div class="tier-list">
       <div class="tier-card t-basic" onclick="doSubscribe('basic')">
@@ -1533,94 +1450,29 @@ async function loadSubmissions() {
 }
 
 // ── MEMBERSHIP ────────────────────────────────────────────────────────────────
-// This runs every time the user opens the Membership page.
-// It does 3 things:
-//   1. Checks if the user has an active membership in the DB
-//   2. If yes, shows the green banner + savings calculator
-//   3. Marks the correct button as "Current Plan"
-async function updateMembershipUI() {
-  // Reset all buttons back to default first
-  const labels = { basic: "Get Basic · €8.99/mo", pro: "Get Pro · €26.99/mo", elite: "Get Elite · €53.99/mo" };
-  ["basic","pro","elite"].forEach(t => {
+// ── MEMBERSHIP UI ─────────────────────────────────────────────────────────────
+// Updates the membership page buttons to reflect the user's current plan
+function updateMembershipUI() {
+  const tiers = ["basic", "pro", "elite"];
+  const labels = {
+    basic: "Get Basic · €8.99/mo",
+    pro:   "Get Pro · €26.99/mo",
+    elite: "Get Elite · €53.99/mo"
+  };
+  tiers.forEach(t => {
     const btn = document.getElementById("membBtn-" + t);
     if (!btn) return;
-    btn.innerText = labels[t];
-    btn.style.opacity = "1";
-    btn.style.cursor  = "pointer";
+    if (t === currentTier) {
+      // User already has this tier — show "Current Plan" on the button
+      btn.innerText = "✓ Current Plan";
+      btn.style.opacity = "0.5";
+      btn.style.cursor  = "default";
+    } else {
+      btn.innerText = labels[t];
+      btn.style.opacity = "1";
+      btn.style.cursor  = "pointer";
+    }
   });
-  document.getElementById("activeMembSection").style.display = "none";
-
-  // Ask the DB: does this user have an active membership?
-  // We join with membership_tiers to get the fee% and name
-  const { data: memData } = await db
-    .from("user_memberships")
-    .select("*, membership_tiers(*)")
-    .eq("telegram_id", tgId)
-    .eq("status", "active")
-    .maybeSingle(); // won't crash if no row found
-
-  if (!memData || !memData.membership_tiers) return; // no membership — nothing to show
-
-  const tier     = memData.membership_tiers;
-  const tierSlug = tier.slug;         // "basic", "pro", or "elite"
-  const tierName = tier.name;         // "Basic", "Pro", "Elite"
-  const tierFee  = Number(tier.platform_fee_pct); // e.g. 3
-
-  // Update the global currentTier so doSubscribe knows too
-  currentTier = tierSlug;
-
-  // Mark the correct button as "Current Plan"
-  const curBtn = document.getElementById("membBtn-" + tierSlug);
-  if (curBtn) {
-    curBtn.innerText = "✓ Current Plan";
-    curBtn.style.opacity = "0.5";
-    curBtn.style.cursor  = "default";
-  }
-
-  // ── SAVINGS CALCULATOR ──────────────────────────────────────────────────────
-  // We look at all the user's past SETTLED trades and calculate:
-  //   - What the 5% free fee would have cost them
-  //   - What they actually paid (tierFee%)
-  //   - The difference = money saved!
-  // We base it on the STAKE (amount_points), not payout, because that's simpler and consistent.
-  const { data: trades } = await db
-    .from("trades")
-    .select("amount_points, fee_pct, status")
-    .eq("telegram_id", tgId)
-    .in("status", ["won", "lost", "active"]); // include all trades
-
-  let freeFeePaid   = 0; // what 5% would have cost
-  let memberFeePaid = 0; // what their tier actually cost
-
-  if (trades && trades.length > 0) {
-    trades.forEach(t => {
-      const stake = t.amount_points || 0;
-      // Free tier: charges 5% of the stake as a fee proxy
-      freeFeePaid   += Math.floor(stake * 0.05);
-      // Their tier fee (stored per-trade in fee_pct, fallback to tier's fee)
-      const actualFee = Number(t.fee_pct || tierFee) / 100;
-      memberFeePaid += Math.floor(stake * actualFee);
-    });
-  }
-
-  const ptsSaved = Math.max(0, freeFeePaid - memberFeePaid);
-
-  // Fill in the banner
-  const icons = { basic: "🔵", pro: "⭐", elite: "💎" };
-  document.getElementById("ambIcon").innerText     = icons[tierSlug] || "⭐";
-  document.getElementById("ambTierName").innerText = `${tierName} Member`;
-  document.getElementById("ambSub").innerText      = `Active · ${tierFee}% platform fee`;
-  document.getElementById("ambFee").innerText      = `${tierFee}%`;
-  document.getElementById("ambSaved").innerText    = ptsSaved.toLocaleString() + " pts";
-
-  // Fill in the savings breakdown
-  document.getElementById("savFree").innerText         = freeFeePaid.toLocaleString() + " pts";
-  document.getElementById("savMemberLabel").innerText  = `Your fee (${tierFee}%)`;
-  document.getElementById("savMember").innerText       = memberFeePaid.toLocaleString() + " pts";
-  document.getElementById("savTotal").innerText        = ptsSaved.toLocaleString() + " pts";
-
-  // Show the whole section
-  document.getElementById("activeMembSection").style.display = "block";
 }
 
 async function doSubscribe(slug) {
@@ -1739,35 +1591,90 @@ async function loadHistory(mode) {
   el.innerHTML = `<div class="spinner"></div>`;
 
   if (mode === "dep") {
-    // ── DEPOSITS ──────────────────────────────────────────────────────────────
-    // Pull from the payments table — each row is a Stripe deposit
-    const { data, error } = await db
-      .from("payments")
-      .select("amount_eur, points_added, created_at")
-      .eq("telegram_id", tgId)
-      .order("created_at", { ascending: false })
-      .limit(100);
+    // ── DEPOSITS + MEMBERSHIP PURCHASES ───────────────────────────────────────
+    // Load both at the same time so we can show everything in one list
 
-    if (error || !data?.length) {
+    // NOTE: payments table uses "points_added" not "amount_points", and has no "status" column
+    const [depRes, memRes, tiersRes] = await Promise.all([
+      db.from("payments")
+        .select("amount_eur, points_added, created_at")  // correct column names!
+        .eq("telegram_id", tgId)
+        .order("created_at", { ascending: false })
+        .limit(100),
+      db.from("user_memberships")
+        .select("tier_id, status, started_at, created_at")
+        .eq("telegram_id", tgId)
+        .order("started_at", { ascending: false }),
+      db.from("membership_tiers")
+        .select("id, name, price_eur_cents, bonus_points")
+    ]);
+
+    // Build a lookup: tier_id → tier info
+    const tierMap = {};
+    (tiersRes.data || []).forEach(t => { tierMap[t.id] = t; });
+
+    // Convert deposits to unified row format
+    const depRows = (depRes.data || []).map(p => ({
+      type: "deposit",
+      date: p.created_at,
+      pts:  p.points_added,      // correct column name
+      eur:  p.amount_eur,
+      status: "completed"        // all rows in payments table = successful Stripe payments
+    }));
+
+    // Convert membership purchases to unified row format
+    const memRows = (memRes.data || []).map(m => {
+      const t = tierMap[m.tier_id] || {};
+      return {
+        type:   "membership",
+        date:   m.started_at || m.created_at,
+        pts:    t.bonus_points || 0,
+        eur:    ((t.price_eur_cents || 0) / 100),
+        status: m.status,
+        name:   t.name || "Unknown"
+      };
+    });
+
+    // Merge both lists and sort newest first
+    const allRows = [...depRows, ...memRows]
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (!allRows.length) {
       el.innerHTML = `<div class="empty"><div class="ei">💳</div><p>No deposits yet.<br>Tap Deposit to add points!</p></div>`;
       return;
     }
 
-    el.innerHTML = data.map(p => {
-      // Status colour — green = completed, yellow = pending, red = failed
-      const sClass = "hs-completed"; // payments table only has completed deposits (Stripe confirmed)
-      const date = new Date(p.created_at).toLocaleDateString("en-GB", {
+    el.innerHTML = allRows.map(row => {
+      const date = new Date(row.date).toLocaleDateString("en-GB", {
         day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
       });
+
+      if (row.type === "membership") {
+        // Membership purchase row — shown differently
+        const sClass = row.status === "active" ? "hs-completed" : "hs-pending";
+        return `<div class="hist-card">
+          <div class="hist-left">
+            <div class="hist-type">⭐ ${row.name} Membership</div>
+            <div class="hist-date">${date}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">+${row.pts} bonus pts included</div>
+          </div>
+          <div class="hist-right">
+            <div class="hist-amt" style="color:var(--blue)">€${Number(row.eur).toFixed(2)}/mo</div>
+            <div class="hist-status ${sClass}">${row.status}</div>
+          </div>
+        </div>`;
+      }
+
+      // Normal deposit row
       return `<div class="hist-card">
         <div class="hist-left">
           <div class="hist-type">💳 Stripe Deposit</div>
           <div class="hist-date">${date}</div>
         </div>
         <div class="hist-right">
-          <div class="hist-amt" style="color:var(--gold)">+${Number(p.points_added).toLocaleString()} pts</div>
-          <div class="hist-eur">€${Number(p.amount_eur).toFixed(2)}</div>
-          <div class="hist-status ${sClass}">completed</div>
+          <div class="hist-amt" style="color:var(--gold)">+${Number(row.pts).toLocaleString()} pts</div>
+          <div class="hist-eur">€${Number(row.eur).toFixed(2)}</div>
+          <div class="hist-status hs-completed">completed</div>
         </div>
       </div>`;
     }).join("");
