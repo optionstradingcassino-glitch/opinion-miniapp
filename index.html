@@ -164,7 +164,17 @@
 
     /* ── PROFILE ── */
     .profile-card { margin: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; text-align: center; }
-    .avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--gold) 0%, #16803f 100%); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #000; margin: 0 auto 14px; }
+    .avatar { width: 86px; height: 86px; border-radius: 50%; background: linear-gradient(135deg, var(--gold) 0%, #16803f 100%); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #000; margin: 0 auto 6px; position: relative; cursor: pointer; overflow: hidden; border: 3px solid var(--border); transition: border-color .2s; }
+    .avatar:hover { border-color: var(--gold); }
+    /* The actual profile image — hidden until a photo is uploaded */
+    .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    /* Small camera icon overlay shown on hover so user knows they can tap to change */
+    .avatar-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .2s; font-size: 20px; }
+    .avatar:hover .avatar-overlay { opacity: 1; }
+    /* Hidden file input — triggered when user taps the avatar */
+    #avatarInput { display: none; }
+    /* Small "tap to change" hint below avatar */
+    .avatar-hint { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
     .prof-name  { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
     /* NEW: @username shown in gold below name */
     .prof-username { font-size: 13px; color: var(--gold); font-weight: 600; margin-bottom: 4px; }
@@ -467,8 +477,17 @@
   <div class="view" id="vProfile">
     <div class="topbar"><div class="topbar-title">Profile</div></div>
     <div class="profile-card">
-      <!-- Avatar: first letter of name in a gold circle -->
-      <div class="avatar" id="profAv">?</div>
+      <!-- Avatar: tappable circle — shows photo or first letter of name -->
+      <!-- Tapping it opens a file picker so user can upload a profile picture -->
+      <div class="avatar" id="profAv" onclick="document.getElementById('avatarInput').click()">
+        <span id="profAvLetter">?</span>
+        <img id="profAvImg" src="" alt="" style="display:none"/>
+        <!-- Camera icon shown on hover/tap so user knows it's clickable -->
+        <div class="avatar-overlay">📷</div>
+      </div>
+      <!-- Hidden file input — only accepts images, max picked via storage policy (2MB) -->
+      <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" onchange="uploadAvatar(event)"/>
+      <div class="avatar-hint">Tap to change photo</div>
       <div class="prof-name" id="profName">—</div>
       <!-- NEW: shows @username in gold -->
       <div class="prof-username" id="profUsername"></div>
@@ -789,7 +808,8 @@ Object.assign(window, {
   doSubscribe,
   wdCalc, doWithdraw,
   shareReferral,
-  histTab,         // NEW — switches between deposits/withdrawals
+  histTab,
+  uploadAvatar,     // NEW — handles profile picture upload
   showToast
 });
 
@@ -1228,15 +1248,20 @@ async function loadTrades() {
 // ── PROFILE ───────────────────────────────────────────────────────────────────
 async function loadProfile() {
   const { data } = await db.from("users")
-    .select("username, full_name, email, membership_tier, referral_badge")
+    .select("username, full_name, email, membership_tier, referral_badge, avatar_url")
     .eq("telegram_id", tgId).single();
   if (!data) return;
 
   const name = data.full_name || data.username || data.email?.split("@")[0] || "Trader";
-  document.getElementById("profAv").innerText    = name[0].toUpperCase();
+  document.getElementById("profAvLetter").innerText = name[0].toUpperCase();
   document.getElementById("profName").innerText  = name;
   document.getElementById("profEmail").innerText = data.email || "—";
   document.getElementById("profTgId").innerText  = tgId;
+
+  // If user has a profile picture, show it (hide the letter)
+  if (data.avatar_url) {
+    setAvatarImg(data.avatar_url);
+  }
 
   // Show @username in gold below the name
   if (data.username) {
@@ -1256,10 +1281,78 @@ async function loadProfile() {
   }
 
   const tier = data.membership_tier || "free";
-  currentTier = tier; // track globally so doSubscribe can check it
+  currentTier = tier;
   const tb   = document.getElementById("profTier");
   tb.innerText = tier.charAt(0).toUpperCase() + tier.slice(1);
   tb.className = `tier-badge tb-${tier}`;
+}
+
+// Helper: shows profile image in the avatar circle and hides the letter
+function setAvatarImg(url) {
+  const img    = document.getElementById("profAvImg");
+  const letter = document.getElementById("profAvLetter");
+  img.src = url + "?t=" + Date.now(); // add timestamp so browser doesn't cache old image
+  img.style.display = "block";
+  letter.style.display = "none";
+}
+
+// Called when user picks a file from the file picker
+async function uploadAvatar(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  // Check file size (2MB max — same as storage bucket limit)
+  if (file.size > 2 * 1024 * 1024) {
+    return showToast("Image too large. Max 2MB.", "bad");
+  }
+
+  showToast("Uploading photo...", "ok");
+
+  try {
+    // File path in storage: avatars/TELEGRAM_ID.jpg
+    // Using telegram_id in the name so each user has exactly one slot
+    const ext      = file.name.split(".").pop() || "jpg";
+    const filePath = `${tgId}.${ext}`;
+
+    // Upload to Supabase Storage "avatars" bucket
+    // upsert: true = replace if file already exists (for updates)
+    const { error: uploadErr } = await db.storage
+      .from("avatars")
+      .upload(filePath, file, {
+        upsert:      true,   // replace existing file
+        contentType: file.type
+      });
+
+    if (uploadErr) {
+      console.error("Upload error:", uploadErr);
+      return showToast("Upload failed: " + uploadErr.message, "bad");
+    }
+
+    // Get the public URL of the uploaded image
+    const { data: urlData } = db.storage.from("avatars").getPublicUrl(filePath);
+    const publicUrl = urlData.publicUrl;
+
+    // Save the URL to the users table so it persists
+    const { error: updateErr } = await db.from("users")
+      .update({ avatar_url: publicUrl })
+      .eq("telegram_id", tgId);
+
+    if (updateErr) {
+      console.error("DB update error:", updateErr);
+      return showToast("Photo uploaded but couldn't save. Try again.", "bad");
+    }
+
+    // Show the new image immediately without reloading
+    setAvatarImg(publicUrl);
+    showToast("Profile photo updated! 📸", "ok");
+
+  } catch (err) {
+    console.error("Avatar upload error:", err);
+    showToast("Something went wrong. Try again.", "bad");
+  }
+
+  // Clear the file input so user can pick the same file again if needed
+  event.target.value = "";
 }
 
 // ── REFERRALS ─────────────────────────────────────────────────────────────────
