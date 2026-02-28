@@ -862,7 +862,7 @@ async function sendReset() {
     await fetch(`${SUPA_URL}/auth/v1/recover`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": SUPA_KEY },
-      body: JSON.stringify({ email, redirect_to: "https://opinion-miniapp.vercel.app" })
+      body: JSON.stringify({ email, redirect_to: "https://opinion-miniapp.vercel.app/reset-password.html" })
     });
     okEl.innerText = "If that email exists, a reset link has been sent. Check your inbox and spam folder.";
     okEl.style.display = "block";
