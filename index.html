@@ -1488,13 +1488,13 @@ async function doSubscribe(slug) {
   showToast("Opening Stripe checkout...", "ok");
 
   try {
-    const res = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
+    // create-membership handles subscription checkout (not create-checkout which is deposits only)
+    const res = await fetch(`${SUPA_URL}/functions/v1/create-membership`, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        type:     "membership",  // tells the function this is a subscription
-        tier:     slug,          // "basic", "pro", or "elite"
-        initData: tgInitData     // proves who the user is
+        tier_slug: slug,      // "basic", "pro", or "elite"
+        initData:  tgInitData // proves who the user is
       })
     });
 
