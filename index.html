@@ -12,7 +12,7 @@
       --surface: #0c0e15;
       --card:    #101420;
       --border:  #1c2035;
-      --gold:    #f0c040;
+      --gold:    #22c063;
       --green:   #00e57a;
       --red:     #ff3d5a;
       --blue:    #4d8fff;
@@ -24,15 +24,16 @@
     html, body { height: 100%; overflow: hidden; background: var(--bg); }
     body { font-family: 'Outfit', sans-serif; color: var(--text); font-size: 15px; }
 
-    #authWrap { position: fixed; inset: 0; z-index: 500; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    /* AUTH WRAP — scrollable so long signup form fits on small screens */
+    #authWrap { position: fixed; inset: 0; z-index: 500; background: var(--bg); display: flex; align-items: flex-start; justify-content: center; padding: 24px; overflow-y: auto; }
     #appShell { display: none; position: fixed; inset: 0; flex-direction: column; }
     #appShell.show { display: flex; }
 
     .view { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 80px; }
     .view.active { display: block; }
 
-    /* AUTH */
-    .auth-box { width: 100%; max-width: 370px; }
+    /* ── AUTH STYLES ── */
+    .auth-box { width: 100%; max-width: 370px; padding-top: 16px; }
     .auth-logo { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; text-align: center; color: var(--gold); margin-bottom: 4px; letter-spacing: 1px; }
     .auth-sub  { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 32px; }
     .tab-row   { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 24px; }
@@ -42,26 +43,28 @@
     .f label   { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
     .f input   { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; padding: 13px 16px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px; outline: none; transition: border-color .2s; }
     .f input:focus { border-color: var(--gold); }
+    /* Small hint text shown below a field */
+    .f-hint { font-size: 11px; color: var(--muted); margin-top: 5px; padding-left: 2px; }
     .err-box   { background: rgba(255,61,90,.1); color: var(--red); border: 1px solid rgba(255,61,90,.25); border-radius: 10px; padding: 11px 14px; font-size: 13px; text-align: center; margin-bottom: 14px; display: none; }
     .btn-gold  { width: 100%; padding: 14px; background: var(--gold); color: #000; border: none; border-radius: 11px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
     .btn-gold:disabled { opacity: .45; cursor: not-allowed; }
     .btn-gold:active   { opacity: .8; }
 
-    /* BOTTOM NAV */
+    /* ── BOTTOM NAV ── */
     #bottomNav { flex-shrink: 0; display: flex; background: var(--surface); border-top: 1px solid var(--border); padding: 6px 0 max(10px, env(safe-area-inset-bottom)); }
     .nav-btn   { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 0; border: none; background: transparent; color: var(--muted); font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer; transition: color .2s; }
     .nav-btn.on { color: var(--gold); }
     .nav-btn svg { width: 21px; height: 21px; }
 
-    /* TOPBAR */
+    /* ── TOPBAR ── */
     .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; position: sticky; top: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 10; }
     .topbar-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
     .back-btn { background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; padding: 0 8px 0 0; line-height: 1; }
-    .bal-chip { background: rgba(240,192,64,.12); color: var(--gold); border: 1px solid rgba(240,192,64,.2); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700; }
+    .bal-chip { background: rgba(34,192,99,.12); color: var(--gold); border: 1px solid rgba(34,192,99,.2); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700; }
 
-    /* SHARED */
+    /* ── SHARED ── */
     .section-head { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 18px 20px 10px; }
-    .notice { margin: 0 20px 20px; background: rgba(240,192,64,.07); border: 1px solid rgba(240,192,64,.2); border-radius: 12px; padding: 14px 16px; display: flex; gap: 12px; }
+    .notice { margin: 0 20px 20px; background: rgba(34,192,99,.07); border: 1px solid rgba(34,192,99,.2); border-radius: 12px; padding: 14px 16px; display: flex; gap: 12px; }
     .notice-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
     .notice-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
     .notice-text strong { color: var(--gold); font-weight: 700; }
@@ -71,9 +74,9 @@
     .empty .ei { font-size: 36px; margin-bottom: 14px; }
     .empty p { font-size: 14px; line-height: 1.6; }
 
-    /* MARKETS VIEW */
+    /* ── MARKETS VIEW ── */
     .balance-hero { margin: 16px 20px; background: linear-gradient(135deg, #0f1220 0%, var(--card) 100%); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; position: relative; overflow: hidden; }
-    .balance-hero::after { content: ''; position: absolute; top: -40px; right: -40px; width: 130px; height: 130px; background: radial-gradient(circle, rgba(240,192,64,.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+    .balance-hero::after { content: ''; position: absolute; top: -40px; right: -40px; width: 130px; height: 130px; background: radial-gradient(circle, rgba(34,192,99,.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
     .bh-label  { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
     .bh-amount { font-family: 'Syne', sans-serif; font-size: 46px; font-weight: 800; color: var(--gold); line-height: 1.1; margin: 4px 0; }
     .bh-sub    { font-size: 12px; color: var(--muted); }
@@ -83,11 +86,7 @@
     .bh-dep { background: var(--gold); color: #000; }
     .bh-wd  { background: var(--card); color: var(--text); border: 1px solid var(--border); }
 
-    /* ── MARKET CARD ──
-       KEY CHANGE: Pools are now HIDDEN from users.
-       We only show YES odds and NO odds.
-       This is like a real bookmaker — you see the price, not the book's exposure.
-    */
+    /* ── MARKET CARD ── */
     .mkt-list { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
     .mkt-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
     .mkt-top  { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
@@ -96,8 +95,6 @@
     .sc-open    { background: rgba(0,229,122,.1);   color: var(--green); }
     .sc-closed  { background: rgba(255,61,90,.1);   color: var(--red); }
     .sc-settled { background: rgba(72,80,112,.15);  color: var(--muted); }
-
-    /* Odds display — two big boxes side by side */
     .odds-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
     .odds-box  { border-radius: 10px; padding: 14px; text-align: center; }
     .ob-yes    { background: rgba(0,229,122,.06); border: 1px solid rgba(0,229,122,.15); }
@@ -109,11 +106,8 @@
     .ob-yes .ob-odds { color: var(--green); }
     .ob-no  .ob-odds { color: var(--red); }
     .ob-sub    { font-size: 11px; color: var(--muted); margin-top: 4px; }
-
-    /* Probability bar — visual only, no numbers */
     .prob-bar  { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
     .prob-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--green), var(--red)); transition: width .5s ease; }
-
     .mkt-btns  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .btn-yes, .btn-no { padding: 12px; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity .15s; }
     .btn-yes { background: rgba(0,229,122,.1); color: var(--green); border: 1px solid rgba(0,229,122,.2); }
@@ -122,7 +116,7 @@
     .mkt-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
     .mkt-timer  { font-size: 11px; color: var(--muted); }
 
-    /* TRADE MODAL */
+    /* ── TRADE MODAL ── */
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 300; align-items: flex-end; }
     .overlay.open { display: flex; }
     .sheet { width: 100%; max-width: 480px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 0 20px 40px; animation: slideUp .22s ease; }
@@ -139,18 +133,17 @@
     .stake-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
     .stake-in  { width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; padding: 14px 16px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; outline: none; transition: border-color .2s; margin-bottom: 10px; }
     .stake-in:focus { border-color: var(--gold); }
-    /* Minimum bet hint shown below the input */
     .min-bet-hint { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
     .quick-row { display: flex; gap: 8px; margin-bottom: 18px; }
     .q-btn { flex: 1; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .q-btn:active { background: rgba(240,192,64,.12); color: var(--gold); }
+    .q-btn:active { background: rgba(34,192,99,.12); color: var(--gold); }
     .payout-preview { background: var(--surface); border-radius: 12px; padding: 15px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
     .pp-left .pp-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
     .pp-left .pp-odds  { font-size: 12px; color: var(--muted); }
     .pp-amount { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--green); }
     .cancel-btn { width: 100%; margin-top: 10px; padding: 12px; background: none; border: none; color: var(--muted); font-family: 'Outfit', sans-serif; font-size: 14px; cursor: pointer; }
 
-    /* PORTFOLIO */
+    /* ── PORTFOLIO ── */
     .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 16px 20px 0; }
     .stat-box  { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
     .stat-val  { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--gold); }
@@ -169,38 +162,41 @@
     .tp-lost   { color: var(--red); }
     .tp-active { color: var(--gold); }
 
-    /* PROFILE */
+    /* ── PROFILE ── */
     .profile-card { margin: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; text-align: center; }
-    .avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--gold) 0%, #c07000 100%); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #000; margin: 0 auto 14px; }
-    .prof-name  { font-size: 18px; font-weight: 700; margin-bottom: 3px; }
-    .prof-email { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+    .avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--gold) 0%, #16803f 100%); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #000; margin: 0 auto 14px; }
+    .prof-name  { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+    /* NEW: @username shown in gold below name */
+    .prof-username { font-size: 13px; color: var(--gold); font-weight: 600; margin-bottom: 4px; }
+    .prof-email { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
     .tier-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     .tb-free  { background: rgba(72,80,112,.2);  color: var(--muted); }
     .tb-basic { background: rgba(77,143,255,.12); color: var(--blue); }
-    .tb-pro   { background: rgba(240,192,64,.12); color: var(--gold); }
+    .tb-pro   { background: rgba(34,192,99,.12); color: var(--gold); }
     .tb-elite { background: rgba(0,229,122,.12);  color: var(--green); }
     .menu-list { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
     .menu-row  { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 15px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: border-color .15s; }
-    .menu-row:active { border-color: rgba(240,192,64,.4); }
+    .menu-row:active { border-color: rgba(34,192,99,.4); }
     .menu-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .mi-gold  { background: rgba(240,192,64,.12); color: var(--gold); }
-    .mi-green { background: rgba(0,229,122,.1);   color: var(--green); }
-    .mi-blue  { background: rgba(77,143,255,.1);  color: var(--blue); }
-    .mi-red   { background: rgba(255,61,90,.1);   color: var(--red); }
+    .mi-gold   { background: rgba(34,192,99,.12); color: var(--gold); }
+    .mi-green  { background: rgba(0,229,122,.1);   color: var(--green); }
+    .mi-blue   { background: rgba(77,143,255,.1);  color: var(--blue); }
+    .mi-red    { background: rgba(255,61,90,.1);   color: var(--red); }
+    .mi-purple { background: rgba(168,85,247,.12); color: #a855f7; }
     .menu-info { flex: 1; }
     .mi-title { font-size: 14px; font-weight: 600; }
     .mi-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .mi-arrow { color: var(--muted); font-size: 20px; line-height: 1; }
 
-    /* MEMBERSHIP */
+    /* ── MEMBERSHIP ── */
     .mem-intro { padding: 16px 20px 0; font-size: 13px; color: var(--muted); line-height: 1.65; }
     .tier-list  { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
     .tier-card  { border: 1px solid var(--border); border-radius: var(--r); padding: 22px; position: relative; overflow: hidden; }
-    .tc-pro { border-color: rgba(240,192,64,.35); }
+    .tc-pro { border-color: rgba(34,192,99,.35); }
     .hot-tag { position: absolute; top: 14px; right: 14px; background: var(--gold); color: #000; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 3px 9px; border-radius: 4px; }
     .tier-glow { position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; pointer-events: none; }
     .t-basic .tier-glow { background: radial-gradient(circle, rgba(77,143,255,.1) 0%, transparent 70%); }
-    .t-pro   .tier-glow { background: radial-gradient(circle, rgba(240,192,64,.12) 0%, transparent 70%); }
+    .t-pro   .tier-glow { background: radial-gradient(circle, rgba(34,192,99,.12) 0%, transparent 70%); }
     .t-elite .tier-glow { background: radial-gradient(circle, rgba(0,229,122,.1) 0%, transparent 70%); }
     .tier-name  { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; }
     .t-basic .tier-name { color: var(--blue); }
@@ -219,7 +215,7 @@
     .tbt-pro   { background: var(--gold); color: #000; }
     .tbt-elite { background: rgba(0,229,122,.12); color: var(--green); border: 1px solid rgba(0,229,122,.25); }
 
-    /* SUBMIT */
+    /* ── SUBMIT ── */
     .form-wrap { padding: 0 20px; }
     .ff        { margin-bottom: 16px; }
     .ff label  { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
@@ -235,7 +231,7 @@
     .ss-rejected { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--red); }
     .sub-pts  { font-size: 12px; color: var(--muted); }
 
-    /* WITHDRAW */
+    /* ── WITHDRAW ── */
     .wd-wrap    { padding: 0 20px; }
     .wd-card    { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; margin-bottom: 20px; text-align: center; }
     .wd-label   { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
@@ -245,7 +241,53 @@
     .wf-input:focus { border-color: var(--gold); }
     .wf-hint    { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
 
-    /* TOAST */
+    /* ── REFERRALS PAGE ── */
+    /* Big gold code box at the top */
+    .ref-code-box { margin: 16px 20px; background: var(--card); border: 1px solid rgba(34,192,99,.3); border-radius: 14px; padding: 24px; text-align: center; }
+    .ref-code-lbl { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .ref-code-val { font-family: 'Syne', sans-serif; font-size: 42px; font-weight: 800; color: var(--gold); letter-spacing: 6px; margin-bottom: 18px; }
+    .ref-share-btn { background: var(--gold); color: #000; border: none; border-radius: 10px; padding: 13px 32px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .ref-share-btn:active { opacity: .8; }
+    /* 3 stats: invited / active / earned */
+    .ref-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 20px; margin-bottom: 6px; }
+    .ref-stat  { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+    .ref-stat-val { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--gold); }
+    .ref-stat-lbl { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-top: 4px; }
+    /* Badge progress section */
+    .badge-wrap { margin: 0 20px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+    .badge-row  { margin-bottom: 16px; }
+    .badge-row:last-child { margin-bottom: 0; }
+    .badge-top  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+    .badge-name { font-size: 13px; font-weight: 700; }
+    .badge-req  { font-size: 11px; color: var(--muted); }
+    .badge-bar  { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .badge-fill { height: 100%; border-radius: 3px; transition: width .5s ease; }
+    /* How it works box */
+    .ref-how { margin: 0 20px 24px; background: rgba(34,192,99,.06); border: 1px solid rgba(34,192,99,.18); border-radius: 12px; padding: 16px; }
+    .ref-how-title { font-size: 12px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .ref-how-step  { font-size: 13px; color: var(--muted); line-height: 2; }
+    .ref-how-step strong { color: var(--text); }
+
+    /* ── HISTORY VIEW (deposits + withdrawals) ── */
+    .hist-tabs   { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 16px 20px 0; }
+    .hist-tab    { padding: 10px; border: 1.5px solid var(--border); border-radius: 10px; background: transparent; color: var(--muted); font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .hist-tab.on { background: rgba(34,192,99,.1); border-color: rgba(34,192,99,.35); color: var(--gold); }
+    .hist-list   { padding: 14px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .hist-card   { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 15px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .hist-left   { flex: 1; min-width: 0; }
+    .hist-type   { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .hist-date   { font-size: 11px; color: var(--muted); }
+    .hist-iban   { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .hist-right  { text-align: right; flex-shrink: 0; }
+    .hist-amt    { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+    .hist-eur    { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .hist-status { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
+    .hs-pending    { color: var(--gold); }
+    .hs-completed  { color: var(--green); }
+    .hs-processing { color: var(--blue); }
+    .hs-rejected   { color: var(--red); }
+
+    /* ── TOAST ── */
     #toast { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 11px 20px; font-size: 13px; font-weight: 600; white-space: nowrap; z-index: 999; opacity: 0; transition: all .25s; pointer-events: none; }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     #toast.ok  { border-color: rgba(0,229,122,.4);  color: var(--green); }
@@ -254,30 +296,92 @@
 </head>
 <body>
 
-<!-- AUTH -->
+<!-- ════════════════════════════════════════════
+     AUTH SCREEN — shown before login/signup
+════════════════════════════════════════════ -->
 <div id="authWrap">
   <div class="auth-box">
     <div class="auth-logo">CASSINO TRADE</div>
     <div class="auth-sub">Predict markets · Trade points · Win big</div>
+
+    <!-- Tab switcher: Sign Up / Login -->
     <div class="tab-row">
       <button class="tab-btn on" id="tabSU" onclick="authTab('su')">Sign Up</button>
       <button class="tab-btn"    id="tabLI" onclick="authTab('li')">Login</button>
     </div>
+
+    <!-- Error message box (hidden by default) -->
     <div class="err-box" id="authErr"></div>
+
+    <!-- ── SIGN UP FORM ── -->
     <div id="formSU">
-      <div class="f"><label>Email</label><input type="email"    id="suEmail" placeholder="you@email.com"/></div>
-      <div class="f"><label>Password</label><input type="password" id="suPass"  placeholder="Min 6 characters"/></div>
-      <div class="f"><label>Confirm Password</label><input type="password" id="suConf"  placeholder="Repeat password"/></div>
+
+      <!-- USERNAME — new field! User picks their own username.
+           We use this to generate their referral code (e.g. suryansh → SURY847) -->
+      <div class="f">
+        <label>Username</label>
+        <input
+          type="text"
+          id="suUsername"
+          placeholder="e.g. suryansh"
+          autocomplete="off"
+          oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"
+        />
+        <!-- Hint explaining the rules -->
+        <div class="f-hint">Only letters, numbers, underscores · min 3 chars</div>
+      </div>
+
+      <div class="f">
+        <label>Email</label>
+        <input type="email" id="suEmail" placeholder="you@email.com"/>
+      </div>
+
+      <div class="f">
+        <label>Password</label>
+        <input type="password" id="suPass" placeholder="Min 6 characters"/>
+      </div>
+
+      <div class="f">
+        <label>Confirm Password</label>
+        <input type="password" id="suConf" placeholder="Repeat password"/>
+      </div>
+
+      <!-- REFERRAL CODE — optional, enter a friend's code here.
+           Both you and your friend get 100 pts when you place your first trade -->
+      <div class="f">
+        <label>Referral Code <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input
+          type="text"
+          id="suRef"
+          placeholder="e.g. SURY847"
+          autocomplete="off"
+          style="text-transform:uppercase"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+        />
+        <div class="f-hint">Have a friend's code? Enter it for a free 100 pts bonus!</div>
+      </div>
+
       <button class="btn-gold" id="suBtn" onclick="doSignup()">Create Account</button>
     </div>
+
+    <!-- ── LOGIN FORM ── -->
     <div id="formLI" style="display:none">
-      <div class="f"><label>Email</label><input type="email"    id="liEmail" placeholder="you@email.com"/></div>
-      <div class="f"><label>Password</label><input type="password" id="liPass"  placeholder="Your password"/></div>
+      <div class="f">
+        <label>Email</label>
+        <input type="email" id="liEmail" placeholder="you@email.com"/>
+      </div>
+      <div class="f">
+        <label>Password</label>
+        <input type="password" id="liPass" placeholder="Your password"/>
+      </div>
       <button class="btn-gold" id="liBtn" onclick="doLogin()">Login</button>
     </div>
+
     <div style="text-align:center;margin-top:14px">
       <button onclick="doForgotPassword()" style="background:none;border:none;color:var(--muted);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">Forgot password?</button>
     </div>
+
+    <!-- ── FORGOT PASSWORD FORM ── -->
     <div id="formFP" style="display:none">
       <div style="text-align:center;margin-bottom:20px">
         <div style="font-size:16px;font-weight:700;margin-bottom:6px">Reset Password</div>
@@ -291,13 +395,19 @@
         <button onclick="authTab('li')" style="background:none;border:none;color:var(--muted);font-family:Outfit,sans-serif;font-size:13px;cursor:pointer;text-decoration:underline">Back to login</button>
       </div>
     </div>
+
+    <!-- Spacer so content doesn't get cut off on small phones -->
+    <div style="height:24px"></div>
   </div>
 </div>
 
-<!-- APP -->
+
+<!-- ════════════════════════════════════════════
+     MAIN APP — shown after login
+════════════════════════════════════════════ -->
 <div id="appShell">
 
-  <!-- MARKETS -->
+  <!-- ── MARKETS VIEW ── -->
   <div class="view active" id="vMarkets">
     <div class="topbar">
       <div class="topbar-title">Markets</div>
@@ -316,7 +426,7 @@
     <div class="mkt-list" id="mktList"><div class="spinner"></div></div>
   </div>
 
-  <!-- PORTFOLIO -->
+  <!-- ── PORTFOLIO VIEW ── -->
   <div class="view" id="vPortfolio">
     <div class="topbar"><div class="topbar-title">My Trades</div></div>
     <div class="stats-row">
@@ -328,7 +438,7 @@
     <div class="trade-list" id="tradeList"><div class="spinner"></div></div>
   </div>
 
-  <!-- SUBMIT -->
+  <!-- ── SUBMIT VIEW ── -->
   <div class="view" id="vSubmit">
     <div class="topbar"><div class="topbar-title">Submit Question</div></div>
     <div class="notice">
@@ -353,16 +463,41 @@
     <div class="sub-list" id="subList"><div class="spinner"></div></div>
   </div>
 
-  <!-- PROFILE -->
+  <!-- ── PROFILE VIEW ── -->
   <div class="view" id="vProfile">
     <div class="topbar"><div class="topbar-title">Profile</div></div>
     <div class="profile-card">
+      <!-- Avatar: first letter of name in a gold circle -->
       <div class="avatar" id="profAv">?</div>
-      <div class="prof-name"  id="profName">—</div>
+      <div class="prof-name" id="profName">—</div>
+      <!-- NEW: shows @username in gold -->
+      <div class="prof-username" id="profUsername"></div>
       <div class="prof-email" id="profEmail">—</div>
-      <div class="tier-badge tb-free" id="profTier">Free</div>
+      <!-- NEW: shows referral badge if earned (hidden until earned) -->
+      <div id="profBadgeWrap" style="display:none;margin-top:8px">
+        <span id="profBadge" style="display:inline-block;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(168,85,247,.15);color:#a855f7;letter-spacing:1px"></span>
+      </div>
+      <div style="margin-top:10px">
+        <span class="tier-badge tb-free" id="profTier">Free</span>
+      </div>
     </div>
     <div class="menu-list">
+      <!-- NEW: Referrals menu item -->
+      <div class="menu-row" onclick="goTo('referrals')">
+        <div class="menu-icon mi-purple">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="menu-info">
+          <div class="mi-title">Referrals</div>
+          <div class="mi-sub">Invite friends · earn 100 pts each</div>
+        </div>
+        <div class="mi-arrow">›</div>
+      </div>
       <div class="menu-row" onclick="goTo('membership')">
         <div class="menu-icon mi-gold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
         <div class="menu-info"><div class="mi-title">Membership</div><div class="mi-sub">Upgrade for better limits &amp; perks</div></div>
@@ -371,6 +506,19 @@
       <div class="menu-row" onclick="goTo('portfolio')">
         <div class="menu-icon mi-blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
         <div class="menu-info"><div class="mi-title">Trade History</div><div class="mi-sub">See all your past bets</div></div>
+        <div class="mi-arrow">›</div>
+      </div>
+      <div class="menu-row" onclick="goTo('history')">
+        <div class="menu-icon mi-blue" style="background:rgba(77,143,255,.1);color:var(--blue)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div class="menu-info">
+          <div class="mi-title">Deposit &amp; Withdrawal History</div>
+          <div class="mi-sub">All your past transactions</div>
+        </div>
         <div class="mi-arrow">›</div>
       </div>
       <div class="menu-row" onclick="openDeposit()">
@@ -387,7 +535,57 @@
     <div style="text-align:center;color:var(--muted);font-size:11px;padding:0 0 20px">Telegram ID: <span id="profTgId">—</span></div>
   </div>
 
-  <!-- MEMBERSHIP -->
+  <!-- ── REFERRALS VIEW — NEW PAGE ── -->
+  <div class="view" id="vReferrals">
+    <div class="topbar">
+      <button class="back-btn" onclick="goBack()">‹</button>
+      <div class="topbar-title">Referrals</div>
+      <div style="width:30px"></div>
+    </div>
+
+    <!-- Big referral code display + share button -->
+    <div class="ref-code-box">
+      <div class="ref-code-lbl">Your Referral Code</div>
+      <!-- This gets filled in by loadReferrals() from the database -->
+      <div class="ref-code-val" id="refCode">—</div>
+      <button class="ref-share-btn" onclick="shareReferral()">📤 Share with Friends</button>
+    </div>
+
+    <!-- Stats row: how many invited, how many completed, points earned -->
+    <div class="ref-stats">
+      <div class="ref-stat">
+        <div class="ref-stat-val" id="refTotal">0</div>
+        <div class="ref-stat-lbl">Invited</div>
+      </div>
+      <div class="ref-stat">
+        <div class="ref-stat-val" id="refActive" style="color:var(--green)">0</div>
+        <div class="ref-stat-lbl">Active</div>
+      </div>
+      <div class="ref-stat">
+        <div class="ref-stat-val" id="refEarned">0</div>
+        <div class="ref-stat-lbl">Pts Earned</div>
+      </div>
+    </div>
+
+    <!-- Badge progress — like a video game achievement system -->
+    <div class="section-head">Badge Progress</div>
+    <div class="badge-wrap" id="badgeWrap">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Simple explanation of how it all works -->
+    <div class="ref-how">
+      <div class="ref-how-title">How It Works</div>
+      <div class="ref-how-step">
+        <strong>1.</strong> Share your code with friends<br>
+        <strong>2.</strong> Friend signs up with your code<br>
+        <strong>3.</strong> Friend places their first trade<br>
+        <strong>4. You both get +100 pts instantly! 🎯</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MEMBERSHIP VIEW ── -->
   <div class="view" id="vMembership">
     <div class="topbar">
       <button class="back-btn" onclick="goBack()">‹</button>
@@ -437,7 +635,7 @@
     <div style="height:24px"></div>
   </div>
 
-  <!-- WITHDRAW -->
+  <!-- ── WITHDRAW VIEW ── -->
   <div class="view" id="vWithdraw">
     <div class="topbar">
       <button class="back-btn" onclick="goBack()">‹</button>
@@ -450,7 +648,6 @@
         <div class="wd-pts" id="wdBal">0</div>
         <div class="wd-eur" id="wdBalEur">≈ €0.00</div>
       </div>
-      <!-- Updated notice: min withdraw is now €20 = 200 pts -->
       <div class="notice" style="margin:0 0 20px">
         <div class="notice-icon">ℹ️</div>
         <div class="notice-text">Minimum <strong>200 pts (€20)</strong>. Processed via bank transfer in 2–5 business days.</div>
@@ -469,9 +666,29 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
+  <!-- ── HISTORY VIEW (deposits + withdrawals in one place) ── -->
+  <div class="view" id="vHistory">
+    <div class="topbar">
+      <button class="back-btn" onclick="goBack()">‹</button>
+      <div class="topbar-title">History</div>
+      <div style="width:30px"></div>
+    </div>
+
+    <!-- Two tabs: Deposits / Withdrawals -->
+    <div class="hist-tabs">
+      <button class="hist-tab on" id="htDep" onclick="histTab('dep')">⬇️ Deposits</button>
+      <button class="hist-tab"    id="htWd"  onclick="histTab('wd')">⬆️ Withdrawals</button>
+    </div>
+
+    <!-- List gets rendered here by JS -->
+    <div class="hist-list" id="histList">
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <!-- ── BOTTOM NAV BAR ── -->
   <nav id="bottomNav">
-    <button class="nav-btn on" id="nb-markets"   onclick="goTo('markets')">
+    <button class="nav-btn on" id="nb-markets" onclick="goTo('markets')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Markets
     </button>
@@ -479,18 +696,18 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       Trades
     </button>
-    <button class="nav-btn" id="nb-submit"    onclick="goTo('submit')">
+    <button class="nav-btn" id="nb-submit" onclick="goTo('submit')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
       Submit
     </button>
-    <button class="nav-btn" id="nb-profile"   onclick="goTo('profile')">
+    <button class="nav-btn" id="nb-profile" onclick="goTo('profile')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Profile
     </button>
   </nav>
 </div>
 
-<!-- TRADE MODAL -->
+<!-- ── TRADE MODAL (slides up from bottom) ── -->
 <div class="overlay" id="tradeOverlay">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -502,10 +719,8 @@
     </div>
     <div class="stake-lbl">Stake (points)</div>
     <input class="stake-in" id="stakeIn" type="number" placeholder="Min 100 pts" oninput="calcPayout()" min="100"/>
-    <!-- Hint shown below input reminding user of minimum -->
     <div class="min-bet-hint">Minimum bet: 100 pts</div>
     <div class="quick-row">
-      <!-- Quick-pick buttons start at 100 (the minimum) -->
       <button class="q-btn" onclick="qs(100)">100</button>
       <button class="q-btn" onclick="qs(500)">500</button>
       <button class="q-btn" onclick="qs(1000)">1K</button>
@@ -526,35 +741,37 @@
 
 <div id="toast"></div>
 
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT — all logic lives here
+════════════════════════════════════════════ -->
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// ── CONFIG ──────────────────────────────────────────────────────────────
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
 const SUPA_URL    = "https://liketekvzrazheolmfnj.supabase.co";
 const SUPA_KEY    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
-const PTS_PER_EUR  = 10;   // €1 = 10 pts
-const MIN_STAKE    = 100;  // minimum bet in points
-const MIN_DEPOSIT  = 10;   // minimum deposit in euros
-const MIN_WITHDRAW = 200;  // minimum withdrawal in points (= €20)
-
-// Virtual pool size used for odds anchoring at 1.80 when market is empty.
-// Higher = odds stay near 1.80 longer before shifting. Lower = shifts faster.
-const VIRTUAL_POOL = 1000;
-const START_ODDS   = 1.80;
+const PTS_PER_EUR  = 10;    // €1 = 10 pts
+const MIN_STAKE    = 100;   // minimum bet
+const MIN_DEPOSIT  = 10;    // minimum deposit in euros
+const MIN_WITHDRAW = 200;   // minimum withdrawal in points (= €20)
+const VIRTUAL_POOL = 1000;  // used for odds smoothing
+const START_ODDS   = 1.80;  // starting odds when market has no bets
 
 const db = createClient(SUPA_URL, SUPA_KEY);
-window._db = db;
+window._db = db; // expose to withdrawal code
 
-// ── STATE ────────────────────────────────────────────────────────────────
-let tgId       = null;
-let tgInitData = null;
-let balance    = 0;
-let markets    = [];
-let activeMkt  = null;
-let choice     = null;
-let prevView   = "markets";
+// ── APP STATE ─────────────────────────────────────────────────────────────────
+let tgId       = null;  // telegram user ID
+let tgInitData = null;  // telegram auth data (proves who the user is)
+let balance    = 0;     // current points balance
+let markets    = [];    // loaded markets array
+let activeMkt  = null;  // market selected for trading
+let choice     = null;  // "YES" or "NO" selected in modal
+let prevView   = "markets"; // for back button
 
-// ── EXPOSE FUNCTIONS TO HTML onclick ────────────────────────────────────
+// ── EXPOSE ALL FUNCTIONS SO HTML onclick CAN CALL THEM ───────────────────────
+// (This is needed because we use type="module" which has its own scope)
 Object.assign(window, {
   doForgotPassword, sendReset,
   authTab, doSignup, doLogin,
@@ -564,27 +781,34 @@ Object.assign(window, {
   doSubmit,
   doSubscribe,
   wdCalc, doWithdraw,
+  shareReferral,
+  histTab,         // NEW — switches between deposits/withdrawals
   showToast
 });
 
-// ── BOOT ─────────────────────────────────────────────────────────────────
+// ── APP BOOT ──────────────────────────────────────────────────────────────────
+// This runs when the page first loads
 document.addEventListener("DOMContentLoaded", async () => {
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.expand(); tg.setBackgroundColor("#06070b"); }
   tgInitData = tg?.initData || "";
 
+  // Step 1: prove who the user is via Telegram
   const result = await telegramLogin();
   if (!result) return;
   tgId = String(tg?.initDataUnsafe?.user?.id || "");
 
+  // Step 2: if they already have an email linked, go straight to app
   if (result.email_linked) {
     balance = result.balance_points || 0;
     startApp();
   } else {
+    // Otherwise show the login/signup screen
     document.getElementById("authWrap").style.display = "flex";
   }
 });
 
+// Calls our telegram-login edge function to verify the user's identity
 async function telegramLogin() {
   try {
     const res = await fetch(`${SUPA_URL}/functions/v1/telegram-login`, {
@@ -595,7 +819,9 @@ async function telegramLogin() {
   } catch { return null; }
 }
 
-// ── AUTH ──────────────────────────────────────────────────────────────────
+// ── AUTH FUNCTIONS ────────────────────────────────────────────────────────────
+
+// Switches between Sign Up and Login tabs
 function authTab(t) {
   document.getElementById("formSU").style.display = t === "su" ? "block" : "none";
   document.getElementById("formLI").style.display = t === "li" ? "block" : "none";
@@ -605,6 +831,7 @@ function authTab(t) {
   setErr("authErr", "");
 }
 
+// Shows the forgot password form
 function doForgotPassword() {
   document.getElementById("formSU").style.display = "none";
   document.getElementById("formLI").style.display = "none";
@@ -614,6 +841,7 @@ function doForgotPassword() {
   setErr("authErr", "");
 }
 
+// Sends a password reset email
 async function sendReset() {
   const email = document.getElementById("fpEmail").value.trim();
   const errEl = document.getElementById("fpErr");
@@ -635,27 +863,56 @@ async function sendReset() {
   finally { btn.disabled = false; btn.innerText = "Send Reset Link"; }
 }
 
+// Helper: show or hide an error message box
 function setErr(id, msg) {
   const el = document.getElementById(id);
   el.innerText = msg;
   el.style.display = msg ? "block" : "none";
 }
 
+// ── SIGN UP ───────────────────────────────────────────────────────────────────
+// Reads all signup fields including the new username and optional referral code
 async function doSignup() {
-  const email = document.getElementById("suEmail").value.trim();
-  const pass  = document.getElementById("suPass").value;
-  const conf  = document.getElementById("suConf").value;
+  // Read the new username field
+  const username = document.getElementById("suUsername").value.trim().toLowerCase();
+  const email    = document.getElementById("suEmail").value.trim();
+  const pass     = document.getElementById("suPass").value;
+  const conf     = document.getElementById("suConf").value;
+  // Read optional referral code (friend's code)
+  const refCode  = document.getElementById("suRef").value.trim().toUpperCase();
+
+  // Validate username: min 3 chars, only letters/numbers/underscores
+  if (!username || username.length < 3)
+    return setErr("authErr", "Username must be at least 3 characters.");
+  if (!/^[a-z0-9_]+$/.test(username))
+    return setErr("authErr", "Username: only letters, numbers, underscores allowed.");
+
   if (!email || !pass)  return setErr("authErr", "Fill in all fields.");
   if (pass !== conf)    return setErr("authErr", "Passwords don't match.");
   if (pass.length < 6)  return setErr("authErr", "Password must be 6+ chars.");
+
   setErr("authErr", "");
   const btn = document.getElementById("suBtn");
   btn.disabled = true; btn.innerText = "Creating...";
+
   try {
-    const res  = await fetch(`${SUPA_URL}/functions/v1/register`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password: pass, telegram_id: tgId,
-        username: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "" })
+    // Send to our register edge function
+    // The function will:
+    //   1. Check username is not taken
+    //   2. Create the Supabase auth account
+    //   3. Generate referral code from username (e.g. suryansh → SURY847)
+    //   4. If referral code provided, create a referral record
+    const res = await fetch(`${SUPA_URL}/functions/v1/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password:      pass,
+        telegram_id:   tgId,
+        username:      username,        // user chose this
+        full_name:     window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "",
+        referral_code: refCode || null  // friend's code, if entered
+      })
     });
     const data = await res.json();
     if (!res.ok) return setErr("authErr", data.error || "Signup failed.");
@@ -665,6 +922,7 @@ async function doSignup() {
   finally { btn.disabled = false; btn.innerText = "Create Account"; }
 }
 
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
 async function doLogin() {
   const email = document.getElementById("liEmail").value.trim();
   const pass  = document.getElementById("liPass").value;
@@ -675,6 +933,7 @@ async function doLogin() {
   try {
     const { data: auth, error } = await db.auth.signInWithPassword({ email, password: pass });
     if (error) return setErr("authErr", "Login failed: " + (error.message || "Wrong email or password."));
+    // Link this Telegram ID to the account (so next time auto-login works)
     await db.from("users").update({ telegram_id: tgId }).eq("auth_id", auth.user.id);
     await db.from("wallets").upsert({ telegram_id: tgId, balance_points: 0, balance_eur: 0 }, { onConflict: "telegram_id", ignoreDuplicates: true });
     const { data: w } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
@@ -684,17 +943,18 @@ async function doLogin() {
   finally { btn.disabled = false; btn.innerText = "Login"; }
 }
 
-// ── START APP ─────────────────────────────────────────────────────────────
+// ── START APP ─────────────────────────────────────────────────────────────────
 function startApp() {
   document.getElementById("authWrap").style.display = "none";
   document.getElementById("appShell").classList.add("show");
   updateBalUI();
   loadMarkets();
   loadProfile();
-  subscribeWallet();
+  subscribeWallet(); // listen for realtime balance changes
 }
 
-// ── BALANCE ───────────────────────────────────────────────────────────────
+// ── BALANCE ───────────────────────────────────────────────────────────────────
+// Updates all the places on screen that show the balance
 function updateBalUI() {
   const f = balance.toLocaleString();
   document.getElementById("topBal").innerText   = f;
@@ -703,6 +963,7 @@ function updateBalUI() {
   document.getElementById("wdBalEur").innerText = `≈ €${(balance / PTS_PER_EUR).toFixed(2)}`;
 }
 
+// Listen for realtime updates from the DB — balance changes instantly
 function subscribeWallet() {
   db.channel("wallet-rt").on("postgres_changes",
     { event: "UPDATE", schema: "public", table: "wallets" },
@@ -710,23 +971,35 @@ function subscribeWallet() {
   ).subscribe();
 }
 
-// ── NAVIGATION ────────────────────────────────────────────────────────────
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+// Maps friendly names to HTML element IDs
 const viewMap = {
-  markets: "vMarkets", portfolio: "vPortfolio", submit: "vSubmit",
-  profile: "vProfile", membership: "vMembership", withdraw: "vWithdraw"
+  markets:    "vMarkets",
+  portfolio:  "vPortfolio",
+  submit:     "vSubmit",
+  profile:    "vProfile",
+  referrals:  "vReferrals",
+  history:    "vHistory",     // NEW — deposit + withdrawal history
+  membership: "vMembership",
+  withdraw:   "vWithdraw"
 };
 
 function goTo(name) {
-  prevView = currentView();
+  prevView = currentView(); // save current so back button works
+  // Hide all views, show the one we want
   Object.values(viewMap).forEach(id => document.getElementById(id)?.classList.remove("active"));
   document.getElementById(viewMap[name])?.classList.add("active");
   document.getElementById(viewMap[name]).scrollTop = 0;
+  // Update bottom nav highlight
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("on"));
   const nb = document.getElementById("nb-" + name);
   if (nb) nb.classList.add("on");
+  // Load data for specific pages when navigating to them
   if (name === "portfolio") loadTrades();
   if (name === "submit")    loadSubmissions();
   if (name === "withdraw")  updateBalUI();
+  if (name === "referrals") loadReferrals();
+  if (name === "history")   loadHistory("dep"); // NEW — load deposits by default
 }
 
 function currentView() {
@@ -737,31 +1010,24 @@ function currentView() {
 
 function goBack() { goTo(prevView || "profile"); }
 
-// ── ODDS CALCULATION (matches backend logic) ──────────────────────────────
-// When market is empty: both sides show START_ODDS (1.80)
-// As bets come in: popular side odds go DOWN, unpopular side goes UP
-// Uses a "virtual pool" blending technique to smooth early swings
+// ── ODDS CALCULATION ──────────────────────────────────────────────────────────
+// Calculates odds from pool amounts using a "virtual pool" anchor
+// This keeps odds near 1.80 when a market is new (no bets yet)
 function calcOdds(yesPool, noPool) {
   const total = yesPool + noPool;
   if (total === 0) return { yesOdds: START_ODDS, noOdds: START_ODDS };
-
-  // Raw parimutuel odds
   const rawYes = yesPool > 0 ? total / yesPool : START_ODDS * 2;
   const rawNo  = noPool  > 0 ? total / noPool  : START_ODDS * 2;
-
-  // Blend with virtual pool anchored to START_ODDS
-  // As real bets grow, virtual pool influence shrinks
   const V = VIRTUAL_POOL;
   const anchoredYes = (yesPool * rawYes + V * START_ODDS) / (yesPool + V);
   const anchoredNo  = (noPool  * rawNo  + V * START_ODDS) / (noPool  + V);
-
   return {
     yesOdds: Math.max(1.01, parseFloat(anchoredYes.toFixed(2))),
     noOdds:  Math.max(1.01, parseFloat(anchoredNo.toFixed(2)))
   };
 }
 
-// ── MARKETS ───────────────────────────────────────────────────────────────
+// ── MARKETS ───────────────────────────────────────────────────────────────────
 async function loadMarkets() {
   try {
     const res = await fetch(`${SUPA_URL}/functions/v1/get-markets`, {
@@ -781,35 +1047,25 @@ function renderMarkets() {
     el.innerHTML = `<div class="empty"><div class="ei">🎯</div><p>No open markets right now.<br>Check back soon!</p></div>`;
     return;
   }
-
   el.innerHTML = markets.map(m => {
-    // Use server-provided odds (yes_pool/no_pool are NOT sent by the API)
-    // Server calculates odds and sends yes_odds / no_odds only
     const yesOdds = m.yes_odds || 1.80;
     const noOdds  = m.no_odds  || 1.80;
-
-    // Probability bar width is based on implied probability of YES
-    // Implied prob = 1 / odds. We normalize so both add up to 100%.
+    // Probability bar: based on implied probability (1/odds), normalized to 100%
     const impliedYes = 1 / yesOdds;
     const impliedNo  = 1 / noOdds;
     const yesPct = Math.round((impliedYes / (impliedYes + impliedNo)) * 100);
-
-    const diff = new Date(m.closes_at) - Date.now();
-    const timer = diff <= 0 ? "Closed"
+    const diff   = new Date(m.closes_at) - Date.now();
+    const timer  = diff <= 0 ? "Closed"
       : diff < 3600000  ? `${Math.floor(diff/60000)}m left`
       : diff < 86400000 ? `${Math.floor(diff/3600000)}h left`
       : `${Math.floor(diff/86400000)}d left`;
-
     const canTrade  = m.status === "open" && diff > 0;
     const chipClass = m.status === "open" ? "sc-open" : m.status === "closed" ? "sc-closed" : "sc-settled";
-
     return `<div class="mkt-card">
       <div class="mkt-top">
         <div class="mkt-q">${m.question}</div>
         <span class="status-chip ${chipClass}">${m.status}</span>
       </div>
-
-      <!-- ODDS BOXES — we show odds only, NOT pool amounts -->
       <div class="odds-row">
         <div class="odds-box ob-yes">
           <div class="ob-label">YES</div>
@@ -822,30 +1078,20 @@ function renderMarkets() {
           <div class="ob-sub">if you win</div>
         </div>
       </div>
-
-      <!-- Probability bar — visual only, no numbers shown -->
-      <div class="prob-bar">
-        <div class="prob-fill" style="width:${yesPct}%"></div>
-      </div>
-
+      <div class="prob-bar"><div class="prob-fill" style="width:${yesPct}%"></div></div>
       ${canTrade
         ? `<div class="mkt-btns">
             <button class="btn-yes" onclick="openTradeModal('${m.id}','YES')">Bet YES ×${yesOdds}</button>
             <button class="btn-no"  onclick="openTradeModal('${m.id}','NO')">Bet NO ×${noOdds}</button>
            </div>`
         : m.result
-          /* SETTLED: show the final result clearly so users know who won */
           ? `<div style="text-align:center;padding:10px 0">
                <div style="font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Final Result</div>
                <div style="font-size:20px;font-weight:800;color:${m.result==='yes'?'var(--green)':'var(--red)'}">
                  ${m.result==='yes' ? '✅ YES' : '❌ NO'}
                </div>
              </div>`
-          /* CLOSED but no result yet: admin hasn't set it */
-          : `<div style="text-align:center;font-size:12px;color:var(--muted);padding:8px 0">
-               ⏳ Awaiting result...
-             </div>`}
-
+          : `<div style="text-align:center;font-size:12px;color:var(--muted);padding:8px 0">⏳ Awaiting result...</div>`}
       <div class="mkt-footer">
         <div class="mkt-timer">🕐 ${timer}</div>
         <div style="font-size:11px;color:var(--muted)">min bet: 100 pts</div>
@@ -854,7 +1100,7 @@ function renderMarkets() {
   }).join("");
 }
 
-// ── TRADE MODAL ───────────────────────────────────────────────────────────
+// ── TRADE MODAL ───────────────────────────────────────────────────────────────
 function openTradeModal(id, c) {
   activeMkt = markets.find(m => m.id === id);
   if (!activeMkt) return;
@@ -866,7 +1112,7 @@ function openTradeModal(id, c) {
   document.getElementById("chYes").classList.remove("sel");
   document.getElementById("chNo").classList.remove("sel");
   document.getElementById("tradeOverlay").classList.add("open");
-  if (c) pick(c);
+  if (c) pick(c); // pre-select YES or NO if called with it
 }
 
 function closeModal() {
@@ -889,26 +1135,16 @@ function qs(n) {
 function calcPayout() {
   if (!activeMkt || !choice) return;
   const stake = parseInt(document.getElementById("stakeIn").value) || 0;
-
-  // Show error hint if below minimum
   if (stake > 0 && stake < MIN_STAKE) {
     document.getElementById("ppAmt").innerText  = "—";
     document.getElementById("ppOdds").innerText = `Minimum bet is ${MIN_STAKE} pts`;
     return;
   }
   if (stake <= 0) { document.getElementById("ppAmt").innerText = "—"; return; }
-
-  // Use the server-provided odds (pool amounts are hidden — not sent by API)
-  // These odds are a snapshot from when the market last loaded.
-  // The real final odds are locked in server-side when the trade is placed.
-  const odds = choice === "YES"
-    ? (activeMkt.yes_odds || START_ODDS)
-    : (activeMkt.no_odds  || START_ODDS);
-
+  const odds   = choice === "YES" ? (activeMkt.yes_odds || START_ODDS) : (activeMkt.no_odds || START_ODDS);
   const gross  = Math.floor(stake * odds);
-  const fee    = Math.floor(gross * 0.05); // 5% fee preview (free tier)
+  const fee    = Math.floor(gross * 0.05); // 5% platform fee
   const payout = gross - fee;
-
   document.getElementById("ppAmt").innerText  = payout.toLocaleString() + " pts";
   document.getElementById("ppOdds").innerText = `×${odds} odds · 5% fee applied`;
 }
@@ -916,10 +1152,9 @@ function calcPayout() {
 async function placeTrade() {
   if (!choice) return showToast("Select YES or NO", "bad");
   const stake = parseInt(document.getElementById("stakeIn").value);
-  if (!stake || stake <= 0)     return showToast("Enter a valid stake", "bad");
-  if (stake < MIN_STAKE)        return showToast(`Minimum bet is ${MIN_STAKE} pts`, "bad");
-  if (stake > balance)          return showToast("Insufficient balance", "bad");
-
+  if (!stake || stake <= 0) return showToast("Enter a valid stake", "bad");
+  if (stake < MIN_STAKE)    return showToast(`Minimum bet is ${MIN_STAKE} pts`, "bad");
+  if (stake > balance)      return showToast("Insufficient balance", "bad");
   const btn = document.getElementById("tradeBtn");
   btn.disabled = true; btn.innerText = "Placing...";
   try {
@@ -942,7 +1177,7 @@ async function loadBalance() {
   if (data) { balance = data.balance_points; updateBalUI(); }
 }
 
-// ── PORTFOLIO ─────────────────────────────────────────────────────────────
+// ── PORTFOLIO ─────────────────────────────────────────────────────────────────
 async function loadTrades() {
   const el = document.getElementById("tradeList");
   el.innerHTML = `<div class="spinner"></div>`;
@@ -963,19 +1198,12 @@ async function loadTrades() {
   el.innerHTML = data.map(t => {
     const cls    = t.status === "won" ? "tp-won" : t.status === "lost" ? "tp-lost" : "tp-active";
     const payout = t.status === "won"  ? `+${t.payout_points?.toLocaleString()} pts`
-                 : t.status === "lost" ? "Lost"
-                 : "Pending";
+                 : t.status === "lost" ? "Lost" : "Pending";
     const optCls = t.option === "YES" ? "tcb-yes" : "tcb-no";
-
-    // Show odds if we can calculate them from stake and payout
-    // e.g. stake=100, payout=163 → odds = 163/100 = 1.63x
-    // Only show for won trades where payout_points is stored
     let oddsStr = "";
     if (t.status === "won" && t.payout_points && t.amount_points) {
-      const impliedOdds = (t.payout_points / t.amount_points).toFixed(2);
-      oddsStr = `<span style="font-size:11px;color:var(--muted);margin-left:6px">×${impliedOdds}</span>`;
+      oddsStr = `<span style="font-size:11px;color:var(--muted);margin-left:6px">×${(t.payout_points/t.amount_points).toFixed(2)}</span>`;
     }
-
     return `<div class="trade-card">
       <div class="tc-q">${t.question || "Market"}</div>
       <div class="tc-row">
@@ -989,28 +1217,121 @@ async function loadTrades() {
   }).join("");
 }
 
-// ── PROFILE ───────────────────────────────────────────────────────────────
+// ── PROFILE ───────────────────────────────────────────────────────────────────
 async function loadProfile() {
   const { data } = await db.from("users")
-    .select("username, full_name, email, membership_tier")
+    .select("username, full_name, email, membership_tier, referral_badge")
     .eq("telegram_id", tgId).single();
   if (!data) return;
+
   const name = data.full_name || data.username || data.email?.split("@")[0] || "Trader";
   document.getElementById("profAv").innerText    = name[0].toUpperCase();
   document.getElementById("profName").innerText  = name;
   document.getElementById("profEmail").innerText = data.email || "—";
   document.getElementById("profTgId").innerText  = tgId;
+
+  // Show @username in gold below the name
+  if (data.username) {
+    document.getElementById("profUsername").innerText = "@" + data.username;
+  }
+
+  // Show referral badge if they earned one (recruiter / connector / influencer / legend)
+  const badgeNames = {
+    recruiter:  "🥉 Recruiter",
+    connector:  "🥈 Connector",
+    influencer: "🥇 Influencer",
+    legend:     "💎 Legend"
+  };
+  if (data.referral_badge && badgeNames[data.referral_badge]) {
+    document.getElementById("profBadge").innerText        = badgeNames[data.referral_badge];
+    document.getElementById("profBadgeWrap").style.display = "block";
+  }
+
   const tier = data.membership_tier || "free";
   const tb   = document.getElementById("profTier");
   tb.innerText = tier.charAt(0).toUpperCase() + tier.slice(1);
   tb.className = `tier-badge tb-${tier}`;
 }
 
-// ── DEPOSIT ───────────────────────────────────────────────────────────────
+// ── REFERRALS ─────────────────────────────────────────────────────────────────
+// Loads data for the referrals page
+async function loadReferrals() {
+  // Get the user's own referral code from the database
+  const { data: user } = await db.from("users")
+    .select("referral_code, referral_badge")
+    .eq("telegram_id", tgId).single();
+
+  if (user?.referral_code) {
+    document.getElementById("refCode").innerText = user.referral_code;
+  }
+
+  // Get all referral records where this user is the referrer
+  // (i.e. people who signed up using their code)
+  const { data: refs } = await db.from("referrals")
+    .select("*")
+    .eq("referrer_id", tgId)
+    .order("created_at", { ascending: false });
+
+  const all       = refs || [];
+  const completed = all.filter(r => r.status === "completed"); // friend placed a trade
+  const earned    = completed.length * 100; // 100 pts per completed referral
+
+  document.getElementById("refTotal").innerText  = all.length;       // total signups with code
+  document.getElementById("refActive").innerText = completed.length; // actually placed a trade
+  document.getElementById("refEarned").innerText = earned;           // points earned
+
+  // Render badge progress bars
+  // Like video game achievements — unlock badges as you refer more people
+  const badges = [
+    { slug: "recruiter",  emoji: "🥉", name: "Recruiter",  need: 1,  color: "#cd7f32" },
+    { slug: "connector",  emoji: "🥈", name: "Connector",  need: 5,  color: "#c0c0c0" },
+    { slug: "influencer", emoji: "🥇", name: "Influencer", need: 10, color: "#f0c040" },
+    { slug: "legend",     emoji: "💎", name: "Legend",     need: 50, color: "#a855f7" },
+  ];
+
+  const count        = completed.length; // how many completed referrals
+  const currentBadge = user?.referral_badge;
+
+  document.getElementById("badgeWrap").innerHTML = badges.map(b => {
+    const done  = count >= b.need; // have they unlocked this badge?
+    const pct   = Math.min(100, Math.floor((count / b.need) * 100)); // progress %
+    const isCur = currentBadge === b.slug; // is this their current badge?
+    return `<div class="badge-row">
+      <div class="badge-top">
+        <span class="badge-name" style="color:${done ? b.color : 'var(--muted)'}">
+          ${b.emoji} ${b.name}${isCur ? ' <span style="font-size:10px;color:var(--muted);font-weight:400">(current)</span>' : ''}
+        </span>
+        <span class="badge-req">${Math.min(count, b.need)}/${b.need}</span>
+      </div>
+      <div class="badge-bar">
+        <div class="badge-fill" style="width:${pct}%;background:${done ? b.color : 'var(--blue)'}"></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// Opens the Telegram share sheet with a pre-written message containing the referral code
+function shareReferral() {
+  const code = document.getElementById("refCode").innerText;
+  if (code === "—") return showToast("Code loading, try again...", "bad");
+
+  const msg = `🎯 Join me on Cassino Trade!\n\nPredict real-world events and win points.\n\nUse my referral code *${code}* when you sign up — we BOTH get 100 pts free when you place your first trade!\n\nt.me/options_trading_cassino_bot`;
+
+  if (window.Telegram?.WebApp) {
+    // Opens Telegram's native share sheet with the message pre-filled
+    window.Telegram.WebApp.openTelegramLink(
+      `https://t.me/share/url?url=https://t.me/options_trading_cassino_bot&text=${encodeURIComponent(msg)}`
+    );
+  } else {
+    // Fallback: copy to clipboard if not inside Telegram
+    navigator.clipboard?.writeText(msg).then(() => showToast("Copied to clipboard!", "ok"));
+  }
+}
+
+// ── DEPOSIT ───────────────────────────────────────────────────────────────────
 async function openDeposit() {
-  // Minimum deposit is €10
   const euros = prompt(`Deposit amount in EUR (minimum €${MIN_DEPOSIT}, €1 = 10 pts):`);
-  if (euros === null) return; // user cancelled
+  if (euros === null) return; // user pressed cancel
   const amount = Number(euros);
   if (!euros || isNaN(amount) || amount < MIN_DEPOSIT) {
     return showToast(`Minimum deposit is €${MIN_DEPOSIT}`, "bad");
@@ -1027,7 +1348,7 @@ async function openDeposit() {
   } catch { showToast("Connection error", "bad"); }
 }
 
-// ── SUBMIT QUESTION ───────────────────────────────────────────────────────
+// ── SUBMIT QUESTION ───────────────────────────────────────────────────────────
 async function doSubmit() {
   const q   = document.getElementById("sqQ").value.trim();
   const ctx = document.getElementById("sqCtx").value.trim();
@@ -1044,8 +1365,8 @@ async function doSubmit() {
     const data = await res.json();
     if (!res.ok) return setErr("sqErr", data.error || "Submission failed.");
     showToast("Submitted! We'll review within 24h 🙌", "ok");
-    document.getElementById("sqQ").value    = "";
-    document.getElementById("sqCtx").value  = "";
+    document.getElementById("sqQ").value     = "";
+    document.getElementById("sqCtx").value   = "";
     document.getElementById("sqC").innerText = "0/200";
     await loadBalance();
     await loadSubmissions();
@@ -1072,12 +1393,12 @@ async function loadSubmissions() {
     </div>`).join("");
 }
 
-// ── MEMBERSHIP ────────────────────────────────────────────────────────────
+// ── MEMBERSHIP ────────────────────────────────────────────────────────────────
 async function doSubscribe(slug) {
   showToast("Prices coming soon — stay tuned!", "bad");
 }
 
-// ── WITHDRAW ──────────────────────────────────────────────────────────────
+// ── WITHDRAW ─────────────────────────────────────────────────────────────────
 function wdCalc() {
   const pts = parseInt(document.getElementById("wdAmt").value) || 0;
   document.getElementById("wdHint").innerText = `≈ €${(pts / PTS_PER_EUR).toFixed(2)}`;
@@ -1087,25 +1408,19 @@ async function doWithdraw() {
   const pts  = parseInt(document.getElementById("wdAmt").value);
   const iban = document.getElementById("wdIban").value.trim().replace(/\s+/g, "");
   setErr("wdErr", "");
-
-  // Minimum withdrawal is 200 pts = €20
   if (!pts || pts < MIN_WITHDRAW) return setErr("wdErr", `Minimum withdrawal is ${MIN_WITHDRAW} pts (€${MIN_WITHDRAW / PTS_PER_EUR}).`);
   if (!iban)                       return setErr("wdErr", "Please enter your IBAN.");
   if (pts > balance)               return setErr("wdErr", "Insufficient balance.");
-
   const btn = document.querySelector("#vWithdraw .btn-gold");
   btn.disabled = true; btn.innerText = "Submitting...";
   try {
-    // Deduct points immediately from wallet
+    // Deduct points immediately
     const newBalance = balance - pts;
     const { error: balErr } = await _db.from("wallets")
-      .update({ balance_points: newBalance })
-      .eq("telegram_id", tgId);
+      .update({ balance_points: newBalance }).eq("telegram_id", tgId);
     if (balErr) return setErr("wdErr", "Failed to lock funds. Please try again.");
-
     balance = newBalance;
     updateBalUI();
-
     // Insert withdrawal request
     const { error: wdErr } = await _db.from("withdrawals").insert({
       telegram_id:   tgId,
@@ -1114,16 +1429,14 @@ async function doWithdraw() {
       iban,
       status:        "pending"
     });
-
     if (wdErr) {
-      // Rollback — give points back if insert failed
+      // Rollback if insert failed
       await _db.from("wallets").update({ balance_points: balance + pts }).eq("telegram_id", tgId);
       balance = balance + pts;
       updateBalUI();
       return setErr("wdErr", "Failed to submit withdrawal. Your points have been returned.");
     }
-
-    // Write ledger entry
+    // Write to ledger
     await _db.rpc("write_ledger", {
       p_telegram_id:  tgId,
       p_amount:       -pts,
@@ -1131,7 +1444,6 @@ async function doWithdraw() {
       p_reference_id: null,
       p_note:         `Withdrawal request: ${pts} pts (€${(pts / PTS_PER_EUR).toFixed(2)})`
     });
-
     showToast("Withdrawal requested ✅ 2–5 business days", "ok");
     document.getElementById("wdAmt").value      = "";
     document.getElementById("wdIban").value     = "";
@@ -1145,7 +1457,109 @@ async function doWithdraw() {
   }
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────
+// ── HISTORY (deposits + withdrawals) ─────────────────────────────────────────
+
+// Tracks which tab is active: "dep" or "wd"
+let histMode = "dep";
+
+// Called when user taps Deposits / Withdrawals tab
+function histTab(mode) {
+  histMode = mode;
+  // Highlight the active tab button
+  document.getElementById("htDep").classList.toggle("on", mode === "dep");
+  document.getElementById("htWd").classList.toggle("on",  mode === "wd");
+  loadHistory(mode);
+}
+
+// Loads the actual data and renders cards
+async function loadHistory(mode) {
+  histMode = mode;
+  const el = document.getElementById("histList");
+  el.innerHTML = `<div class="spinner"></div>`;
+
+  if (mode === "dep") {
+    // ── DEPOSITS ──────────────────────────────────────────────────────────────
+    // Pull from the payments table — each row is a Stripe deposit
+    const { data, error } = await db
+      .from("payments")
+      .select("amount_eur, amount_points, status, created_at, stripe_session_id")
+      .eq("telegram_id", tgId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error || !data?.length) {
+      el.innerHTML = `<div class="empty"><div class="ei">💳</div><p>No deposits yet.<br>Tap Deposit to add points!</p></div>`;
+      return;
+    }
+
+    el.innerHTML = data.map(p => {
+      // Status colour — green = completed, yellow = pending, red = failed
+      const sClass = p.status === "completed" ? "hs-completed"
+                   : p.status === "pending"   ? "hs-pending"
+                   : "hs-rejected";
+      const date = new Date(p.created_at).toLocaleDateString("en-GB", {
+        day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+      });
+      return `<div class="hist-card">
+        <div class="hist-left">
+          <div class="hist-type">💳 Stripe Deposit</div>
+          <div class="hist-date">${date}</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-amt" style="color:var(--gold)">+${Number(p.amount_points).toLocaleString()} pts</div>
+          <div class="hist-eur">€${Number(p.amount_eur).toFixed(2)}</div>
+          <div class="hist-status ${sClass}">${p.status}</div>
+        </div>
+      </div>`;
+    }).join("");
+
+  } else {
+    // ── WITHDRAWALS ───────────────────────────────────────────────────────────
+    // Pull from the withdrawals table
+    const { data, error } = await db
+      .from("withdrawals")
+      .select("amount_eur, amount_points, iban, status, created_at, admin_note")
+      .eq("telegram_id", tgId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error || !data?.length) {
+      el.innerHTML = `<div class="empty"><div class="ei">🏦</div><p>No withdrawals yet.<br>Win some trades first!</p></div>`;
+      return;
+    }
+
+    el.innerHTML = data.map(w => {
+      // Status colour
+      const sClass = w.status === "completed"  ? "hs-completed"
+                   : w.status === "processing" ? "hs-processing"
+                   : w.status === "pending"    ? "hs-pending"
+                   : "hs-rejected";
+      const date = new Date(w.created_at).toLocaleDateString("en-GB", {
+        day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+      });
+      // Shorten IBAN for display: show first 8 + *** + last 4
+      const iban = w.iban
+        ? w.iban.replace(/\s/g, "").replace(/(.{8}).*(.{4})$/, "$1•••$2")
+        : "—";
+      return `<div class="hist-card">
+        <div class="hist-left">
+          <div class="hist-type">🏦 Bank Withdrawal</div>
+          <div class="hist-date">${date}</div>
+          <div class="hist-iban">${iban}</div>
+          ${w.admin_note ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">${w.admin_note}</div>` : ""}
+        </div>
+        <div class="hist-right">
+          <div class="hist-amt" style="color:var(--red)">−${Number(w.amount_points).toLocaleString()} pts</div>
+          <div class="hist-eur">€${Number(w.amount_eur).toFixed(2)}</div>
+          <div class="hist-status ${sClass}">${w.status}</div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+}
+
+// ── TOAST NOTIFICATION ────────────────────────────────────────────────────────
+// Shows a small popup message at the bottom of the screen
 function showToast(msg, type = "ok") {
   const t = document.getElementById("toast");
   t.innerText = msg;
