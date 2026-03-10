@@ -968,7 +968,7 @@
 <!-- ════════════════════════════════════════════
      JAVASCRIPT — ALL LOGIC
 ════════════════════════════════════════════ -->
-<script>
+<script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 // ── CONSTANTS ─────────────────────────────────────────────────────────────────
@@ -1033,27 +1033,7 @@ function addToHomeScreen() {
   }
 }
 
-Object.assign(window, {
-  doForgotPassword, sendReset,
-  authTab, doSignup, doLogin,
-  goTo, goBack,
-  openDeposit,
-  openTradeModal, closeModal, pick, qs, calcPayout, placeTrade,
-  doSubmit,
-  doSubscribe,
-  wdCalc, doWithdraw,
-  shareReferral,
-  histTab,
-  uploadAvatar,
-  showToast
-});
 
-// Expose functions defined in this module to global scope so HTML onclick= works
-// These MUST be after the function definitions (ES modules don't hoist)
-window.selectGroup     = selectGroup;
-window.switchLbTab     = switchLbTab;
-window.doLogout        = doLogout;
-window.addToHomeScreen = addToHomeScreen;
 
 // ── APP BOOT ──────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
@@ -2113,6 +2093,32 @@ function showToast(msg, type = "ok") {
   clearTimeout(t._t);
   t._t = setTimeout(() => t.className = "", 3000);
 }
+
+// ════════════════════════════════════════════════════════════
+// EXPOSE ALL FUNCTIONS TO GLOBAL WINDOW
+// MUST be here at the END — after all function definitions
+// In ES modules, onclick="foo()" needs window.foo to exist
+// Functions are NOT auto-global in modules — we set them here
+// ════════════════════════════════════════════════════════════
+Object.assign(window, {
+  doForgotPassword, sendReset,
+  authTab, doSignup, doLogin,
+  goTo, goBack,
+  openDeposit,
+  openTradeModal, closeModal, pick, qs, calcPayout, placeTrade,
+  doSubmit,
+  doSubscribe,
+  wdCalc, doWithdraw,
+  shareReferral,
+  histTab,
+  uploadAvatar,
+  showToast,
+  selectGroup,
+  switchLbTab,
+  doLogout,
+  addToHomeScreen
+});
+
 </script>
 </body>
 </html>
