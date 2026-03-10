@@ -180,8 +180,8 @@
     .balance-hero { margin: 16px 20px; background: linear-gradient(135deg, #0f1220 0%, var(--card) 100%); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; position: relative; overflow: hidden; }
     .balance-hero::after { content: ''; position: absolute; top: -40px; right: -40px; width: 130px; height: 130px; background: radial-gradient(circle, rgba(34,192,99,.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
     .bh-label  { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-    /* Balance amount uses Druk Wide — it's a big heading number */
-    .bh-amount { font-family: var(--font-heading); font-size: 44px; font-weight: 700; color: var(--gold); line-height: 1.1; margin: 4px 0; letter-spacing: 1px; }
+    /* Balance amount uses Urbanist (NOT Druk Wide — avoids stylized 0 looking like circle on mobile) */
+    .bh-amount { font-family: var(--font-body); font-size: 44px; font-weight: 700; color: var(--gold); line-height: 1.1; margin: 4px 0; }
     .bh-sub    { font-size: 12px; color: var(--muted); }
     .bh-btns   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
     .bh-btn    { padding: 11px; border: none; border-radius: 10px; font-family: var(--font-body); font-size: 13px; font-weight: 700; cursor: pointer; }
@@ -205,8 +205,8 @@
     .ob-label  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
     .ob-yes .ob-label { color: var(--green); }
     .ob-no  .ob-label { color: var(--red); }
-    /* Odds numbers use Druk Wide — they're display numbers */
-    .ob-odds   { font-family: var(--font-heading); font-size: 24px; font-weight: 700; line-height: 1; }
+    /* Odds numbers use Urbanist (NOT Druk Wide — avoids stylized 0 issue) */
+    .ob-odds   { font-family: var(--font-body); font-size: 24px; font-weight: 700; line-height: 1; }
     .ob-yes .ob-odds { color: var(--green); }
     .ob-no  .ob-odds { color: var(--red); }
     .ob-sub    { font-size: 11px; color: var(--muted); margin-top: 4px; }
@@ -245,15 +245,15 @@
     .payout-preview { background: var(--surface); border-radius: 12px; padding: 15px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
     .pp-left .pp-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
     .pp-left .pp-odds  { font-size: 12px; color: var(--muted); }
-    /* Payout amount uses Druk Wide — it's a display number */
-    .pp-amount { font-family: var(--font-heading); font-size: 24px; font-weight: 700; color: var(--green); }
+    /* Payout amount uses Urbanist (NOT Druk Wide — avoids stylized 0) */
+    .pp-amount { font-family: var(--font-body); font-size: 24px; font-weight: 700; color: var(--green); }
     .cancel-btn { width: 100%; margin-top: 10px; padding: 12px; background: none; border: none; color: var(--muted); font-family: var(--font-body); font-size: 14px; cursor: pointer; }
 
     /* ── PORTFOLIO ── */
     .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 16px 20px 0; }
     .stat-box  { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
-    /* Stat values use Druk Wide */
-    .stat-val  { font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: var(--gold); }
+    /* Stat values use Urbanist (NOT Druk Wide — Druk's 0 looks like a circle on mobile) */
+    .stat-val  { font-family: var(--font-body); font-size: 20px; font-weight: 700; color: var(--gold); }
     .stat-lbl  { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; margin-top: 4px; }
     .trade-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
     .trade-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 15px 16px; }
@@ -348,8 +348,8 @@
     .wd-wrap    { padding: 0 20px; }
     .wd-card    { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; margin-bottom: 20px; text-align: center; }
     .wd-label   { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-    /* Withdraw balance amount uses Druk Wide */
-    .wd-pts     { font-family: var(--font-heading); font-size: 42px; font-weight: 700; color: var(--gold); line-height: 1; }
+    /* Withdraw balance amount uses Urbanist (NOT Druk Wide — avoids stylized 0) */
+    .wd-pts     { font-family: var(--font-body); font-size: 42px; font-weight: 700; color: var(--gold); line-height: 1; }
     .wd-eur     { font-size: 13px; color: var(--muted); margin-top: 6px; }
     .wf-input   { width: 100%; background: var(--card); border: 1.5px solid var(--border); border-radius: 11px; padding: 14px 16px; color: var(--text); font-family: var(--font-body); font-size: 16px; font-weight: 600; outline: none; transition: border-color .2s; margin-bottom: 6px; }
     .wf-input:focus { border-color: var(--gold); }
@@ -358,14 +358,15 @@
     /* ── REFERRALS PAGE ── */
     .ref-code-box { margin: 16px 20px; background: var(--card); border: 1px solid rgba(34,192,99,.3); border-radius: 14px; padding: 24px; text-align: center; }
     .ref-code-lbl { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-    /* Referral code uses Druk Wide — big display text */
-    .ref-code-val { font-family: var(--font-heading); font-size: 38px; font-weight: 700; color: var(--gold); letter-spacing: 8px; margin-bottom: 18px; }
+    /* Referral code uses Druk Wide — responsive size so it never overflows the box */
+    .ref-code-val { font-family: var(--font-heading); font-size: clamp(20px, 8vw, 38px); font-weight: 700; color: var(--gold); letter-spacing: 4px; margin-bottom: 18px; word-break: break-all; }
     .ref-share-btn { background: var(--gold); color: #000; border: none; border-radius: 10px; padding: 13px 32px; font-family: var(--font-body); font-size: 14px; font-weight: 700; cursor: pointer; }
     .ref-share-btn:active { opacity: .8; }
     .ref-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 20px; margin-bottom: 6px; }
     .ref-stat  { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
-    /* Referral stat numbers use Druk Wide */
-    .ref-stat-val { font-family: var(--font-heading); font-size: 22px; font-weight: 700; color: var(--gold); }
+    /* Referral stat numbers use Urbanist (NOT Druk Wide — Druk's stylized 0 looks like a circle on mobile) */
+    /* Ref stat numbers use Urbanist (not Druk Wide) because Druk renders 0 as O — confusing! */
+    .ref-stat-val { font-family: var(--font-body); font-size: 28px; font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; }
     .ref-stat-lbl { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-top: 4px; }
     .badge-wrap { margin: 0 20px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
     .badge-row  { margin-bottom: 16px; }
@@ -391,8 +392,8 @@
     .hist-date   { font-size: 11px; color: var(--muted); }
     .hist-iban   { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
     .hist-right  { text-align: right; flex-shrink: 0; }
-    /* History amounts use Druk Wide */
-    .hist-amt    { font-family: var(--font-heading); font-size: 17px; font-weight: 700; }
+    /* History amounts use Urbanist (NOT Druk Wide — avoids stylized 0 issue) */
+    .hist-amt    { font-family: var(--font-body); font-size: 17px; font-weight: 700; }
     .hist-eur    { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .hist-status { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
     .hs-pending    { color: var(--gold); }
@@ -430,7 +431,7 @@
     <div id="formSU">
       <div class="f">
         <label>Username</label>
-        <input type="text" id="suUsername" placeholder="e.g. suryansh" autocomplete="off"
+        <input type="text" id="suUsername" placeholder="Choose a username" autocomplete="off"
           oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
         <div class="f-hint">Only letters, numbers, underscores · min 3 chars</div>
       </div>
@@ -448,7 +449,7 @@
       </div>
       <div class="f">
         <label>Referral Code <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-        <input type="text" id="suRef" placeholder="e.g. SURY847" autocomplete="off" style="text-transform:uppercase"
+        <input type="text" id="suRef" placeholder="Friend's referral code" autocomplete="off" style="text-transform:uppercase"
           oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
         <div class="f-hint">Have a friend's code? Enter it for a free 100 pts bonus!</div>
       </div>
@@ -1286,13 +1287,22 @@ async function loadProfile() {
 
   // BUG FIX: Referral code was showing "—" because the users table stores it
   // as "referral_code" but we weren't reading it here. Now we do.
-  // The referral code is generated when the user signs up in the register function.
+  // Also fix: if code is the full username (too long), shorten it to 4 chars + 3 numbers
   if (user.referral_code) {
-    document.getElementById("refCode").innerText = user.referral_code;
+    let code = user.referral_code;
+    // If code is longer than 8 chars it's probably the full username — shorten it
+    if (code.length > 8) {
+      code = code.slice(0, 4).toUpperCase() + Math.floor(Math.random() * 900 + 100);
+      // Save the shortened code back to DB so it stays consistent
+      db.from("users").update({ referral_code: code }).eq("telegram_id", tgId);
+    }
+    document.getElementById("refCode").innerText = code;
   } else {
     // If somehow missing, generate from username (fallback)
     const fallback = (user.username || "USER").toUpperCase().slice(0, 4) +
       Math.floor(Math.random() * 900 + 100);
+    // Save it so it's consistent next time
+    db.from("users").update({ referral_code: fallback }).eq("telegram_id", tgId);
     document.getElementById("refCode").innerText = fallback;
   }
 
