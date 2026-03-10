@@ -445,6 +445,8 @@
     .lb-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
 
   
+  </style>
+</head>
 <body>
 
 <!-- ════════════════════════════════════════════
@@ -985,10 +987,13 @@ Object.assign(window, {
   shareReferral,
   histTab,
   uploadAvatar,
-  showToast,
-  selectGroup,
-  switchLbTab
+  showToast
 });
+
+// Expose functions defined in this module to global scope so HTML onclick= works
+// These MUST be after the function definitions (ES modules don't hoist)
+window.selectGroup  = selectGroup;
+window.switchLbTab  = switchLbTab;
 
 // ── APP BOOT ──────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
@@ -997,7 +1002,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   tgInitData = tg?.initData || "";
 
   const result = await telegramLogin();
-  if (!result) return;
+  if (!result) {
+    // telegramLogin failed — either no Telegram context or server error
+    // Show the auth screen so the user isn't stuck on a blank black page
+    document.getElementById("authWrap").style.display = "flex";
+    return;
+  }
   tgId = String(tg?.initDataUnsafe?.user?.id || "");
 
   if (result.email_linked) {
