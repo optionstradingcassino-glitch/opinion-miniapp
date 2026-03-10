@@ -4,14 +4,20 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Cassino Trade</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <!-- ══════════════════════════════════════════════
        FONTS
        - Druk Wide Bold  → headings (loaded from your Supabase)
        - Urbanist        → body text (replaces Outfit)
        - Cormorant Garamond → accent font (Arsenica-style, use ~5% only)
   ══════════════════════════════════════════════ -->
+  <!-- PWA meta tags — lets browsers install this as a home screen app -->
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Cassino Trade"/>
+  <meta name="theme-color" content="#06070b"/>
+  <link rel="apple-touch-icon" href="https://liketekvzrazheolmfnj.supabase.co/storage/v1/object/public/Fonts/DrukWideBold.ttf"/>
+
   <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
   <style>
     /* Druk Wide Bold — your hosted font on Supabase */
@@ -688,8 +694,22 @@
         <div class="menu-info"><div class="mi-title">Withdraw</div><div class="mi-sub">Cash out · min €20</div></div>
         <div class="mi-arrow">›</div>
       </div>
+      <!-- Logout button -->
+      <div class="menu-row" onclick="doLogout()" style="margin-top:8px">
+        <div class="menu-icon" style="background:rgba(255,61,90,.1);color:var(--red)">🚪</div>
+        <div class="menu-info"><div class="mi-title" style="color:var(--red)">Log Out</div></div>
+        <div class="mi-arrow" style="color:var(--red)">›</div>
+      </div>
+      <!-- Add to Home Screen (shown only on supported browsers) -->
+      <div class="menu-row" id="addHomeBtn" onclick="addToHomeScreen()" style="display:none;margin-top:4px">
+        <div class="menu-icon mi-green">📲</div>
+        <div class="menu-info">
+          <div class="mi-title">Add to Home Screen</div>
+          <div class="mi-sub">Install app on your phone</div>
+        </div>
+        <div class="mi-arrow">›</div>
+      </div>
     </div>
-    <div style="text-align:center;color:var(--muted);font-size:11px;padding:0 0 20px">Telegram ID: <span id="profTgId">—</span></div>
   </div>
 
   <!-- REFERRALS VIEW -->
@@ -948,7 +968,7 @@
 <!-- ════════════════════════════════════════════
      JAVASCRIPT — ALL LOGIC
 ════════════════════════════════════════════ -->
-<script type="module">
+<script>
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 // ── CONSTANTS ─────────────────────────────────────────────────────────────────
@@ -961,13 +981,14 @@ const MIN_WITHDRAW = 200;
 const VIRTUAL_POOL = 1000;
 const START_ODDS   = 1.80;
 
-const db = createClient(SUPA_URL, SUPA_KEY);
+const db = createClient(SUPA_URL, SUPA_KEY, {
+  auth: { persistSession: true, storage: window.localStorage }
+});
 window._db = db;
 
 // ── APP STATE ─────────────────────────────────────────────────────────────────
-let tgId        = null;
+let tgId        = null;  // stores telegram_id from users table (user's identifier)
 let currentTier = "free";
-let tgInitData  = null;
 let balance     = 0;
 let markets     = [];
 let activeMkt   = null;
@@ -975,6 +996,43 @@ let choice      = null;
 let prevView    = "markets";
 
 // ── EXPOSE FUNCTIONS TO HTML onclick ──────────────────────────────────────────
+// ── LOGOUT ───────────────────────────────────────────────────────────────────
+async function doLogout() {
+  await db.auth.signOut(); // clear Supabase session from localStorage
+  tgId    = null;
+  balance = 0;
+  document.getElementById("appShell").classList.remove("show");
+  document.getElementById("authWrap").style.display = "flex";
+  showToast("Logged out ✓");
+}
+
+// ── PWA ADD TO HOME SCREEN ───────────────────────────────────────────────────
+let _deferredInstallPrompt = null; // saved browser install event
+
+// Listen for the browser's "beforeinstallprompt" event
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault(); // stop automatic prompt
+  _deferredInstallPrompt = e;
+  // Show the "Add to Home Screen" button in profile
+  const btn = document.getElementById("addHomeBtn");
+  if (btn) btn.style.display = "flex";
+});
+
+// Called when user taps "Add to Home Screen"
+function addToHomeScreen() {
+  if (_deferredInstallPrompt) {
+    _deferredInstallPrompt.prompt();
+    _deferredInstallPrompt.userChoice.then(() => {
+      _deferredInstallPrompt = null;
+      const btn = document.getElementById("addHomeBtn");
+      if (btn) btn.style.display = "none";
+    });
+  } else {
+    // Fallback: show manual instructions (iOS Safari doesn't support the event)
+    showToast("Tap the Share button → 'Add to Home Screen' 📲", "ok");
+  }
+}
+
 Object.assign(window, {
   doForgotPassword, sendReset,
   authTab, doSignup, doLogin,
@@ -992,40 +1050,39 @@ Object.assign(window, {
 
 // Expose functions defined in this module to global scope so HTML onclick= works
 // These MUST be after the function definitions (ES modules don't hoist)
-window.selectGroup  = selectGroup;
-window.switchLbTab  = switchLbTab;
+window.selectGroup     = selectGroup;
+window.switchLbTab     = switchLbTab;
+window.doLogout        = doLogout;
+window.addToHomeScreen = addToHomeScreen;
 
 // ── APP BOOT ──────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  const tg = window.Telegram?.WebApp;
-  if (tg) { tg.expand(); tg.setBackgroundColor("#06070b"); }
-  tgInitData = tg?.initData || "";
-
-  const result = await telegramLogin();
-  if (!result) {
-    // telegramLogin failed — either no Telegram context or server error
-    // Show the auth screen so the user isn't stuck on a blank black page
-    document.getElementById("authWrap").style.display = "flex";
-    return;
-  }
-  tgId = String(tg?.initDataUnsafe?.user?.id || "");
-
-  if (result.email_linked) {
-    balance = result.balance_points || 0;
-    startApp();
+  // Check if user already has a Supabase session saved in localStorage
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    // User was previously logged in — restore their session automatically
+    await resumeSession(session.user);
   } else {
+    // No saved session — show login/signup screen
     document.getElementById("authWrap").style.display = "flex";
   }
 });
 
-async function telegramLogin() {
-  try {
-    const res = await fetch(`${SUPA_URL}/functions/v1/telegram-login`, {
-      method: "POST", headers: { "Content-Type": "text/plain" }, body: tgInitData
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch { return null; }
+// resumeSession: called on page load if localStorage has a saved session
+async function resumeSession(authUser) {
+  // Load the user record from DB using auth_id to get their telegram_id (our user identifier)
+  const { data: userRow } = await db.from("users")
+    .select("telegram_id, balance_points")
+    .eq("auth_id", authUser.id)
+    .single();
+  if (!userRow) {
+    // Auth session exists but no user row — show auth screen
+    document.getElementById("authWrap").style.display = "flex";
+    return;
+  }
+  tgId    = String(userRow.telegram_id);
+  balance = userRow.balance_points || 0;
+  startApp();
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
@@ -1127,9 +1184,9 @@ async function doSignup() {
       body: JSON.stringify({
         email,
         password:      pass,
-        telegram_id:   tgId,
+        telegram_id:   null,  // will be auto-assigned by register function using auth user id
         username:      username,
-        full_name:     window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "",
+        full_name:     "",
         referral_code: refCode || null,
         user_group:    selectedGroup  // 'cassino' or 'unicas'
       })
@@ -1137,6 +1194,12 @@ async function doSignup() {
     clearTimeout(timeoutId); // cancel timeout if we got a response
     const data = await res.json();
     if (!res.ok) return setErr("authErr", data.error || "Signup failed.");
+    // After signup, sign in to get session, then load user record
+    const { data: auth2, error: loginErr } = await db.auth.signInWithPassword({ email, password: pass });
+    if (loginErr || !auth2) return setErr("authErr", "Signup succeeded but login failed. Please log in manually.");
+    const { data: userRow2 } = await db.from("users").select("telegram_id").eq("auth_id", auth2.user.id).single();
+    if (!userRow2) return setErr("authErr", "Account created but profile not found. Please log in.");
+    tgId    = String(userRow2.telegram_id);
     balance = 0;
     startApp();
   } catch (e) {
@@ -1164,9 +1227,13 @@ async function doLogin() {
   try {
     const { data: auth, error } = await db.auth.signInWithPassword({ email, password: pass });
     if (error) return setErr("authErr", "Login failed: " + (error.message || "Wrong email or password."));
-    await db.from("users").update({ telegram_id: tgId }).eq("auth_id", auth.user.id);
+    // Load user's telegram_id (our internal user identifier) from DB
+    const { data: userRow } = await db.from("users").select("telegram_id").eq("auth_id", auth.user.id).single();
+    if (!userRow) return setErr("authErr", "Account not found. Please sign up.");
+    tgId = String(userRow.telegram_id);
     await db.from("wallets").upsert({ telegram_id: tgId, balance_points: 0, balance_eur: 0 }, { onConflict: "telegram_id", ignoreDuplicates: true });
     const { data: w } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
+    // tgId is now set from DB above
     balance = w?.balance_points || 0;
     startApp();
   } catch { setErr("authErr", "Connection error. Try again."); }
@@ -1196,7 +1263,7 @@ function subscribeWallet() {
   // Listen for realtime changes on the wallets table (fires when admin adjusts balance)
   db.channel("wallet-rt").on("postgres_changes",
     { event: "UPDATE", schema: "public", table: "wallets" },
-    p => { if (p.new.telegram_id === tgId) { balance = p.new.balance_points; updateBalUI(); } }
+    p => { if (String(p.new.telegram_id) === String(tgId)) { balance = p.new.balance_points; updateBalUI(); } }
   ).subscribe();
 }
 
@@ -1385,9 +1452,15 @@ async function placeTrade() {
   const btn = document.getElementById("tradeBtn");
   btn.disabled = true; btn.innerText = "Placing...";
   try {
+    const { data: { session: tradeSess } } = await db.auth.getSession();
+    const tradeToken = tradeSess?.access_token || SUPA_KEY;
     const res = await fetch(`${SUPA_URL}/functions/v1/place-trade`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY },
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPA_KEY,
+        "Authorization": `Bearer ${tradeToken}`
+      },
       body: JSON.stringify({ telegram_id: tgId, market_id: activeMkt.id, side: choice, stake })
     });
     const data = await res.json();
@@ -1421,7 +1494,7 @@ async function loadProfile() {
   // Fill in profile fields
   document.getElementById("profName").innerText  = user.full_name || "—";
   document.getElementById("profEmail").innerText = user.email || "—";
-  document.getElementById("profTgId").innerText  = tgId;
+  // profTgId removed — no longer showing telegram ID
 
   // Show @username in gold
   if (user.username) {
@@ -1592,9 +1665,16 @@ async function doSubmit() {
   const btn = document.getElementById("sqBtn");
   btn.disabled = true; btn.innerText = "Submitting...";
   try {
+    // Get current auth session token to authenticate the request
+    const { data: { session: sess } } = await db.auth.getSession();
+    const authToken = sess?.access_token || SUPA_KEY;
     const res = await fetch(`${SUPA_URL}/functions/v1/submit-question`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY },
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPA_KEY,
+        "Authorization": `Bearer ${authToken}`
+      },
       body: JSON.stringify({ telegram_id: tgId, question: q, context: ctx })
     });
     const data = await res.json();
