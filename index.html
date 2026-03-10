@@ -406,8 +406,45 @@
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     #toast.ok  { border-color: rgba(0,229,122,.4);  color: var(--green); }
     #toast.bad { border-color: rgba(255,61,90,.4);  color: var(--red); }
-  </style>
-</head>
+    /* ── LEADERBOARD ── */
+    .lb-tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 20px; }
+    .lb-tab  { padding: 10px; border: none; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 14px; font-weight: 600; border-radius: 9px; cursor: pointer; transition: all .2s; }
+    .lb-tab.on { background: var(--gold); color: #000; }
+
+    /* Top 3 podium cards */
+    .lb-podium { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 24px; }
+    .lb-pod    { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .lb-pod-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-weight: 700; color: #000; flex-shrink: 0; }
+    .lb-pod.first .lb-pod-avatar  { width: 64px; height: 64px; font-size: 22px; background: linear-gradient(135deg, #ffd700, #ffaa00); box-shadow: 0 0 20px rgba(255,215,0,.4); }
+    .lb-pod.second .lb-pod-avatar { width: 52px; height: 52px; font-size: 18px; background: linear-gradient(135deg, #c0c0c0, #888); }
+    .lb-pod.third .lb-pod-avatar  { width: 44px; height: 44px; font-size: 15px; background: linear-gradient(135deg, #cd7f32, #8b4513); }
+    .lb-pod-name  { font-size: 12px; font-weight: 700; color: var(--text); text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lb-pod-pts   { font-size: 11px; color: var(--gold); font-weight: 600; }
+    .lb-pod-rank  { font-size: 22px; }
+    /* Podium base bar — 1st tallest, 2nd medium, 3rd shortest */
+    .lb-pod-base  { width: 70px; border-radius: 6px 6px 0 0; margin-top: 8px; }
+    .lb-pod.first  .lb-pod-base  { height: 44px; background: linear-gradient(to top, #ffd700, #ffaa00); }
+    .lb-pod.second .lb-pod-base  { height: 30px; background: linear-gradient(to top, #c0c0c0, #888); }
+    .lb-pod.third  .lb-pod-base  { height: 20px; background: linear-gradient(to top, #cd7f32, #8b4513); }
+    .lb-pod.first  { order: 2; }  /* 1st in center */
+    .lb-pod.second { order: 1; }  /* 2nd on left */
+    .lb-pod.third  { order: 3; }  /* 3rd on right */
+
+    /* Rest of the list */
+    .lb-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface); border-radius: 12px; margin-bottom: 8px; }
+    .lb-rank { font-family: var(--font-body); font-size: 13px; font-weight: 700; color: var(--muted); width: 22px; text-align: center; flex-shrink: 0; }
+    .lb-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), #147a3a); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 14px; font-weight: 700; color: #000; flex-shrink: 0; overflow: hidden; }
+    .lb-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .lb-info  { flex: 1; min-width: 0; }
+    .lb-name  { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .lb-pts   { font-family: var(--font-body); font-size: 15px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+    /* Highlight the current user's row */
+    .lb-row.me { background: rgba(34,192,99,.1); border: 1px solid rgba(34,192,99,.25); }
+    .lb-row.me .lb-name::after { content: " (you)"; color: var(--gold); font-size: 11px; }
+    .lb-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
+
+  
 <body>
 
 <!-- ════════════════════════════════════════════
@@ -452,6 +489,23 @@
         <input type="text" id="suRef" placeholder="Friend's referral code" autocomplete="off" style="text-transform:uppercase"
           oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
         <div class="f-hint">Have a friend's code? Enter it for a free 100 pts bonus!</div>
+      </div>
+      <!-- UNICAS student toggle — sets user_group on signup -->
+      <div class="f" style="margin-bottom:18px">
+        <label>Are you a UNICAS student?</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+          <button type="button" id="grpCassino" onclick="selectGroup('cassino')"
+            style="padding:10px;border-radius:10px;border:1.5px solid var(--gold);background:var(--gold);
+                   color:#000;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer">
+            🎰 No
+          </button>
+          <button type="button" id="grpUnicas" onclick="selectGroup('unicas')"
+            style="padding:10px;border-radius:10px;border:1.5px solid var(--border);background:transparent;
+                   color:var(--muted);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer">
+            🎓 Yes, UNICAS
+          </button>
+        </div>
+        <div class="f-hint">UNICAS students get their own private leaderboard</div>
       </div>
       <button class="btn-gold" id="suBtn" onclick="doSignup()">Create Account</button>
     </div>
@@ -622,6 +676,11 @@
         <div class="menu-info"><div class="mi-title">Deposit</div><div class="mi-sub">Add points · min €10 · €1 = 10 pts</div></div>
         <div class="mi-arrow">›</div>
       </div>
+      <div class="menu-row" onclick="goTo('submit')">
+        <div class="menu-icon" style="background:rgba(34,192,99,.15);color:var(--gold)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+        <div class="menu-info"><div class="mi-title">Submit a Question</div><div class="mi-sub">Suggest a market · costs 100 pts</div></div>
+        <div class="mi-arrow">›</div>
+      </div>
       <div class="menu-row" onclick="goTo('withdraw')">
         <div class="menu-icon mi-red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
         <div class="menu-info"><div class="mi-title">Withdraw</div><div class="mi-sub">Cash out · min €20</div></div>
@@ -727,6 +786,42 @@
   </div>
 
   <!-- WITHDRAW VIEW -->
+  <!-- ══════════════════════════════════════════════════
+       LEADERBOARD VIEW
+       Two boards: Cassino (all-time total winnings) and
+       UNICAS (a separate group leaderboard)
+  ══════════════════════════════════════════════════ -->
+  <div class="view" id="vLeaderboard">
+    <div class="topbar"><div class="topbar-title">Leaderboard</div></div>
+    <div style="padding:16px 16px 100px">
+
+      <!-- Switch between the 2 boards -->
+      <div class="lb-tabs">
+        <button class="lb-tab on" id="lbt-cassino" onclick="switchLbTab('cassino')">🎰 Cassino</button>
+        <button class="lb-tab"    id="lbt-unicas"  onclick="switchLbTab('unicas')">🎓 UNICAS</button>
+      </div>
+      <!-- Board subtitle — changes when tab switches -->
+      <div id="lbSubtitle" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:16px">
+        All-time top traders on Cassino Trade
+      </div>
+
+      <!-- Top 3 podium — filled by JS -->
+      <div class="lb-podium" id="lbPodium">
+        <div class="lb-empty" style="width:100%">Loading...</div>
+      </div>
+
+      <!-- Rank list 4 and beyond -->
+      <div id="lbList"></div>
+
+      <!-- My position (pinned at bottom if not in top view) -->
+      <div id="lbMyPos" style="margin-top:16px;display:none">
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Your Position</div>
+        <div id="lbMyRow"></div>
+      </div>
+
+    </div>
+  </div>
+
   <div class="view" id="vWithdraw">
     <div class="topbar">
       <button class="back-btn" onclick="goBack()">‹</button>
@@ -792,13 +887,14 @@
         </svg>
         Trades
       </button>
-      <button class="nav-btn" id="nb-submit" onclick="goTo('submit')">
+      <button class="nav-btn" id="nb-leaderboard" onclick="goTo('leaderboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="16"/>
-          <line x1="8" y1="12" x2="16" y2="12"/>
+          <rect x="2" y="14" width="4" height="8" rx="1"/>
+          <rect x="9" y="9" width="4" height="13" rx="1"/>
+          <rect x="16" y="4" width="4" height="18" rx="1"/>
+          <polyline points="2 7 9 4 15 7 22 2"/>
         </svg>
-        Submit
+        Ranks
       </button>
       <button class="nav-btn" id="nb-profile" onclick="goTo('profile')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -889,7 +985,9 @@ Object.assign(window, {
   shareReferral,
   histTab,
   uploadAvatar,
-  showToast
+  showToast,
+  selectGroup,
+  switchLbTab
 });
 
 // ── APP BOOT ──────────────────────────────────────────────────────────────────
@@ -969,6 +1067,23 @@ function setErr(id, msg) {
 // ── SIGN UP ───────────────────────────────────────────────────────────────────
 // BUG FIX: Added 15-second timeout so it never gets stuck at "Creating..." forever.
 // Before this fix, if the server was slow or had an error, the button stayed disabled.
+// Tracks which group the user selected on signup — default is cassino
+let selectedGroup = "cassino";
+
+function selectGroup(group) {
+  selectedGroup = group;
+  // Update button styles — selected = gold filled, other = ghost outline
+  const cassBtn = document.getElementById("grpCassino");
+  const unicBtn = document.getElementById("grpUnicas");
+  if (group === "cassino") {
+    cassBtn.style.cssText = "padding:10px;border-radius:10px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer";
+    unicBtn.style.cssText = "padding:10px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer";
+  } else {
+    unicBtn.style.cssText = "padding:10px;border-radius:10px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer";
+    cassBtn.style.cssText = "padding:10px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer";
+  }
+}
+
 async function doSignup() {
   const username = document.getElementById("suUsername").value.trim().toLowerCase();
   const email    = document.getElementById("suEmail").value.trim();
@@ -1005,7 +1120,8 @@ async function doSignup() {
         telegram_id:   tgId,
         username:      username,
         full_name:     window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "",
-        referral_code: refCode || null
+        referral_code: refCode || null,
+        user_group:    selectedGroup  // 'cassino' or 'unicas'
       })
     });
     clearTimeout(timeoutId); // cancel timeout if we got a response
@@ -1067,22 +1183,37 @@ function updateBalUI() {
 }
 
 function subscribeWallet() {
+  // Listen for realtime changes on the wallets table (fires when admin adjusts balance)
   db.channel("wallet-rt").on("postgres_changes",
     { event: "UPDATE", schema: "public", table: "wallets" },
     p => { if (p.new.telegram_id === tgId) { balance = p.new.balance_points; updateBalUI(); } }
   ).subscribe();
 }
 
+// ── REFRESH BALANCE FROM DB ────────────────────────────────────────────────────
+// Called every time user navigates to home screen — ensures admin adjustments show up
+// even if realtime doesn't fire (realtime requires table to be in Supabase Realtime publication)
+async function refreshBalanceFromDB() {
+  try {
+    const { data } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
+    if (data && data.balance_points !== undefined) {
+      balance = data.balance_points;
+      updateBalUI();
+    }
+  } catch (e) { /* non-critical — keep showing cached balance */ }
+}
+
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
 const viewMap = {
-  markets:    "vMarkets",
-  portfolio:  "vPortfolio",
-  submit:     "vSubmit",
-  profile:    "vProfile",
-  referrals:  "vReferrals",
-  history:    "vHistory",
-  membership: "vMembership",
-  withdraw:   "vWithdraw"
+  markets:     "vMarkets",
+  portfolio:   "vPortfolio",
+  leaderboard: "vLeaderboard",
+  profile:     "vProfile",
+  referrals:   "vReferrals",
+  history:     "vHistory",
+  membership:  "vMembership",
+  withdraw:    "vWithdraw",
+  submit:      "vSubmit"
 };
 
 function goTo(name) {
@@ -1093,12 +1224,14 @@ function goTo(name) {
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("on"));
   const nb = document.getElementById("nb-" + name);
   if (nb) nb.classList.add("on");
-  if (name === "portfolio")  loadTrades();
-  if (name === "submit")     loadSubmissions();
-  if (name === "withdraw")   updateBalUI();
-  if (name === "referrals")  loadReferrals();
-  if (name === "history")    loadHistory("dep");
-  if (name === "membership") updateMembershipUI();
+  if (name === "markets")      refreshBalanceFromDB();
+  if (name === "portfolio")    loadTrades();
+  if (name === "leaderboard")  loadLeaderboard();
+  if (name === "submit")       loadSubmissions();
+  if (name === "withdraw")     { refreshBalanceFromDB(); updateBalUI(); }
+  if (name === "referrals")    loadReferrals();
+  if (name === "history")      loadHistory("dep");
+  if (name === "membership")   updateMembershipUI();
 }
 
 function currentView() {
@@ -1524,6 +1657,177 @@ function updateMembershipUI() {
       btn.disabled  = false;
     }
   });
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────────────────────────
+// Two boards: "cassino" (all users ranked by total winnings) and
+// "unicas" (filtered to users who joined with the UNICAS referral group).
+// "Total winnings" = sum of payout_points from trades where status = 'won'
+
+let currentLbTab = "cassino"; // which board is showing right now
+
+// Called when user taps Cassino or UNICAS tab button
+function switchLbTab(tab) {
+  currentLbTab = tab;
+  // Highlight the right tab button
+  document.getElementById("lbt-cassino").classList.toggle("on", tab === "cassino");
+  document.getElementById("lbt-unicas").classList.toggle("on", tab === "unicas");
+  // Update the subtitle text based on which board is active
+  const sub = document.getElementById("lbSubtitle");
+  if (sub) {
+    sub.textContent = tab === "unicas"
+      ? "University of Cassino students only 🎓"
+      : "All-time top traders on Cassino Trade";
+  }
+  loadLeaderboard();
+}
+
+async function loadLeaderboard() {
+  // Show loading state
+  document.getElementById("lbPodium").innerHTML = '<div class="lb-empty" style="width:100%">Loading...</div>';
+  document.getElementById("lbList").innerHTML = "";
+  document.getElementById("lbMyPos").style.display = "none";
+
+  const myTgId = String(tgId); // current logged-in user's telegram ID
+
+  // Step 1: Get all won trades with payout amounts
+  // We fetch all trades where status='won' then group by telegram_id in JS
+  let query = db.from("trades")
+    .select("telegram_id, payout_points")
+    .eq("status", "won");
+
+  const { data: trades, error } = await query;
+  if (error || !trades) {
+    document.getElementById("lbPodium").innerHTML = '<div class="lb-empty" style="width:100%">Could not load leaderboard</div>';
+    return;
+  }
+
+  // Step 2: Get all users — include email so we can filter UNICAS by email domain
+  const { data: users } = await db.from("users")
+    .select("telegram_id, username, full_name, avatar_url, user_group");
+
+  // Build a map: telegram_id → user info
+  const userMap = {};
+  (users || []).forEach(u => { userMap[String(u.telegram_id)] = u; });
+
+  // Step 3: Sum up winnings per user (total payout_points on won trades)
+  const winMap = {};
+  trades.forEach(t => {
+    const tid = String(t.telegram_id);
+    winMap[tid] = (winMap[tid] || 0) + Number(t.payout_points || 0);
+  });
+
+  // Step 4: Build entries and filter by board
+  let entries = Object.entries(winMap).map(([tid, pts]) => ({
+    tid, pts, user: userMap[tid] || {}
+  }));
+
+  if (currentLbTab === "unicas") {
+    // UNICAS board = only users who selected "UNICAS" on signup (user_group = 'unicas')
+    entries = entries.filter(e => e.user.user_group === "unicas");
+  }
+
+  // Step 5: Sort by total winnings descending
+  entries.sort((a, b) => b.pts - a.pts);
+
+  // Show a small stats bar above the podium
+  const totalPlayers = entries.length;
+  const totalPrize   = entries.reduce((s, e) => s + e.pts, 0);
+  const boardLabel   = currentLbTab === "unicas" ? "UNICAS" : "Cassino";
+  // Remove old stats bar if switching tabs
+  const oldStats = document.getElementById("lbStats");
+  if (oldStats) oldStats.remove();
+  document.getElementById("lbPodium").insertAdjacentHTML("beforebegin",
+    `<div id="lbStats" style="display:flex;justify-content:space-between;align-items:center;
+      background:var(--surface);border-radius:12px;padding:12px 16px;margin-bottom:16px">
+      <div style="text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--gold)">${totalPlayers}</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Players</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${boardLabel}</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Board</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:18px;font-weight:700;color:var(--gold)">${totalPrize >= 1000 ? (totalPrize/1000).toFixed(1)+"K" : totalPrize}</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Total pts won</div>
+      </div>
+    </div>`
+  );
+
+  if (!entries.length) {
+    document.getElementById("lbPodium").innerHTML =
+      `<div class="lb-empty" style="width:100%">No winners yet on the ${boardLabel} board 🏆<br>
+      <span style="font-size:12px;margin-top:8px;display:block">Start trading to get on the board!</span></div>`;
+    return;
+  }
+
+  // Step 6: Build podium (top 3)
+  const top3 = entries.slice(0, 3);
+  const podiumClasses = ["first", "second", "third"];
+  const medals = ["🥇", "🥈", "🥉"];
+
+  document.getElementById("lbPodium").innerHTML = top3.map((e, i) => {
+    const u = e.user;
+    const name = u.username ? "@" + u.username : "User " + e.tid.slice(-4);
+    const initial = (u.username || u.full_name || "?")[0].toUpperCase();
+    const avatarHtml = u.avatar_url
+      ? `<img src="${u.avatar_url}" alt="${initial}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+      : initial;
+    // Format pts — e.g. 12500 → "12.5K"
+    const pts = e.pts >= 1000 ? (e.pts / 1000).toFixed(1) + "K" : e.pts;
+    return `
+      <div class="lb-pod ${podiumClasses[i]}">
+        <div class="lb-pod-rank">${medals[i]}</div>
+        <div class="lb-pod-avatar">${avatarHtml}</div>
+        <div class="lb-pod-name">${name}</div>
+        <div class="lb-pod-pts">${pts} pts</div>
+        <div class="lb-pod-base"></div>
+      </div>`;
+  }).join("");
+
+  // Step 7: Build rank list (position 4 onwards, or all if < 4 total)
+  const rest = entries.slice(3);
+  document.getElementById("lbList").innerHTML = rest.length
+    ? rest.map((e, i) => buildLbRow(e, i + 4, myTgId)).join("")
+    : "";
+
+  // Step 8: Find and show my position if not in visible top section
+  const myRank = entries.findIndex(e => e.tid === myTgId);
+  if (myRank >= 3) {
+    // User is not in podium or top list — show pinned at bottom
+    const myEntry = entries[myRank];
+    document.getElementById("lbMyRow").innerHTML = buildLbRow(myEntry, myRank + 1, myTgId);
+    document.getElementById("lbMyPos").style.display = "block";
+  } else if (myRank === -1) {
+    // User has no wins yet — show them at bottom with 0
+    const myUser = userMap[myTgId] || {};
+    const myEntry = { tid: myTgId, pts: 0, user: myUser };
+    document.getElementById("lbMyRow").innerHTML = buildLbRow(myEntry, entries.length + 1, myTgId);
+    document.getElementById("lbMyPos").style.display = "block";
+  }
+}
+
+// Build a single leaderboard row HTML string
+function buildLbRow(e, rank, myTgId) {
+  const u = e.user;
+  const isMe = e.tid === myTgId;
+  const name = u.username ? "@" + u.username : "User " + e.tid.slice(-4);
+  const initial = (u.username || u.full_name || "?")[0].toUpperCase();
+  const avatarHtml = u.avatar_url
+    ? `<img src="${u.avatar_url}" alt="${initial}">`
+    : initial;
+  const pts = e.pts >= 1000 ? (e.pts / 1000).toFixed(1) + "K" : e.pts;
+  return `
+    <div class="lb-row${isMe ? " me" : ""}">
+      <div class="lb-rank">#${rank}</div>
+      <div class="lb-avatar">${avatarHtml}</div>
+      <div class="lb-info">
+        <div class="lb-name">${name}</div>
+        <div class="lb-sub">${e.pts.toLocaleString()} pts won</div>
+      </div>
+      <div class="lb-pts">${pts}</div>
+    </div>`;
 }
 
 // ── REFERRALS ─────────────────────────────────────────────────────────────────
