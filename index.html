@@ -3,32 +3,22 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Cassino Trade</title>
-  <!-- ══════════════════════════════════════════════
-       FONTS
-       - Druk Wide Bold  → headings (loaded from your Supabase)
-       - Urbanist        → body text (replaces Outfit)
-       - Cormorant Garamond → accent font (Arsenica-style, use ~5% only)
-  ══════════════════════════════════════════════ -->
-  <!-- PWA meta tags — lets browsers install this as a home screen app -->
+  <title>My Opinio</title>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Cassino Trade"/>
+  <meta name="apple-mobile-web-app-title" content="My Opinio"/>
   <meta name="theme-color" content="#06070b"/>
   <link rel="apple-touch-icon" href="https://liketekvzrazheolmfnj.supabase.co/storage/v1/object/public/Fonts/DrukWideBold.ttf"/>
-
   <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
   <style>
-    /* Druk Wide Bold — your hosted font on Supabase */
     @font-face {
-      font-family: 'Druk Wide';
-      src: url('https://liketekvzrazheolmfnj.supabase.co/storage/v1/object/public/Fonts/DrukWideBold.ttf') format('truetype');
+      font-family: "Druk Wide";
+      src: url("https://liketekvzrazheolmfnj.supabase.co/storage/v1/object/public/Fonts/DrukWideBold.ttf") format("truetype");
       font-weight: 700;
       font-style: normal;
-      font-display: swap; /* page loads first, font swaps in when ready */
+      font-display: swap;
     }
-
     :root {
       --bg:      #06070b;
       --surface: #0c0e15;
@@ -41,36 +31,21 @@
       --text:    #dde0f0;
       --muted:   #485070;
       --r: 14px;
-
-      /* Font shortcuts — easy to change later */
-      --font-heading: 'Druk Wide', 'Arial Black', sans-serif;
-      --font-body:    'Urbanist', 'Helvetica Neue', sans-serif;
-      --font-accent:  'Cormorant Garamond', Georgia, serif; /* use rarely ~5% */
+      --font-heading: "Druk Wide", "Arial Black", sans-serif;
+      --font-body:    "Urbanist", "Helvetica Neue", sans-serif;
+      --font-accent:  "Cormorant Garamond", Georgia, serif;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow: hidden; background: var(--bg); }
-
-    /* ── BODY now uses Urbanist instead of Outfit ── */
     body { font-family: var(--font-body); color: var(--text); font-size: 15px; }
-
-    /* AUTH WRAP — scrollable so long signup form fits on small screens */
     #authWrap { position: fixed; inset: 0; z-index: 500; background: var(--bg); display: flex; align-items: flex-start; justify-content: center; padding: 24px; overflow-y: auto; }
     #appShell { display: none; position: fixed; inset: 0; flex-direction: column; }
     #appShell.show { display: flex; }
-
     .view { display: none; flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 100px; }
     .view.active { display: block; }
-
-    /* ── AUTH STYLES ── */
     .auth-box  { width: 100%; max-width: 370px; padding-top: 16px; }
-
-    /* Logo uses Druk Wide now */
     .auth-logo { font-family: var(--font-heading); font-size: 28px; font-weight: 700; text-align: center; color: var(--gold); margin-bottom: 4px; letter-spacing: 2px; }
-
-    /* Auth sub uses Cormorant accent font (this is the ~5% use case — brand tagline) */
     .auth-sub  { text-align: center; color: var(--muted); font-size: 15px; font-family: var(--font-accent); font-style: italic; margin-bottom: 32px; }
-
     .tab-row   { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 24px; }
     .tab-btn   { padding: 10px; border: none; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 14px; font-weight: 600; border-radius: 9px; cursor: pointer; transition: all .2s; }
     .tab-btn.on { background: var(--gold); color: #000; }
@@ -83,94 +58,18 @@
     .btn-gold  { width: 100%; padding: 14px; background: var(--gold); color: #000; border: none; border-radius: 11px; font-family: var(--font-body); font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
     .btn-gold:disabled { opacity: .45; cursor: not-allowed; }
     .btn-gold:active   { opacity: .8; }
-
-    /* ══════════════════════════════════════════════
-       macOS DOCK — bottom navigation bar
-       Floats above the page, rounded pill, blurred glass
-       Icons magnify on hover like a real Mac dock
-    ══════════════════════════════════════════════ */
-    #bottomNav {
-      flex-shrink: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      padding-bottom: max(16px, env(safe-area-inset-bottom));
-      padding-top: 8px;
-      background: transparent;         /* no background on the outer wrapper */
-      position: relative;
-      z-index: 50;
-    }
-
-    /* The actual dock pill */
-    .dock-inner {
-      display: flex;
-      align-items: flex-end;           /* icons sit on the bottom line */
-      gap: 6px;
-      background: rgba(12, 14, 21, 0.75);  /* semi-transparent dark */
-      backdrop-filter: blur(20px);     /* frosted glass effect */
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 28px;             /* big pill shape */
-      padding: 10px 14px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    /* Each dock icon button */
-    .nav-btn {
-      flex: 0 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      padding: 6px 10px;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-family: var(--font-body);
-      font-size: 9px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform .2s cubic-bezier(.34,1.56,.64,1), color .2s;
-      transform-origin: bottom center;  /* zoom from bottom */
-      border-radius: 14px;
-    }
-
-    /* Active icon glows gold and scales up slightly */
-    .nav-btn.on {
-      color: var(--gold);
-    }
-
-    /* Hover: magnify like macOS dock */
-    .nav-btn:hover {
-      transform: scale(1.25) translateY(-4px);
-      color: var(--text);
-    }
-    .nav-btn.on:hover {
-      color: var(--gold);
-    }
-
-    /* The SVG icon inside dock button */
+    #bottomNav { flex-shrink: 0; display: flex; justify-content: center; align-items: flex-end; padding-bottom: max(16px, env(safe-area-inset-bottom)); padding-top: 8px; background: transparent; position: relative; z-index: 50; }
+    .dock-inner { display: flex; align-items: flex-end; gap: 6px; background: rgba(12,14,21,0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; padding: 10px 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3); }
+    .nav-btn { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 10px; border: none; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 9px; font-weight: 600; cursor: pointer; transition: transform .2s cubic-bezier(.34,1.56,.64,1), color .2s; transform-origin: bottom center; border-radius: 14px; }
+    .nav-btn.on { color: var(--gold); }
+    .nav-btn:hover { transform: scale(1.25) translateY(-4px); color: var(--text); }
+    .nav-btn.on:hover { color: var(--gold); }
     .nav-btn svg { width: 22px; height: 22px; }
-
-    /* Active indicator dot below the icon (like macOS) */
-    .nav-btn.on::after {
-      content: '';
-      display: block;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--gold);
-      margin-top: 2px;
-    }
-
-    /* ── TOPBAR ── */
+    .nav-btn.on::after { content: ""; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); margin-top: 2px; }
     .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; position: sticky; top: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 10; }
-    /* Topbar title uses Druk Wide */
     .topbar-title { font-family: var(--font-heading); font-size: 18px; font-weight: 700; letter-spacing: 1px; }
     .back-btn { background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; padding: 0 8px 0 0; line-height: 1; }
     .bal-chip { background: rgba(34,192,99,.12); color: var(--gold); border: 1px solid rgba(34,192,99,.2); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700; }
-
-    /* ── SHARED ── */
     .section-head { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 18px 20px 10px; }
     .notice { margin: 0 20px 20px; background: rgba(34,192,99,.07); border: 1px solid rgba(34,192,99,.2); border-radius: 12px; padding: 14px 16px; display: flex; gap: 12px; }
     .notice-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
@@ -181,12 +80,9 @@
     .empty { text-align: center; padding: 52px 20px; color: var(--muted); }
     .empty .ei { font-size: 36px; margin-bottom: 14px; }
     .empty p { font-size: 14px; line-height: 1.6; }
-
-    /* ── MARKETS VIEW ── */
     .balance-hero { margin: 16px 20px; background: linear-gradient(135deg, #0f1220 0%, var(--card) 100%); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; position: relative; overflow: hidden; }
-    .balance-hero::after { content: ''; position: absolute; top: -40px; right: -40px; width: 130px; height: 130px; background: radial-gradient(circle, rgba(34,192,99,.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+    .balance-hero::after { content: ""; position: absolute; top: -40px; right: -40px; width: 130px; height: 130px; background: radial-gradient(circle, rgba(34,192,99,.12) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
     .bh-label  { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-    /* Balance amount uses Urbanist (NOT Druk Wide — avoids stylized 0 looking like circle on mobile) */
     .bh-amount { font-family: var(--font-body); font-size: 44px; font-weight: 700; color: var(--gold); line-height: 1.1; margin: 4px 0; }
     .bh-sub    { font-size: 12px; color: var(--muted); }
     .bh-btns   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
@@ -194,24 +90,21 @@
     .bh-btn:active { opacity: .8; }
     .bh-dep { background: var(--gold); color: #000; }
     .bh-wd  { background: var(--card); color: var(--text); border: 1px solid var(--border); }
-
-    /* ── MARKET CARD ── */
     .mkt-list { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
     .mkt-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; }
     .mkt-top  { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
     .mkt-q    { font-size: 15px; font-weight: 600; line-height: 1.45; flex: 1; }
     .status-chip { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0; }
-    .sc-open    { background: rgba(0,229,122,.1);   color: var(--green); }
-    .sc-closed  { background: rgba(255,61,90,.1);   color: var(--red); }
-    .sc-settled { background: rgba(72,80,112,.15);  color: var(--muted); }
+    .sc-open    { background: rgba(0,229,122,.1);  color: var(--green); }
+    .sc-closed  { background: rgba(255,61,90,.1);  color: var(--red); }
+    .sc-settled { background: rgba(72,80,112,.15); color: var(--muted); }
     .odds-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
     .odds-box  { border-radius: 10px; padding: 14px; text-align: center; }
     .ob-yes    { background: rgba(0,229,122,.06); border: 1px solid rgba(0,229,122,.15); }
-    .ob-no     { background: rgba(255,61,90,.06);  border: 1px solid rgba(255,61,90,.15); }
+    .ob-no     { background: rgba(255,61,90,.06); border: 1px solid rgba(255,61,90,.15); }
     .ob-label  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
     .ob-yes .ob-label { color: var(--green); }
     .ob-no  .ob-label { color: var(--red); }
-    /* Odds numbers use Urbanist (NOT Druk Wide — avoids stylized 0 issue) */
     .ob-odds   { font-family: var(--font-body); font-size: 24px; font-weight: 700; line-height: 1; }
     .ob-yes .ob-odds { color: var(--green); }
     .ob-no  .ob-odds { color: var(--red); }
@@ -225,14 +118,11 @@
     .btn-yes:active, .btn-no:active { opacity: .7; }
     .mkt-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
     .mkt-timer  { font-size: 11px; color: var(--muted); }
-
-    /* ── TRADE MODAL ── */
     .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 300; align-items: flex-end; }
     .overlay.open { display: flex; }
     .sheet { width: 100%; max-width: 480px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 0 20px 40px; animation: slideUp .22s ease; }
     @keyframes slideUp { from { transform: translateY(100%); } }
     .sheet-handle  { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 14px auto 22px; }
-    /* Sheet title uses Druk Wide */
     .sheet-title   { font-family: var(--font-heading); font-size: 18px; font-weight: 700; margin-bottom: 6px; letter-spacing: 1px; }
     .sheet-q       { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
     .choice-row    { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
@@ -251,14 +141,10 @@
     .payout-preview { background: var(--surface); border-radius: 12px; padding: 15px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
     .pp-left .pp-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
     .pp-left .pp-odds  { font-size: 12px; color: var(--muted); }
-    /* Payout amount uses Urbanist (NOT Druk Wide — avoids stylized 0) */
     .pp-amount { font-family: var(--font-body); font-size: 24px; font-weight: 700; color: var(--green); }
     .cancel-btn { width: 100%; margin-top: 10px; padding: 12px; background: none; border: none; color: var(--muted); font-family: var(--font-body); font-size: 14px; cursor: pointer; }
-
-    /* ── PORTFOLIO ── */
     .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 16px 20px 0; }
     .stat-box  { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
-    /* Stat values use Urbanist (NOT Druk Wide — Druk's 0 looks like a circle on mobile) */
     .stat-val  { font-family: var(--font-body); font-size: 20px; font-weight: 700; color: var(--gold); }
     .stat-lbl  { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; margin-top: 4px; }
     .trade-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
@@ -274,8 +160,6 @@
     .tp-won    { color: var(--green); }
     .tp-lost   { color: var(--red); }
     .tp-active { color: var(--gold); }
-
-    /* ── PROFILE ── */
     .profile-card { margin: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; text-align: center; }
     .avatar { width: 86px; height: 86px; border-radius: 50%; background: linear-gradient(135deg, var(--gold) 0%, #16803f 100%); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 28px; font-weight: 700; color: #000; margin: 0 auto 6px; position: relative; cursor: pointer; overflow: hidden; border: 3px solid var(--border); transition: border-color .2s; }
     .avatar:hover { border-color: var(--gold); }
@@ -290,13 +174,13 @@
     .tier-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     .tb-free  { background: rgba(72,80,112,.2);  color: var(--muted); }
     .tb-basic { background: rgba(77,143,255,.12); color: var(--blue); }
-    .tb-pro   { background: rgba(34,192,99,.12); color: var(--gold); }
+    .tb-pro   { background: rgba(34,192,99,.12);  color: var(--gold); }
     .tb-elite { background: rgba(0,229,122,.12);  color: var(--green); }
     .menu-list { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
     .menu-row  { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 15px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: border-color .15s; }
     .menu-row:active { border-color: rgba(34,192,99,.4); }
     .menu-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .mi-gold   { background: rgba(34,192,99,.12); color: var(--gold); }
+    .mi-gold   { background: rgba(34,192,99,.12);  color: var(--gold); }
     .mi-green  { background: rgba(0,229,122,.1);   color: var(--green); }
     .mi-blue   { background: rgba(77,143,255,.1);  color: var(--blue); }
     .mi-red    { background: rgba(255,61,90,.1);   color: var(--red); }
@@ -305,8 +189,6 @@
     .mi-title { font-size: 14px; font-weight: 600; }
     .mi-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .mi-arrow { color: var(--muted); font-size: 20px; line-height: 1; }
-
-    /* ── MEMBERSHIP ── */
     .mem-intro { padding: 16px 20px 0; font-size: 13px; color: var(--muted); line-height: 1.65; }
     .tier-list  { padding: 0 20px; display: flex; flex-direction: column; gap: 14px; }
     .tier-card  { border: 1px solid var(--border); border-radius: var(--r); padding: 22px; position: relative; overflow: hidden; }
@@ -316,7 +198,6 @@
     .t-basic .tier-glow { background: radial-gradient(circle, rgba(77,143,255,.1) 0%, transparent 70%); }
     .t-pro   .tier-glow { background: radial-gradient(circle, rgba(34,192,99,.12) 0%, transparent 70%); }
     .t-elite .tier-glow { background: radial-gradient(circle, rgba(0,229,122,.1) 0%, transparent 70%); }
-    /* Tier names use Druk Wide — big display headings */
     .tier-name  { font-family: var(--font-heading); font-size: 26px; font-weight: 700; letter-spacing: 2px; margin-bottom: 4px; }
     .t-basic .tier-name { color: var(--blue); }
     .t-pro   .tier-name { color: var(--gold); }
@@ -330,11 +211,9 @@
     .t-elite .perk-dot { background: var(--green); }
     .tier-btn   { width: 100%; padding: 13px; border: none; border-radius: 10px; font-family: var(--font-body); font-size: 14px; font-weight: 700; cursor: pointer; }
     .tier-btn:active { opacity: .8; }
-    .tbt-basic { background: rgba(77,143,255,.15); color: var(--blue); border: 1px solid rgba(77,143,255,.3); }
+    .tbt-basic { background: rgba(77,143,255,.15); color: var(--blue);  border: 1px solid rgba(77,143,255,.3); }
     .tbt-pro   { background: var(--gold); color: #000; }
-    .tbt-elite { background: rgba(0,229,122,.12); color: var(--green); border: 1px solid rgba(0,229,122,.25); }
-
-    /* ── SUBMIT ── */
+    .tbt-elite { background: rgba(0,229,122,.12);  color: var(--green); border: 1px solid rgba(0,229,122,.25); }
     .form-wrap { padding: 0 20px; }
     .ff        { margin-bottom: 16px; }
     .ff label  { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
@@ -349,29 +228,21 @@
     .ss-approved { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--green); }
     .ss-rejected { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--red); }
     .sub-pts  { font-size: 12px; color: var(--muted); }
-
-    /* ── WITHDRAW ── */
     .wd-wrap    { padding: 0 20px; }
     .wd-card    { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 22px; margin-bottom: 20px; text-align: center; }
     .wd-label   { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-    /* Withdraw balance amount uses Urbanist (NOT Druk Wide — avoids stylized 0) */
     .wd-pts     { font-family: var(--font-body); font-size: 42px; font-weight: 700; color: var(--gold); line-height: 1; }
     .wd-eur     { font-size: 13px; color: var(--muted); margin-top: 6px; }
     .wf-input   { width: 100%; background: var(--card); border: 1.5px solid var(--border); border-radius: 11px; padding: 14px 16px; color: var(--text); font-family: var(--font-body); font-size: 16px; font-weight: 600; outline: none; transition: border-color .2s; margin-bottom: 6px; }
     .wf-input:focus { border-color: var(--gold); }
     .wf-hint    { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
-
-    /* ── REFERRALS PAGE ── */
     .ref-code-box { margin: 16px 20px; background: var(--card); border: 1px solid rgba(34,192,99,.3); border-radius: 14px; padding: 24px; text-align: center; }
     .ref-code-lbl { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-    /* Referral code uses Druk Wide — responsive size so it never overflows the box */
     .ref-code-val { font-family: var(--font-heading); font-size: clamp(20px, 8vw, 38px); font-weight: 700; color: var(--gold); letter-spacing: 4px; margin-bottom: 18px; word-break: break-all; }
     .ref-share-btn { background: var(--gold); color: #000; border: none; border-radius: 10px; padding: 13px 32px; font-family: var(--font-body); font-size: 14px; font-weight: 700; cursor: pointer; }
     .ref-share-btn:active { opacity: .8; }
     .ref-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 20px; margin-bottom: 6px; }
     .ref-stat  { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
-    /* Referral stat numbers use Urbanist (NOT Druk Wide — Druk's stylized 0 looks like a circle on mobile) */
-    /* Ref stat numbers use Urbanist (not Druk Wide) because Druk renders 0 as O — confusing! */
     .ref-stat-val { font-family: var(--font-body); font-size: 28px; font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; }
     .ref-stat-lbl { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-top: 4px; }
     .badge-wrap { margin: 0 20px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
@@ -386,8 +257,6 @@
     .ref-how-title { font-size: 12px; font-weight: 800; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
     .ref-how-step  { font-size: 13px; color: var(--muted); line-height: 2; }
     .ref-how-step strong { color: var(--text); }
-
-    /* ── HISTORY VIEW ── */
     .hist-tabs   { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 16px 20px 0; }
     .hist-tab    { padding: 10px; border: 1.5px solid var(--border); border-radius: 10px; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
     .hist-tab.on { background: rgba(34,192,99,.1); border-color: rgba(34,192,99,.35); color: var(--gold); }
@@ -398,7 +267,6 @@
     .hist-date   { font-size: 11px; color: var(--muted); }
     .hist-iban   { font-size: 11px; color: var(--muted); margin-top: 2px; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
     .hist-right  { text-align: right; flex-shrink: 0; }
-    /* History amounts use Urbanist (NOT Druk Wide — avoids stylized 0 issue) */
     .hist-amt    { font-family: var(--font-body); font-size: 17px; font-weight: 700; }
     .hist-eur    { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .hist-status { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
@@ -406,18 +274,13 @@
     .hs-completed  { color: var(--green); }
     .hs-processing { color: var(--blue); }
     .hs-rejected   { color: var(--red); }
-
-    /* ── TOAST ── */
     #toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 11px 20px; font-size: 13px; font-weight: 600; white-space: nowrap; z-index: 999; opacity: 0; transition: all .25s; pointer-events: none; }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    #toast.ok  { border-color: rgba(0,229,122,.4);  color: var(--green); }
-    #toast.bad { border-color: rgba(255,61,90,.4);  color: var(--red); }
-    /* ── LEADERBOARD ── */
+    #toast.ok  { border-color: rgba(0,229,122,.4); color: var(--green); }
+    #toast.bad { border-color: rgba(255,61,90,.4); color: var(--red); }
     .lb-tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 20px; }
     .lb-tab  { padding: 10px; border: none; background: transparent; color: var(--muted); font-family: var(--font-body); font-size: 14px; font-weight: 600; border-radius: 9px; cursor: pointer; transition: all .2s; }
     .lb-tab.on { background: var(--gold); color: #000; }
-
-    /* Top 3 podium cards */
     .lb-podium { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 24px; }
     .lb-pod    { display: flex; flex-direction: column; align-items: center; gap: 6px; }
     .lb-pod-avatar { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-weight: 700; color: #000; flex-shrink: 0; }
@@ -427,16 +290,13 @@
     .lb-pod-name  { font-size: 12px; font-weight: 700; color: var(--text); text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .lb-pod-pts   { font-size: 11px; color: var(--gold); font-weight: 600; }
     .lb-pod-rank  { font-size: 22px; }
-    /* Podium base bar — 1st tallest, 2nd medium, 3rd shortest */
     .lb-pod-base  { width: 70px; border-radius: 6px 6px 0 0; margin-top: 8px; }
-    .lb-pod.first  .lb-pod-base  { height: 44px; background: linear-gradient(to top, #ffd700, #ffaa00); }
-    .lb-pod.second .lb-pod-base  { height: 30px; background: linear-gradient(to top, #c0c0c0, #888); }
-    .lb-pod.third  .lb-pod-base  { height: 20px; background: linear-gradient(to top, #cd7f32, #8b4513); }
-    .lb-pod.first  { order: 2; }  /* 1st in center */
-    .lb-pod.second { order: 1; }  /* 2nd on left */
-    .lb-pod.third  { order: 3; }  /* 3rd on right */
-
-    /* Rest of the list */
+    .lb-pod.first  .lb-pod-base { height: 44px; background: linear-gradient(to top, #ffd700, #ffaa00); }
+    .lb-pod.second .lb-pod-base { height: 30px; background: linear-gradient(to top, #c0c0c0, #888); }
+    .lb-pod.third  .lb-pod-base { height: 20px; background: linear-gradient(to top, #cd7f32, #8b4513); }
+    .lb-pod.first  { order: 2; }
+    .lb-pod.second { order: 1; }
+    .lb-pod.third  { order: 3; }
     .lb-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface); border-radius: 12px; margin-bottom: 8px; }
     .lb-rank { font-family: var(--font-body); font-size: 13px; font-weight: 700; color: var(--muted); width: 22px; text-align: center; flex-shrink: 0; }
     .lb-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), #147a3a); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 14px; font-weight: 700; color: #000; flex-shrink: 0; overflow: hidden; }
@@ -445,39 +305,26 @@
     .lb-name  { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .lb-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .lb-pts   { font-family: var(--font-body); font-size: 15px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
-    /* Highlight the current user's row */
     .lb-row.me { background: rgba(34,192,99,.1); border: 1px solid rgba(34,192,99,.25); }
     .lb-row.me .lb-name::after { content: " (you)"; color: var(--gold); font-size: 11px; }
     .lb-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
-
-  
   </style>
 </head>
 <body>
 
-<!-- ════════════════════════════════════════════
-     AUTH SCREEN
-════════════════════════════════════════════ -->
 <div id="authWrap">
   <div class="auth-box">
-    <!-- Logo uses Druk Wide font -->
-    <div class="auth-logo">CASSINO TRADE</div>
-    <!-- Tagline uses Cormorant accent font (italic, elegant) -->
-    <div class="auth-sub">Predict markets · Trade points · Win big</div>
-
+    <div class="auth-logo">MY OPINIO</div>
+    <div class="auth-sub">hot takes only. bet on what you know. 🔥</div>
     <div class="tab-row">
       <button class="tab-btn on" id="tabSU" onclick="authTab('su')">Sign Up</button>
       <button class="tab-btn"    id="tabLI" onclick="authTab('li')">Login</button>
     </div>
-
     <div class="err-box" id="authErr"></div>
-
-    <!-- SIGN UP FORM -->
     <div id="formSU">
       <div class="f">
         <label>Username</label>
-        <input type="text" id="suUsername" placeholder="Choose a username" autocomplete="off"
-          oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
+        <input type="text" id="suUsername" placeholder="Choose a username" autocomplete="off" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')"/>
         <div class="f-hint">Only letters, numbers, underscores · min 3 chars</div>
       </div>
       <div class="f">
@@ -494,48 +341,27 @@
       </div>
       <div class="f">
         <label>Referral Code <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-        <input type="text" id="suRef" placeholder="Friend's referral code" autocomplete="off" style="text-transform:uppercase"
-          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
+        <input type="text" id="suRef" placeholder="Friend's referral code" autocomplete="off" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
         <div class="f-hint">Have a friend's code? Enter it for a free 100 pts bonus!</div>
       </div>
-      <!-- UNICAS student toggle — sets user_group on signup -->
       <div class="f" style="margin-bottom:18px">
         <label>Are you a UNICAS student?</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-          <button type="button" id="grpCassino" onclick="selectGroup('cassino')"
-            style="padding:10px;border-radius:10px;border:1.5px solid var(--gold);background:var(--gold);
-                   color:#000;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer">
-            🎰 No
-          </button>
-          <button type="button" id="grpUnicas" onclick="selectGroup('unicas')"
-            style="padding:10px;border-radius:10px;border:1.5px solid var(--border);background:transparent;
-                   color:var(--muted);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer">
-            🎓 Yes, UNICAS
-          </button>
+          <button type="button" id="grpCassino" onclick="selectGroup('cassino')" style="padding:10px;border-radius:10px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer">🎰 No</button>
+          <button type="button" id="grpUnicas"  onclick="selectGroup('unicas')"  style="padding:10px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer">🎓 Yes, UNICAS</button>
         </div>
         <div class="f-hint">UNICAS students get their own private leaderboard</div>
       </div>
       <button class="btn-gold" id="suBtn" onclick="doSignup()">Create Account</button>
     </div>
-
-    <!-- LOGIN FORM -->
     <div id="formLI" style="display:none">
-      <div class="f">
-        <label>Email</label>
-        <input type="email" id="liEmail" placeholder="you@email.com"/>
-      </div>
-      <div class="f">
-        <label>Password</label>
-        <input type="password" id="liPass" placeholder="Your password"/>
-      </div>
+      <div class="f"><label>Email</label><input type="email" id="liEmail" placeholder="you@email.com"/></div>
+      <div class="f"><label>Password</label><input type="password" id="liPass" placeholder="Your password"/></div>
       <button class="btn-gold" id="liBtn" onclick="doLogin()">Login</button>
     </div>
-
     <div style="text-align:center;margin-top:14px">
       <button onclick="doForgotPassword()" style="background:none;border:none;color:var(--muted);font-family:var(--font-body);font-size:13px;cursor:pointer;text-decoration:underline">Forgot password?</button>
     </div>
-
-    <!-- FORGOT PASSWORD FORM -->
     <div id="formFP" style="display:none">
       <div style="text-align:center;margin-bottom:20px">
         <div style="font-size:16px;font-weight:700;margin-bottom:6px">Reset Password</div>
@@ -549,18 +375,11 @@
         <button onclick="authTab('li')" style="background:none;border:none;color:var(--muted);font-family:var(--font-body);font-size:13px;cursor:pointer;text-decoration:underline">Back to login</button>
       </div>
     </div>
-
     <div style="height:24px"></div>
   </div>
 </div>
 
-
-<!-- ════════════════════════════════════════════
-     MAIN APP — shown after login
-════════════════════════════════════════════ -->
 <div id="appShell">
-
-  <!-- MARKETS VIEW -->
   <div class="view active" id="vMarkets">
     <div class="topbar">
       <div class="topbar-title">Markets</div>
@@ -579,7 +398,6 @@
     <div class="mkt-list" id="mktList"><div class="spinner"></div></div>
   </div>
 
-  <!-- PORTFOLIO VIEW -->
   <div class="view" id="vPortfolio">
     <div class="topbar"><div class="topbar-title">My Trades</div></div>
     <div class="stats-row">
@@ -591,7 +409,6 @@
     <div class="trade-list" id="tradeList"><div class="spinner"></div></div>
   </div>
 
-  <!-- SUBMIT VIEW -->
   <div class="view" id="vSubmit">
     <div class="topbar"><div class="topbar-title">Submit Question</div></div>
     <div class="notice">
@@ -616,7 +433,6 @@
     <div class="sub-list" id="subList"><div class="spinner"></div></div>
   </div>
 
-  <!-- PROFILE VIEW -->
   <div class="view" id="vProfile">
     <div class="topbar"><div class="topbar-title">Profile</div></div>
     <div class="profile-card">
@@ -625,10 +441,6 @@
         <img id="profAvImg" src="" alt="" style="display:none"/>
         <div class="avatar-overlay">📷</div>
       </div>
-      <!-- 
-        BUG FIX: accept attribute now includes image/* broadly for better mobile support.
-        Previously phone gallery wasn't opening because some Android browsers need image/* not just jpeg/png/webp
-      -->
       <input type="file" id="avatarInput" accept="image/*" onchange="uploadAvatar(event)"/>
       <div class="avatar-hint">Tap to change photo</div>
       <div class="prof-name" id="profName">—</div>
@@ -637,24 +449,12 @@
       <div id="profBadgeWrap" style="display:none;margin-top:8px">
         <span id="profBadge" style="display:inline-block;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(168,85,247,.15);color:#a855f7;letter-spacing:1px"></span>
       </div>
-      <div style="margin-top:10px">
-        <span class="tier-badge tb-free" id="profTier">Free</span>
-      </div>
+      <div style="margin-top:10px"><span class="tier-badge tb-free" id="profTier">Free</span></div>
     </div>
     <div class="menu-list">
       <div class="menu-row" onclick="goTo('referrals')">
-        <div class="menu-icon mi-purple">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        </div>
-        <div class="menu-info">
-          <div class="mi-title">Referrals</div>
-          <div class="mi-sub">Invite friends · earn 100 pts each</div>
-        </div>
+        <div class="menu-icon mi-purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="menu-info"><div class="mi-title">Referrals</div><div class="mi-sub">Invite friends · earn 100 pts each</div></div>
         <div class="mi-arrow">›</div>
       </div>
       <div class="menu-row" onclick="goTo('membership')">
@@ -668,15 +468,8 @@
         <div class="mi-arrow">›</div>
       </div>
       <div class="menu-row" onclick="goTo('history')">
-        <div class="menu-icon mi-blue" style="background:rgba(77,143,255,.1);color:var(--blue)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-          </svg>
-        </div>
-        <div class="menu-info">
-          <div class="mi-title">Deposit &amp; Withdrawal History</div>
-          <div class="mi-sub">All your past transactions</div>
-        </div>
+        <div class="menu-icon mi-blue" style="background:rgba(77,143,255,.1);color:var(--blue)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="menu-info"><div class="mi-title">Deposit &amp; Withdrawal History</div><div class="mi-sub">All your past transactions</div></div>
         <div class="mi-arrow">›</div>
       </div>
       <div class="menu-row" onclick="openDeposit()">
@@ -694,25 +487,19 @@
         <div class="menu-info"><div class="mi-title">Withdraw</div><div class="mi-sub">Cash out · min €20</div></div>
         <div class="mi-arrow">›</div>
       </div>
-      <!-- Logout button -->
       <div class="menu-row" onclick="doLogout()" style="margin-top:8px">
         <div class="menu-icon" style="background:rgba(255,61,90,.1);color:var(--red)">🚪</div>
         <div class="menu-info"><div class="mi-title" style="color:var(--red)">Log Out</div></div>
         <div class="mi-arrow" style="color:var(--red)">›</div>
       </div>
-      <!-- Add to Home Screen (shown only on supported browsers) -->
       <div class="menu-row" id="addHomeBtn" onclick="addToHomeScreen()" style="display:none;margin-top:4px">
         <div class="menu-icon mi-green">📲</div>
-        <div class="menu-info">
-          <div class="mi-title">Add to Home Screen</div>
-          <div class="mi-sub">Install app on your phone</div>
-        </div>
+        <div class="menu-info"><div class="mi-title">Add to Home Screen</div><div class="mi-sub">Install app on your phone</div></div>
         <div class="mi-arrow">›</div>
       </div>
     </div>
   </div>
 
-  <!-- REFERRALS VIEW -->
   <div class="view" id="vReferrals">
     <div class="topbar">
       <button class="back-btn" onclick="goBack()">‹</button>
@@ -721,24 +508,13 @@
     </div>
     <div class="ref-code-box">
       <div class="ref-code-lbl">Your Referral Code</div>
-      <!-- BUG FIX: was showing "—" because loadReferrals() wasn't waiting for profile load.
-           Now loadProfile() always populates this before the user can see referrals page. -->
       <div class="ref-code-val" id="refCode">—</div>
       <button class="ref-share-btn" onclick="shareReferral()">📤 Share with Friends</button>
     </div>
     <div class="ref-stats">
-      <div class="ref-stat">
-        <div class="ref-stat-val" id="refTotal">0</div>
-        <div class="ref-stat-lbl">Invited</div>
-      </div>
-      <div class="ref-stat">
-        <div class="ref-stat-val" id="refActive" style="color:var(--green)">0</div>
-        <div class="ref-stat-lbl">Active</div>
-      </div>
-      <div class="ref-stat">
-        <div class="ref-stat-val" id="refEarned">0</div>
-        <div class="ref-stat-lbl">Pts Earned</div>
-      </div>
+      <div class="ref-stat"><div class="ref-stat-val" id="refTotal">0</div><div class="ref-stat-lbl">Invited</div></div>
+      <div class="ref-stat"><div class="ref-stat-val" id="refActive" style="color:var(--green)">0</div><div class="ref-stat-lbl">Active</div></div>
+      <div class="ref-stat"><div class="ref-stat-val" id="refEarned">0</div><div class="ref-stat-lbl">Pts Earned</div></div>
     </div>
     <div class="ref-how">
       <div class="ref-how-title">How It Works</div>
@@ -752,12 +528,9 @@
     <div class="section-head">Badge Progress</div>
     <div class="badge-wrap" id="badgeWrap"><div class="spinner"></div></div>
     <div class="section-head">People Who Used Your Code</div>
-    <div id="refPeopleList" style="padding:0 20px 24px;display:flex;flex-direction:column;gap:10px">
-      <div class="spinner"></div>
-    </div>
+    <div id="refPeopleList" style="padding:0 20px 24px;display:flex;flex-direction:column;gap:10px"><div class="spinner"></div></div>
   </div>
 
-  <!-- MEMBERSHIP VIEW -->
   <div class="view" id="vMembership">
     <div class="topbar">
       <button class="back-btn" onclick="goBack()">‹</button>
@@ -807,40 +580,20 @@
     <div style="height:24px"></div>
   </div>
 
-  <!-- WITHDRAW VIEW -->
-  <!-- ══════════════════════════════════════════════════
-       LEADERBOARD VIEW
-       Two boards: Cassino (all-time total winnings) and
-       UNICAS (a separate group leaderboard)
-  ══════════════════════════════════════════════════ -->
   <div class="view" id="vLeaderboard">
     <div class="topbar"><div class="topbar-title">Leaderboard</div></div>
     <div style="padding:16px 16px 100px">
-
-      <!-- Switch between the 2 boards -->
       <div class="lb-tabs">
         <button class="lb-tab on" id="lbt-cassino" onclick="switchLbTab('cassino')">🎰 Cassino</button>
         <button class="lb-tab"    id="lbt-unicas"  onclick="switchLbTab('unicas')">🎓 UNICAS</button>
       </div>
-      <!-- Board subtitle — changes when tab switches -->
-      <div id="lbSubtitle" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:16px">
-        All-time top traders on Cassino Trade
-      </div>
-
-      <!-- Top 3 podium — filled by JS -->
-      <div class="lb-podium" id="lbPodium">
-        <div class="lb-empty" style="width:100%">Loading...</div>
-      </div>
-
-      <!-- Rank list 4 and beyond -->
+      <div id="lbSubtitle" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:16px">All-time top traders on My Opinio</div>
+      <div class="lb-podium" id="lbPodium"><div class="lb-empty" style="width:100%">Loading...</div></div>
       <div id="lbList"></div>
-
-      <!-- My position (pinned at bottom if not in top view) -->
       <div id="lbMyPos" style="margin-top:16px;display:none">
         <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Your Position</div>
         <div id="lbMyRow"></div>
       </div>
-
     </div>
   </div>
 
@@ -874,7 +627,6 @@
     </div>
   </div>
 
-  <!-- HISTORY VIEW -->
   <div class="view" id="vHistory">
     <div class="topbar">
       <button class="back-btn" onclick="goBack()">‹</button>
@@ -888,49 +640,28 @@
     <div class="hist-list" id="histList"><div class="spinner"></div></div>
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       macOS DOCK BOTTOM NAV
-       The dock-inner pill floats above the page
-  ══════════════════════════════════════════════ -->
   <nav id="bottomNav">
     <div class="dock-inner">
       <button class="nav-btn on" id="nb-markets" onclick="goTo('markets')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <rect x="14" y="14" width="7" height="7" rx="1"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Markets
       </button>
       <button class="nav-btn" id="nb-portfolio" onclick="goTo('portfolio')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Trades
       </button>
       <button class="nav-btn" id="nb-leaderboard" onclick="goTo('leaderboard')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="14" width="4" height="8" rx="1"/>
-          <rect x="9" y="9" width="4" height="13" rx="1"/>
-          <rect x="16" y="4" width="4" height="18" rx="1"/>
-          <polyline points="2 7 9 4 15 7 22 2"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="14" width="4" height="8" rx="1"/><rect x="9" y="9" width="4" height="13" rx="1"/><rect x="16" y="4" width="4" height="18" rx="1"/><polyline points="2 7 9 4 15 7 22 2"/></svg>
         Ranks
       </button>
       <button class="nav-btn" id="nb-profile" onclick="goTo('profile')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Profile
       </button>
     </div>
   </nav>
-
 </div>
 
-<!-- TRADE MODAL -->
 <div class="overlay" id="tradeOverlay">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -964,108 +695,56 @@
 
 <div id="toast"></div>
 
-
-<!-- ════════════════════════════════════════════
-     JAVASCRIPT — ALL LOGIC
-════════════════════════════════════════════ -->
 <script type="module">
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-// ── CONSTANTS ─────────────────────────────────────────────────────────────────
 const SUPA_URL    = "https://liketekvzrazheolmfnj.supabase.co";
 const SUPA_KEY    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxpa2V0ZWt2enJhemhlb2xtZm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyNDg0MzYsImV4cCI6MjA4NjgyNDQzNn0.8Zo-NJ0QmaH95zt3Nh4yV20M0HM5OOH9V0cDs1xYpPE";
 const PTS_PER_EUR  = 10;
 const MIN_STAKE    = 100;
-const MIN_DEPOSIT  = 10;
 const MIN_WITHDRAW = 200;
 const VIRTUAL_POOL = 1000;
 const START_ODDS   = 1.80;
 
-const db = createClient(SUPA_URL, SUPA_KEY, {
-  auth: { persistSession: true, storage: window.localStorage }
-});
+const db = createClient(SUPA_URL, SUPA_KEY, { auth: { persistSession: true, storage: window.localStorage } });
 window._db = db;
 
-// ── APP STATE ─────────────────────────────────────────────────────────────────
-let tgId        = null;  // stores telegram_id from users table (user's identifier)
-let currentTier = "free";
-let balance     = 0;
-let markets     = [];
-let activeMkt   = null;
-let choice      = null;
-let prevView    = "markets";
+let tgId = null, currentTier = "free", balance = 0, markets = [], activeMkt = null, choice = null, prevView = "markets";
 
-// ── EXPOSE FUNCTIONS TO HTML onclick ──────────────────────────────────────────
-// ── LOGOUT ───────────────────────────────────────────────────────────────────
 async function doLogout() {
-  await db.auth.signOut(); // clear Supabase session from localStorage
-  tgId    = null;
-  balance = 0;
+  await db.auth.signOut();
+  tgId = null; balance = 0;
   document.getElementById("appShell").classList.remove("show");
   document.getElementById("authWrap").style.display = "flex";
   showToast("Logged out ✓");
 }
 
-// ── PWA ADD TO HOME SCREEN ───────────────────────────────────────────────────
-let _deferredInstallPrompt = null; // saved browser install event
-
-// Listen for the browser's "beforeinstallprompt" event
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault(); // stop automatic prompt
-  _deferredInstallPrompt = e;
-  // Show the "Add to Home Screen" button in profile
+let _deferredInstallPrompt = null;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault(); _deferredInstallPrompt = e;
   const btn = document.getElementById("addHomeBtn");
   if (btn) btn.style.display = "flex";
 });
 
-// Called when user taps "Add to Home Screen"
 function addToHomeScreen() {
   if (_deferredInstallPrompt) {
     _deferredInstallPrompt.prompt();
-    _deferredInstallPrompt.userChoice.then(() => {
-      _deferredInstallPrompt = null;
-      const btn = document.getElementById("addHomeBtn");
-      if (btn) btn.style.display = "none";
-    });
-  } else {
-    // Fallback: show manual instructions (iOS Safari doesn't support the event)
-    showToast("Tap the Share button → 'Add to Home Screen' 📲", "ok");
-  }
+    _deferredInstallPrompt.userChoice.then(() => { _deferredInstallPrompt = null; const btn = document.getElementById("addHomeBtn"); if (btn) btn.style.display = "none"; });
+  } else { showToast("Tap the Share button → 'Add to Home Screen' 📲", "ok"); }
 }
 
-
-
-// ── APP BOOT ──────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  // Check if user already has a Supabase session saved in localStorage
   const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    // User was previously logged in — restore their session automatically
-    await resumeSession(session.user);
-  } else {
-    // No saved session — show login/signup screen
-    document.getElementById("authWrap").style.display = "flex";
-  }
+  if (session) { await resumeSession(session.user); }
+  else { document.getElementById("authWrap").style.display = "flex"; }
 });
 
-// resumeSession: called on page load if localStorage has a saved session
 async function resumeSession(authUser) {
-  // Load the user record from DB using auth_id to get their telegram_id (our user identifier)
-  const { data: userRow } = await db.from("users")
-    .select("telegram_id, balance_points")
-    .eq("auth_id", authUser.id)
-    .single();
-  if (!userRow) {
-    // Auth session exists but no user row — show auth screen
-    document.getElementById("authWrap").style.display = "flex";
-    return;
-  }
-  tgId    = String(userRow.telegram_id);
-  balance = userRow.balance_points || 0;
-  startApp();
+  const { data: userRow } = await db.from("users").select("telegram_id, balance_points").eq("auth_id", authUser.id).single();
+  if (!userRow) { document.getElementById("authWrap").style.display = "flex"; return; }
+  tgId = String(userRow.telegram_id); balance = userRow.balance_points || 0; startApp();
 }
 
-// ── AUTH ──────────────────────────────────────────────────────────────────────
 function authTab(t) {
   document.getElementById("formSU").style.display = t === "su" ? "block" : "none";
   document.getElementById("formLI").style.display = t === "li" ? "block" : "none";
@@ -1086,42 +765,23 @@ function doForgotPassword() {
 
 async function sendReset() {
   const email = document.getElementById("fpEmail").value.trim();
-  const errEl = document.getElementById("fpErr");
-  const okEl  = document.getElementById("fpOk");
-  errEl.style.display = "none";
-  okEl.style.display  = "none";
+  const errEl = document.getElementById("fpErr"), okEl = document.getElementById("fpOk");
+  errEl.style.display = "none"; okEl.style.display = "none";
   if (!email) { errEl.innerText = "Enter your email first."; errEl.style.display = "block"; return; }
-  const btn = document.getElementById("fpBtn");
-  btn.disabled = true; btn.innerText = "Sending...";
+  const btn = document.getElementById("fpBtn"); btn.disabled = true; btn.innerText = "Sending...";
   try {
-    await fetch(`${SUPA_URL}/auth/v1/recover`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY },
-      body: JSON.stringify({ email, redirect_to: "https://opinion-miniapp.vercel.app/reset-password.html" })
-    });
-    okEl.innerText = "If that email exists, a reset link has been sent. Check your inbox and spam folder.";
-    okEl.style.display = "block";
+    await fetch(`${SUPA_URL}/auth/v1/recover`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPA_KEY }, body: JSON.stringify({ email, redirect_to: "https://opinion-miniapp.vercel.app/reset-password.html" }) });
+    okEl.innerText = "If that email exists, a reset link has been sent. Check your inbox and spam folder."; okEl.style.display = "block";
   } catch { errEl.innerText = "Connection error. Try again."; errEl.style.display = "block"; }
   finally { btn.disabled = false; btn.innerText = "Send Reset Link"; }
 }
 
-function setErr(id, msg) {
-  const el = document.getElementById(id);
-  el.innerText = msg;
-  el.style.display = msg ? "block" : "none";
-}
+function setErr(id, msg) { const el = document.getElementById(id); el.innerText = msg; el.style.display = msg ? "block" : "none"; }
 
-// ── SIGN UP ───────────────────────────────────────────────────────────────────
-// BUG FIX: Added 15-second timeout so it never gets stuck at "Creating..." forever.
-// Before this fix, if the server was slow or had an error, the button stayed disabled.
-// Tracks which group the user selected on signup — default is cassino
 let selectedGroup = "cassino";
-
 function selectGroup(group) {
   selectedGroup = group;
-  // Update button styles — selected = gold filled, other = ghost outline
-  const cassBtn = document.getElementById("grpCassino");
-  const unicBtn = document.getElementById("grpUnicas");
+  const cassBtn = document.getElementById("grpCassino"), unicBtn = document.getElementById("grpUnicas");
   if (group === "cassino") {
     cassBtn.style.cssText = "padding:10px;border-radius:10px;border:1.5px solid var(--gold);background:var(--gold);color:#000;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer";
     unicBtn.style.cssText = "padding:10px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer";
@@ -1133,145 +793,82 @@ function selectGroup(group) {
 
 async function doSignup() {
   const username = document.getElementById("suUsername").value.trim().toLowerCase();
-  const email    = document.getElementById("suEmail").value.trim();
-  const pass     = document.getElementById("suPass").value;
-  const conf     = document.getElementById("suConf").value;
-  const refCode  = document.getElementById("suRef").value.trim().toUpperCase();
-
-  if (!username || username.length < 3)
-    return setErr("authErr", "Username must be at least 3 characters.");
-  if (!/^[a-z0-9_]+$/.test(username))
-    return setErr("authErr", "Username: only letters, numbers, underscores allowed.");
-  if (!email || !pass)  return setErr("authErr", "Fill in all fields.");
-  if (pass !== conf)    return setErr("authErr", "Passwords don't match.");
-  if (pass.length < 6)  return setErr("authErr", "Password must be 6+ chars.");
-
+  const email = document.getElementById("suEmail").value.trim();
+  const pass = document.getElementById("suPass").value;
+  const conf = document.getElementById("suConf").value;
+  const refCode = document.getElementById("suRef").value.trim().toUpperCase();
+  if (!username || username.length < 3) return setErr("authErr", "Username must be at least 3 characters.");
+  if (!/^[a-z0-9_]+$/.test(username)) return setErr("authErr", "Username: only letters, numbers, underscores allowed.");
+  if (!email || !pass) return setErr("authErr", "Fill in all fields.");
+  if (pass !== conf) return setErr("authErr", "Passwords don't match.");
+  if (pass.length < 6) return setErr("authErr", "Password must be 6+ chars.");
   setErr("authErr", "");
-  const btn = document.getElementById("suBtn");
-  btn.disabled = true;
-  btn.innerText = "Creating...";
-
-  // BUG FIX: 15-second timeout using AbortController.
-  // If the server takes too long, the user sees an error instead of being stuck.
+  const btn = document.getElementById("suBtn"); btn.disabled = true; btn.innerText = "Creating...";
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds
-
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
-    const res = await fetch(`${SUPA_URL}/functions/v1/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      signal: controller.signal, // attach the timeout
-      body: JSON.stringify({
-        email,
-        password:      pass,
-        telegram_id:   null,  // will be auto-assigned by register function using auth user id
-        username:      username,
-        full_name:     "",
-        referral_code: refCode || null,
-        user_group:    selectedGroup  // 'cassino' or 'unicas'
-      })
-    });
-    clearTimeout(timeoutId); // cancel timeout if we got a response
+    const res = await fetch(`${SUPA_URL}/functions/v1/register`, { method: "POST", headers: { "Content-Type": "application/json" }, signal: controller.signal, body: JSON.stringify({ email, password: pass, telegram_id: null, username, full_name: "", referral_code: refCode || null, user_group: selectedGroup }) });
+    clearTimeout(timeoutId);
     const data = await res.json();
     if (!res.ok) return setErr("authErr", data.error || "Signup failed.");
-    // After signup, sign in to get session, then load user record
     const { data: auth2, error: loginErr } = await db.auth.signInWithPassword({ email, password: pass });
     if (loginErr || !auth2) return setErr("authErr", "Signup succeeded but login failed. Please log in manually.");
     const { data: userRow2 } = await db.from("users").select("telegram_id").eq("auth_id", auth2.user.id).single();
     if (!userRow2) return setErr("authErr", "Account created but profile not found. Please log in.");
-    tgId    = String(userRow2.telegram_id);
-    balance = 0;
-    startApp();
+    tgId = String(userRow2.telegram_id); balance = 0; startApp();
   } catch (e) {
     clearTimeout(timeoutId);
-    // Tell user what went wrong — timeout or connection error
-    if (e.name === "AbortError") {
-      setErr("authErr", "Server is taking too long. Please try again.");
-    } else {
-      setErr("authErr", "Connection error. Try again.");
-    }
-  } finally {
-    btn.disabled = false;
-    btn.innerText = "Create Account";
-  }
+    if (e.name === "AbortError") { setErr("authErr", "Server is taking too long. Please try again."); }
+    else { setErr("authErr", "Connection error. Try again."); }
+  } finally { btn.disabled = false; btn.innerText = "Create Account"; }
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
 async function doLogin() {
   const email = document.getElementById("liEmail").value.trim();
-  const pass  = document.getElementById("liPass").value;
+  const pass = document.getElementById("liPass").value;
   if (!email || !pass) return setErr("authErr", "Fill in all fields.");
   setErr("authErr", "");
-  const btn = document.getElementById("liBtn");
-  btn.disabled = true; btn.innerText = "Logging in...";
+  const btn = document.getElementById("liBtn"); btn.disabled = true; btn.innerText = "Logging in...";
   try {
     const { data: auth, error } = await db.auth.signInWithPassword({ email, password: pass });
     if (error) return setErr("authErr", "Login failed: " + (error.message || "Wrong email or password."));
-    // Load user's telegram_id (our internal user identifier) from DB
     const { data: userRow } = await db.from("users").select("telegram_id").eq("auth_id", auth.user.id).single();
     if (!userRow) return setErr("authErr", "Account not found. Please sign up.");
     tgId = String(userRow.telegram_id);
     await db.from("wallets").upsert({ telegram_id: tgId, balance_points: 0, balance_eur: 0 }, { onConflict: "telegram_id", ignoreDuplicates: true });
     const { data: w } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
-    // tgId is now set from DB above
-    balance = w?.balance_points || 0;
-    startApp();
+    balance = w?.balance_points || 0; startApp();
   } catch { setErr("authErr", "Connection error. Try again."); }
   finally { btn.disabled = false; btn.innerText = "Login"; }
 }
 
-// ── START APP ─────────────────────────────────────────────────────────────────
 function startApp() {
   document.getElementById("authWrap").style.display = "none";
   document.getElementById("appShell").classList.add("show");
-  updateBalUI();
-  loadMarkets();
-  loadProfile();
-  subscribeWallet();
+  updateBalUI(); loadMarkets(); loadProfile(); subscribeWallet();
 }
 
-// ── BALANCE ───────────────────────────────────────────────────────────────────
 function updateBalUI() {
   const f = balance.toLocaleString();
-  document.getElementById("topBal").innerText   = f;
-  document.getElementById("heroBal").innerText  = f;
-  document.getElementById("wdBal").innerText    = f;
+  document.getElementById("topBal").innerText = f;
+  document.getElementById("heroBal").innerText = f;
+  document.getElementById("wdBal").innerText = f;
   document.getElementById("wdBalEur").innerText = `≈ €${(balance / PTS_PER_EUR).toFixed(2)}`;
 }
 
 function subscribeWallet() {
-  // Listen for realtime changes on the wallets table (fires when admin adjusts balance)
-  db.channel("wallet-rt").on("postgres_changes",
-    { event: "UPDATE", schema: "public", table: "wallets" },
-    p => { if (String(p.new.telegram_id) === String(tgId)) { balance = p.new.balance_points; updateBalUI(); } }
-  ).subscribe();
+  db.channel("wallet-rt").on("postgres_changes", { event: "UPDATE", schema: "public", table: "wallets" },
+    p => { if (String(p.new.telegram_id) === String(tgId)) { balance = p.new.balance_points; updateBalUI(); } }).subscribe();
 }
 
-// ── REFRESH BALANCE FROM DB ────────────────────────────────────────────────────
-// Called every time user navigates to home screen — ensures admin adjustments show up
-// even if realtime doesn't fire (realtime requires table to be in Supabase Realtime publication)
 async function refreshBalanceFromDB() {
   try {
     const { data } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
-    if (data && data.balance_points !== undefined) {
-      balance = data.balance_points;
-      updateBalUI();
-    }
-  } catch (e) { /* non-critical — keep showing cached balance */ }
+    if (data && data.balance_points !== undefined) { balance = data.balance_points; updateBalUI(); }
+  } catch(e) {}
 }
 
-// ── NAVIGATION ────────────────────────────────────────────────────────────────
-const viewMap = {
-  markets:     "vMarkets",
-  portfolio:   "vPortfolio",
-  leaderboard: "vLeaderboard",
-  profile:     "vProfile",
-  referrals:   "vReferrals",
-  history:     "vHistory",
-  membership:  "vMembership",
-  withdraw:    "vWithdraw",
-  submit:      "vSubmit"
-};
+const viewMap = { markets:"vMarkets", portfolio:"vPortfolio", leaderboard:"vLeaderboard", profile:"vProfile", referrals:"vReferrals", history:"vHistory", membership:"vMembership", withdraw:"vWithdraw", submit:"vSubmit" };
 
 function goTo(name) {
   prevView = currentView();
@@ -1279,143 +876,76 @@ function goTo(name) {
   document.getElementById(viewMap[name])?.classList.add("active");
   document.getElementById(viewMap[name]).scrollTop = 0;
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("on"));
-  const nb = document.getElementById("nb-" + name);
-  if (nb) nb.classList.add("on");
-  if (name === "markets")      refreshBalanceFromDB();
-  if (name === "portfolio")    loadTrades();
-  if (name === "leaderboard")  loadLeaderboard();
-  if (name === "submit")       loadSubmissions();
-  if (name === "withdraw")     { refreshBalanceFromDB(); updateBalUI(); }
-  if (name === "referrals")    loadReferrals();
-  if (name === "history")      loadHistory("dep");
-  if (name === "membership")   updateMembershipUI();
+  const nb = document.getElementById("nb-" + name); if (nb) nb.classList.add("on");
+  if (name === "markets")     refreshBalanceFromDB();
+  if (name === "portfolio")   loadTrades();
+  if (name === "leaderboard") loadLeaderboard();
+  if (name === "submit")      loadSubmissions();
+  if (name === "withdraw")    { refreshBalanceFromDB(); updateBalUI(); }
+  if (name === "referrals")   loadReferrals();
+  if (name === "history")     loadHistory("dep");
+  if (name === "membership")  updateMembershipUI();
 }
 
 function currentView() {
-  for (const [k, v] of Object.entries(viewMap))
-    if (document.getElementById(v)?.classList.contains("active")) return k;
+  for (const [k, v] of Object.entries(viewMap)) if (document.getElementById(v)?.classList.contains("active")) return k;
   return "markets";
 }
-
 function goBack() { goTo(prevView || "profile"); }
 
-// ── ODDS CALCULATION ──────────────────────────────────────────────────────────
 function calcOdds(yesPool, noPool) {
   const total = yesPool + noPool;
   if (total === 0) return { yesOdds: START_ODDS, noOdds: START_ODDS };
   const rawYes = yesPool > 0 ? total / yesPool : START_ODDS * 2;
   const rawNo  = noPool  > 0 ? total / noPool  : START_ODDS * 2;
   const V = VIRTUAL_POOL;
-  const anchoredYes = (yesPool * rawYes + V * START_ODDS) / (yesPool + V);
-  const anchoredNo  = (noPool  * rawNo  + V * START_ODDS) / (noPool  + V);
   return {
-    yesOdds: Math.max(1.01, parseFloat(anchoredYes.toFixed(2))),
-    noOdds:  Math.max(1.01, parseFloat(anchoredNo.toFixed(2)))
+    yesOdds: Math.max(1.01, parseFloat(((yesPool * rawYes + V * START_ODDS) / (yesPool + V)).toFixed(2))),
+    noOdds:  Math.max(1.01, parseFloat(((noPool  * rawNo  + V * START_ODDS) / (noPool  + V)).toFixed(2)))
   };
 }
 
-// ── MARKETS ───────────────────────────────────────────────────────────────────
 async function loadMarkets() {
   try {
-    const res = await fetch(`${SUPA_URL}/functions/v1/get-markets`, {
-      headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` }
-    });
-    markets = await res.json();
-    renderMarkets();
-  } catch {
-    document.getElementById("mktList").innerHTML =
-      `<div class="empty"><div class="ei">⚠️</div><p>Failed to load markets.<br>Pull to refresh.</p></div>`;
-  }
+    const res = await fetch(`${SUPA_URL}/functions/v1/get-markets`, { headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` } });
+    markets = await res.json(); renderMarkets();
+  } catch { document.getElementById("mktList").innerHTML = `<div class="empty"><div class="ei">⚠️</div><p>Failed to load markets.<br>Pull to refresh.</p></div>`; }
 }
 
 function renderMarkets() {
   const el = document.getElementById("mktList");
-  if (!markets?.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">🎯</div><p>No open markets right now.<br>Check back soon!</p></div>`;
-    return;
-  }
+  if (!markets?.length) { el.innerHTML = `<div class="empty"><div class="ei">🎯</div><p>No open markets right now.<br>Check back soon!</p></div>`; return; }
   el.innerHTML = markets.map(m => {
-    const yesOdds = m.yes_odds || 1.80;
-    const noOdds  = m.no_odds  || 1.80;
-    const impliedYes = 1 / yesOdds;
-    const impliedNo  = 1 / noOdds;
+    const yesOdds = m.yes_odds || 1.80, noOdds = m.no_odds || 1.80;
+    const impliedYes = 1 / yesOdds, impliedNo = 1 / noOdds;
     const yesPct = Math.round((impliedYes / (impliedYes + impliedNo)) * 100);
-    const diff   = new Date(m.closes_at) - Date.now();
-    const timer  = diff <= 0 ? "Closed"
-      : diff < 3600000  ? `${Math.floor(diff/60000)}m left`
-      : diff < 86400000 ? `${Math.floor(diff/3600000)}h left`
-      : `${Math.floor(diff/86400000)}d left`;
-    const canTrade  = m.status === "open" && diff > 0;
+    const diff = new Date(m.closes_at) - Date.now();
+    const timer = diff <= 0 ? "Closed" : diff < 3600000 ? `${Math.floor(diff/60000)}m left` : diff < 86400000 ? `${Math.floor(diff/3600000)}h left` : `${Math.floor(diff/86400000)}d left`;
+    const canTrade = m.status === "open" && diff > 0;
     const chipClass = m.status === "open" ? "sc-open" : m.status === "closed" ? "sc-closed" : "sc-settled";
-    return `<div class="mkt-card">
-      <div class="mkt-top">
-        <div class="mkt-q">${m.question}</div>
-        <span class="status-chip ${chipClass}">${m.status}</span>
-      </div>
-      <div class="odds-row">
-        <div class="odds-box ob-yes">
-          <div class="ob-label">YES</div>
-          <div class="ob-odds">×${yesOdds}</div>
-          <div class="ob-sub">${yesPct}% chance</div>
-        </div>
-        <div class="odds-box ob-no">
-          <div class="ob-label">NO</div>
-          <div class="ob-odds">×${noOdds}</div>
-          <div class="ob-sub">${100-yesPct}% chance</div>
-        </div>
-      </div>
-      <div class="prob-bar"><div class="prob-fill" style="width:${yesPct}%"></div></div>
-      <div class="mkt-btns">
-        <button class="btn-yes" ${canTrade?"":"disabled style='opacity:.4;cursor:not-allowed'"} onclick="openTradeModal('${m.id}','YES')">✅ Bet YES</button>
-        <button class="btn-no"  ${canTrade?"":"disabled style='opacity:.4;cursor:not-allowed'"} onclick="openTradeModal('${m.id}','NO')">❌ Bet NO</button>
-      </div>
-      <div class="mkt-footer"><span class="mkt-timer">⏱ ${timer}</span></div>
-    </div>`;
+    return `<div class="mkt-card"><div class="mkt-top"><div class="mkt-q">${m.question}</div><span class="status-chip ${chipClass}">${m.status}</span></div><div class="odds-row"><div class="odds-box ob-yes"><div class="ob-label">YES</div><div class="ob-odds">×${yesOdds}</div><div class="ob-sub">${yesPct}% chance</div></div><div class="odds-box ob-no"><div class="ob-label">NO</div><div class="ob-odds">×${noOdds}</div><div class="ob-sub">${100-yesPct}% chance</div></div></div><div class="prob-bar"><div class="prob-fill" style="width:${yesPct}%"></div></div><div class="mkt-btns"><button class="btn-yes" ${canTrade?"":"disabled style='opacity:.4;cursor:not-allowed'"} onclick="openTradeModal('${m.id}','YES')">✅ Bet YES</button><button class="btn-no" ${canTrade?"":"disabled style='opacity:.4;cursor:not-allowed'"} onclick="openTradeModal('${m.id}','NO')">❌ Bet NO</button></div><div class="mkt-footer"><span class="mkt-timer">⏱ ${timer}</span></div></div>`;
   }).join("");
 }
 
-// ── TRADE MODAL ───────────────────────────────────────────────────────────────
 function openTradeModal(mktId, side) {
-  activeMkt = markets.find(m => m.id === mktId);
-  if (!activeMkt) return;
+  activeMkt = markets.find(m => m.id === mktId); if (!activeMkt) return;
   choice = side;
   document.getElementById("sheetQ").innerText = activeMkt.question;
   document.getElementById("chYes").classList.toggle("sel", side === "YES");
-  document.getElementById("chNo").classList.toggle("sel",  side === "NO");
+  document.getElementById("chNo").classList.toggle("sel", side === "NO");
   document.getElementById("stakeIn").value = "";
   document.getElementById("ppAmt").innerText = "—";
   document.getElementById("ppOdds").innerText = "Pick YES or NO first";
-  document.getElementById("tradeOverlay").classList.add("open");
-  calcPayout();
+  document.getElementById("tradeOverlay").classList.add("open"); calcPayout();
 }
-
-function closeModal() {
-  document.getElementById("tradeOverlay").classList.remove("open");
-  activeMkt = null; choice = null;
-}
-
-function pick(side) {
-  choice = side;
-  document.getElementById("chYes").classList.toggle("sel", side === "YES");
-  document.getElementById("chNo").classList.toggle("sel",  side === "NO");
-  calcPayout();
-}
-
-function qs(amt) {
-  document.getElementById("stakeIn").value = amt;
-  calcPayout();
-}
-
+function closeModal() { document.getElementById("tradeOverlay").classList.remove("open"); activeMkt = null; choice = null; }
+function pick(side) { choice = side; document.getElementById("chYes").classList.toggle("sel", side === "YES"); document.getElementById("chNo").classList.toggle("sel", side === "NO"); calcPayout(); }
+function qs(amt) { document.getElementById("stakeIn").value = amt; calcPayout(); }
 function calcPayout() {
   const stake = parseFloat(document.getElementById("stakeIn").value) || 0;
-  if (!choice || !activeMkt || stake <= 0) {
-    document.getElementById("ppAmt").innerText  = "—";
-    document.getElementById("ppOdds").innerText = choice ? "Enter stake" : "Pick YES or NO first";
-    return;
-  }
+  if (!choice || !activeMkt || stake <= 0) { document.getElementById("ppAmt").innerText = "—"; document.getElementById("ppOdds").innerText = choice ? "Enter stake" : "Pick YES or NO first"; return; }
   const odds = choice === "YES" ? (activeMkt.yes_odds || 1.80) : (activeMkt.no_odds || 1.80);
-  const payout = Math.floor(stake * odds);
-  document.getElementById("ppAmt").innerText  = payout.toLocaleString() + " pts";
+  document.getElementById("ppAmt").innerText = Math.floor(stake * odds).toLocaleString() + " pts";
   document.getElementById("ppOdds").innerText = `×${odds} odds`;
 }
 
@@ -1423,702 +953,268 @@ async function placeTrade() {
   if (!activeMkt || !choice) return showToast("Pick YES or NO first", "bad");
   const stake = parseInt(document.getElementById("stakeIn").value) || 0;
   if (stake < MIN_STAKE) return showToast(`Min stake is ${MIN_STAKE} pts`, "bad");
-  if (stake > balance)   return showToast("Not enough points", "bad");
-
+  if (stake > balance) return showToast("Not enough points", "bad");
   const maxStakeMap = { free: 10000, basic: 50000, pro: 200000, elite: Infinity };
   const maxStake = maxStakeMap[currentTier] || 10000;
   if (stake > maxStake) return showToast(`Your tier max is ${maxStake.toLocaleString()} pts`, "bad");
-
-  const btn = document.getElementById("tradeBtn");
-  btn.disabled = true; btn.innerText = "Placing...";
+  const btn = document.getElementById("tradeBtn"); btn.disabled = true; btn.innerText = "Placing...";
   try {
     const { data: { session: tradeSess } } = await db.auth.getSession();
     const tradeToken = tradeSess?.access_token || SUPA_KEY;
-    const res = await fetch(`${SUPA_URL}/functions/v1/place-trade`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPA_KEY,
-        "Authorization": `Bearer ${tradeToken}`
-      },
-      body: JSON.stringify({ telegram_id: tgId, market_id: activeMkt.id, side: choice, stake })
-    });
+    const res = await fetch(`${SUPA_URL}/functions/v1/place-trade`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${tradeToken}` }, body: JSON.stringify({ telegram_id: tgId, market_id: activeMkt.id, side: choice, stake }) });
     const data = await res.json();
     if (!res.ok) return showToast(data.error || "Trade failed", "bad");
-    balance = data.new_balance;
-    updateBalUI();
-    closeModal();
-    showToast(`✅ Trade placed! Potential: ${data.potential_payout?.toLocaleString()} pts`, "ok");
-    loadMarkets();
+    balance = data.new_balance; updateBalUI(); closeModal();
+    showToast(`✅ Trade placed! Potential: ${data.potential_payout?.toLocaleString()} pts`, "ok"); loadMarkets();
   } catch { showToast("Connection error. Try again.", "bad"); }
   finally { btn.disabled = false; btn.innerText = "Confirm Trade"; }
 }
 
-// ── PROFILE ───────────────────────────────────────────────────────────────────
-// BUG FIX: Profile now always fetches avatar_url from DB on load.
-// Before: avatar was stored in browser memory only (localStorage) → gone on refresh.
-// Now: it reads from the "users" table where we save the Supabase Storage URL.
 async function loadProfile() {
   if (!tgId) return;
-  const { data: user } = await db
-    .from("users")
-    .select("full_name, email, username, referral_code, avatar_url, membership_tier")
-    .eq("telegram_id", tgId)
-    .single();
-
+  const { data: user } = await db.from("users").select("full_name, email, username, referral_code, avatar_url, membership_tier").eq("telegram_id", tgId).single();
   if (!user) return;
-
-  // Store tier globally so trade limits work
   currentTier = user.membership_tier || "free";
-
-  // Fill in profile fields
-  document.getElementById("profName").innerText  = user.full_name || "—";
+  document.getElementById("profName").innerText = user.full_name || "—";
   document.getElementById("profEmail").innerText = user.email || "—";
-  // profTgId removed — no longer showing telegram ID
-
-  // Show @username in gold
-  if (user.username) {
-    document.getElementById("profUsername").innerText = "@" + user.username;
-  }
-
-  // BUG FIX: Referral code was showing "—" because the users table stores it
-  // as "referral_code" but we weren't reading it here. Now we do.
-  // Also fix: if code is the full username (too long), shorten it to 4 chars + 3 numbers
+  if (user.username) document.getElementById("profUsername").innerText = "@" + user.username;
   if (user.referral_code) {
     let code = user.referral_code;
-    // If code is longer than 8 chars it's probably the full username — shorten it
-    if (code.length > 8) {
-      code = code.slice(0, 4).toUpperCase() + Math.floor(Math.random() * 900 + 100);
-      // Save the shortened code back to DB so it stays consistent
-      db.from("users").update({ referral_code: code }).eq("telegram_id", tgId);
-    }
+    if (code.length > 8) { code = code.slice(0,4).toUpperCase() + Math.floor(Math.random()*900+100); db.from("users").update({ referral_code: code }).eq("telegram_id", tgId); }
     document.getElementById("refCode").innerText = code;
   } else {
-    // If somehow missing, generate from username (fallback)
-    const fallback = (user.username || "USER").toUpperCase().slice(0, 4) +
-      Math.floor(Math.random() * 900 + 100);
-    // Save it so it's consistent next time
+    const fallback = (user.username || "USER").toUpperCase().slice(0,4) + Math.floor(Math.random()*900+100);
     db.from("users").update({ referral_code: fallback }).eq("telegram_id", tgId);
     document.getElementById("refCode").innerText = fallback;
   }
-
-  // Show the first letter of name as placeholder in avatar circle
   const letter = (user.full_name || user.username || "?")[0].toUpperCase();
   document.getElementById("profAvLetter").innerText = letter;
-
-  // BUG FIX: Load avatar from Supabase Storage URL saved in DB.
-  // Before: avatar was saved only in browser memory → disappeared on refresh.
-  // Now: we save avatar_url to the database, and load it here every time.
-  if (user.avatar_url) {
-    const img = document.getElementById("profAvImg");
-    img.src = user.avatar_url;
-    img.style.display = "block";
-    document.getElementById("profAvLetter").style.display = "none";
-  }
-
-  // Update tier badge
+  if (user.avatar_url) { const img = document.getElementById("profAvImg"); img.src = user.avatar_url; img.style.display = "block"; document.getElementById("profAvLetter").style.display = "none"; }
   const tierEl = document.getElementById("profTier");
-  const tierMap = { free: ["tb-free","Free"], basic: ["tb-basic","Basic"], pro: ["tb-pro","Pro"], elite: ["tb-elite","Elite"] };
+  const tierMap = { free:["tb-free","Free"], basic:["tb-basic","Basic"], pro:["tb-pro","Pro"], elite:["tb-elite","Elite"] };
   const [cls, label] = tierMap[currentTier] || ["tb-free","Free"];
-  tierEl.className = `tier-badge ${cls}`;
-  tierEl.innerText = label;
+  tierEl.className = `tier-badge ${cls}`; tierEl.innerText = label;
 }
 
-// ── AVATAR UPLOAD ─────────────────────────────────────────────────────────────
-// BUG FIX: Full rewrite of uploadAvatar.
-// Before: was saving to localStorage → not available on other devices/sessions.
-// Now: uploads to Supabase Storage bucket "avatars", saves public URL to users table.
-// That way the photo persists across refreshes and devices.
 async function uploadAvatar(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  // Only allow image files (extra safety check)
-  if (!file.type.startsWith("image/")) {
-    return showToast("Please pick an image file", "bad");
-  }
-
-  // Show a loading indicator on the avatar while uploading
-  const overlay = document.querySelector(".avatar-overlay");
-  overlay.style.opacity = "1";
-  overlay.innerText = "⏳";
-
+  const file = event.target.files?.[0]; if (!file) return;
+  if (!file.type.startsWith("image/")) return showToast("Please pick an image file", "bad");
+  const overlay = document.querySelector(".avatar-overlay"); overlay.style.opacity = "1"; overlay.innerText = "⏳";
   try {
-    // Create a unique filename using the telegram ID + timestamp
-    // This prevents overwriting other users' photos
-    const ext      = file.name.split(".").pop() || "jpg";
-    const fileName = `${tgId}_${Date.now()}.${ext}`;
-    const filePath = `avatars/${fileName}`;  // folder/filename in the bucket
-
-    // Upload the file to Supabase Storage bucket called "avatars"
-    // If the bucket doesn't exist, go create it in Supabase Dashboard → Storage → New bucket "avatars" (public)
-    const { error: uploadError } = await db.storage
-      .from("avatars")        // bucket name — must exist and be PUBLIC in Supabase
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: true          // overwrite if the same filename already exists
-      });
-
+    const ext = file.name.split(".").pop() || "jpg";
+    const filePath = `avatars/${tgId}_${Date.now()}.${ext}`;
+    const { error: uploadError } = await db.storage.from("avatars").upload(filePath, file, { cacheControl: "3600", upsert: true });
     if (uploadError) throw uploadError;
-
-    // Get the public URL of the uploaded file
-    const { data: urlData } = db.storage
-      .from("avatars")
-      .getPublicUrl(filePath);
-
-    const publicUrl = urlData?.publicUrl;
-    if (!publicUrl) throw new Error("Could not get public URL");
-
-    // Save the URL to the users table so it loads on next login/refresh
-    await db.from("users")
-      .update({ avatar_url: publicUrl })
-      .eq("telegram_id", tgId);
-
-    // Show the new photo in the UI immediately (no need to refresh)
-    const img = document.getElementById("profAvImg");
-    img.src = publicUrl;
-    img.style.display = "block";
+    const { data: urlData } = db.storage.from("avatars").getPublicUrl(filePath);
+    const publicUrl = urlData?.publicUrl; if (!publicUrl) throw new Error("Could not get public URL");
+    await db.from("users").update({ avatar_url: publicUrl }).eq("telegram_id", tgId);
+    const img = document.getElementById("profAvImg"); img.src = publicUrl; img.style.display = "block";
     document.getElementById("profAvLetter").style.display = "none";
-
     showToast("Profile photo updated! ✅", "ok");
-
-  } catch (err) {
-    console.error("Avatar upload failed:", err);
-    showToast("Upload failed: " + (err.message || "Try again"), "bad");
-  } finally {
-    // Reset the overlay no matter what
-    overlay.style.opacity = "0";
-    overlay.innerText = "📷";
-    // Clear the file input so picking the same file again works
-    event.target.value = "";
-  }
+  } catch (err) { showToast("Upload failed: " + (err.message || "Try again"), "bad"); }
+  finally { overlay.style.opacity = "0"; overlay.innerText = "📷"; event.target.value = ""; }
 }
 
-// ── PORTFOLIO / TRADES ────────────────────────────────────────────────────────
 async function loadTrades() {
-  const el = document.getElementById("tradeList");
-  el.innerHTML = '<div class="spinner"></div>';
-  const { data, error } = await db
-    .from("trades")
-    .select("side, stake, potential_payout, result, created_at, market_id")
-    .eq("telegram_id", tgId)
-    .order("created_at", { ascending: false })
-    .limit(50);
-  if (error || !data?.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">📊</div><p>No trades yet.<br>Go pick a market!</p></div>`;
-    const stats = { total: 0, won: 0, pts: 0 };
-    document.getElementById("stTotal").innerText = stats.total;
-    document.getElementById("stWon").innerText   = stats.won;
-    document.getElementById("stPts").innerText   = stats.pts;
-    return;
-  }
-  const won  = data.filter(t => t.result === "won").length;
-  const pts  = data.filter(t => t.result === "won").reduce((s,t) => s + (t.potential_payout||0), 0);
-  document.getElementById("stTotal").innerText = data.length;
-  document.getElementById("stWon").innerText   = won;
-  document.getElementById("stPts").innerText   = pts.toLocaleString();
+  const el = document.getElementById("tradeList"); el.innerHTML = '<div class="spinner"></div>';
+  const { data, error } = await db.from("trades").select("side, stake, potential_payout, result, created_at, market_id").eq("telegram_id", tgId).order("created_at", { ascending: false }).limit(50);
+  if (error || !data?.length) { el.innerHTML = `<div class="empty"><div class="ei">📊</div><p>No trades yet.<br>Go pick a market!</p></div>`; document.getElementById("stTotal").innerText = 0; document.getElementById("stWon").innerText = 0; document.getElementById("stPts").innerText = 0; return; }
+  const won = data.filter(t => t.result === "won").length;
+  const pts = data.filter(t => t.result === "won").reduce((s,t) => s + (t.potential_payout||0), 0);
+  document.getElementById("stTotal").innerText = data.length; document.getElementById("stWon").innerText = won; document.getElementById("stPts").innerText = pts.toLocaleString();
   el.innerHTML = data.map(t => {
     const payClass = t.result === "won" ? "tp-won" : t.result === "lost" ? "tp-lost" : "tp-active";
-    const payLabel = t.result === "won"  ? `+${t.potential_payout?.toLocaleString()} pts`
-                   : t.result === "lost" ? `-${t.stake} pts`
-                   : `${t.potential_payout?.toLocaleString()} pts (open)`;
-    return `<div class="trade-card">
-      <div class="tc-q">${t.market_id}</div>
-      <div class="tc-row">
-        <div class="tc-left">
-          <span class="tc-badge ${t.side==="YES"?"tcb-yes":"tcb-no"}">${t.side}</span>
-          <span class="tc-stake">${t.stake?.toLocaleString()} pts staked</span>
-        </div>
-        <span class="tc-payout ${payClass}">${payLabel}</span>
-      </div>
-    </div>`;
+    const payLabel = t.result === "won" ? `+${t.potential_payout?.toLocaleString()} pts` : t.result === "lost" ? `-${t.stake} pts` : `${t.potential_payout?.toLocaleString()} pts (open)`;
+    return `<div class="trade-card"><div class="tc-q">${t.market_id}</div><div class="tc-row"><div class="tc-left"><span class="tc-badge ${t.side==="YES"?"tcb-yes":"tcb-no"}">${t.side}</span><span class="tc-stake">${t.stake?.toLocaleString()} pts staked</span></div><span class="tc-payout ${payClass}">${payLabel}</span></div></div>`;
   }).join("");
 }
 
-// ── SUBMIT QUESTION ───────────────────────────────────────────────────────────
 async function doSubmit() {
-  const q    = document.getElementById("sqQ").value.trim();
-  const ctx  = document.getElementById("sqCtx").value.trim();
+  const q = document.getElementById("sqQ").value.trim(), ctx = document.getElementById("sqCtx").value.trim();
   if (q.length < 10) return setErr("sqErr", "Question must be at least 10 characters.");
   if (balance < 100) return setErr("sqErr", "You need at least 100 pts to submit.");
   setErr("sqErr", "");
-  const btn = document.getElementById("sqBtn");
-  btn.disabled = true; btn.innerText = "Submitting...";
+  const btn = document.getElementById("sqBtn"); btn.disabled = true; btn.innerText = "Submitting...";
   try {
-    // Get current auth session token to authenticate the request
     const { data: { session: sess } } = await db.auth.getSession();
     const authToken = sess?.access_token || SUPA_KEY;
-    const res = await fetch(`${SUPA_URL}/functions/v1/submit-question`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPA_KEY,
-        "Authorization": `Bearer ${authToken}`
-      },
-      body: JSON.stringify({ telegram_id: tgId, question: q, context: ctx })
-    });
+    const res = await fetch(`${SUPA_URL}/functions/v1/submit-question`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${authToken}` }, body: JSON.stringify({ telegram_id: tgId, question: q, context: ctx }) });
     const data = await res.json();
     if (!res.ok) return setErr("sqErr", data.error || "Submission failed.");
-    balance = data.new_balance;
-    updateBalUI();
-    document.getElementById("sqQ").value = "";
-    document.getElementById("sqCtx").value = "";
-    document.getElementById("sqC").innerText = "0/200";
-    showToast("Question submitted! We'll review it soon 🎯", "ok");
-    loadSubmissions();
+    balance = data.new_balance; updateBalUI();
+    document.getElementById("sqQ").value = ""; document.getElementById("sqCtx").value = ""; document.getElementById("sqC").innerText = "0/200";
+    showToast("Question submitted! We'll review it soon 🎯", "ok"); loadSubmissions();
   } catch { setErr("sqErr", "Connection error. Try again."); }
   finally { btn.disabled = false; btn.innerText = "Submit · 100 pts"; }
 }
 
 async function loadSubmissions() {
-  const el = document.getElementById("subList");
-  el.innerHTML = '<div class="spinner"></div>';
-  const { data, error } = await db
-    .from("question_submissions")
-    .select("question, status, created_at, pts_refunded")
-    .eq("telegram_id", tgId)
-    .order("created_at", { ascending: false })
-    .limit(20);
-  if (error || !data?.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">📝</div><p>No submissions yet.</p></div>`;
-    return;
-  }
-  el.innerHTML = data.map(s => `
-    <div class="sub-item">
-      <div class="sub-q">${s.question}</div>
-      <div class="sub-foot">
-        <span class="ss-${s.status}">${s.status.toUpperCase()}</span>
-        <span class="sub-pts">${s.pts_refunded ? "100 pts refunded" : "−100 pts"}</span>
-      </div>
-    </div>`).join("");
+  const el = document.getElementById("subList"); el.innerHTML = '<div class="spinner"></div>';
+  const { data, error } = await db.from("question_submissions").select("question, status, created_at, pts_refunded").eq("telegram_id", tgId).order("created_at", { ascending: false }).limit(20);
+  if (error || !data?.length) { el.innerHTML = `<div class="empty"><div class="ei">📝</div><p>No submissions yet.</p></div>`; return; }
+  el.innerHTML = data.map(s => `<div class="sub-item"><div class="sub-q">${s.question}</div><div class="sub-foot"><span class="ss-${s.status}">${s.status.toUpperCase()}</span><span class="sub-pts">${s.pts_refunded ? "100 pts refunded" : "−100 pts"}</span></div></div>`).join("");
 }
 
-// ── MEMBERSHIP ────────────────────────────────────────────────────────────────
 async function doSubscribe(tierName) {
-  const btn = document.getElementById(`membBtn-${tierName}`);
-  if (!btn) return;
+  const btn = document.getElementById(`membBtn-${tierName}`); if (!btn) return;
   btn.disabled = true; btn.innerText = "Redirecting...";
   try {
-    const res = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY },
-      body: JSON.stringify({ telegram_id: tgId, tier: tierName })
-    });
+    const res = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPA_KEY }, body: JSON.stringify({ telegram_id: tgId, tier: tierName }) });
     const data = await res.json();
-    if (!res.ok || !data.url) {
-      showToast(data.error || "Checkout failed", "bad");
-    } else {
-      window.open(data.url, "_blank");
-    }
+    if (!res.ok || !data.url) { showToast(data.error || "Checkout failed", "bad"); } else { window.open(data.url, "_blank"); }
   } catch { showToast("Connection error. Try again.", "bad"); }
   finally { btn.disabled = false; updateMembershipUI(); }
 }
 
 function updateMembershipUI() {
   ["basic","pro","elite"].forEach(t => {
-    const btn = document.getElementById(`membBtn-${t}`);
-    if (!btn) return;
-    if (currentTier === t) {
-      btn.innerText = "✅ Current Plan";
-      btn.disabled  = true;
-    } else {
-      const prices = { basic: "€8.99/mo", pro: "€26.99/mo", elite: "€53.99/mo" };
-      btn.innerText = `Get ${t.charAt(0).toUpperCase()+t.slice(1)} · ${prices[t]}`;
-      btn.disabled  = false;
-    }
+    const btn = document.getElementById(`membBtn-${t}`); if (!btn) return;
+    if (currentTier === t) { btn.innerText = "✅ Current Plan"; btn.disabled = true; }
+    else { const prices = { basic:"€8.99/mo", pro:"€26.99/mo", elite:"€53.99/mo" }; btn.innerText = `Get ${t.charAt(0).toUpperCase()+t.slice(1)} · ${prices[t]}`; btn.disabled = false; }
   });
 }
 
-// ── LEADERBOARD ───────────────────────────────────────────────────────────────
-// Two boards: "cassino" (all users ranked by total winnings) and
-// "unicas" (filtered to users who joined with the UNICAS referral group).
-// "Total winnings" = sum of payout_points from trades where status = 'won'
-
-let currentLbTab = "cassino"; // which board is showing right now
-
-// Called when user taps Cassino or UNICAS tab button
+let currentLbTab = "cassino";
 function switchLbTab(tab) {
   currentLbTab = tab;
-  // Highlight the right tab button
   document.getElementById("lbt-cassino").classList.toggle("on", tab === "cassino");
   document.getElementById("lbt-unicas").classList.toggle("on", tab === "unicas");
-  // Update the subtitle text based on which board is active
   const sub = document.getElementById("lbSubtitle");
-  if (sub) {
-    sub.textContent = tab === "unicas"
-      ? "University of Cassino students only 🎓"
-      : "All-time top traders on Cassino Trade";
-  }
+  if (sub) sub.textContent = tab === "unicas" ? "University of Cassino students only 🎓" : "All-time top traders on My Opinio";
   loadLeaderboard();
 }
 
 async function loadLeaderboard() {
-  // Show loading state
   document.getElementById("lbPodium").innerHTML = '<div class="lb-empty" style="width:100%">Loading...</div>';
-  document.getElementById("lbList").innerHTML = "";
-  document.getElementById("lbMyPos").style.display = "none";
-
-  const myTgId = String(tgId); // current logged-in user's telegram ID
-
-  // Step 1: Get all won trades with payout amounts
-  // We fetch all trades where status='won' then group by telegram_id in JS
-  let query = db.from("trades")
-    .select("telegram_id, payout_points")
-    .eq("status", "won");
-
-  const { data: trades, error } = await query;
-  if (error || !trades) {
-    document.getElementById("lbPodium").innerHTML = '<div class="lb-empty" style="width:100%">Could not load leaderboard</div>';
-    return;
-  }
-
-  // Step 2: Get all users — include email so we can filter UNICAS by email domain
-  const { data: users } = await db.from("users")
-    .select("telegram_id, username, full_name, avatar_url, user_group");
-
-  // Build a map: telegram_id → user info
-  const userMap = {};
-  (users || []).forEach(u => { userMap[String(u.telegram_id)] = u; });
-
-  // Step 3: Sum up winnings per user (total payout_points on won trades)
-  const winMap = {};
-  trades.forEach(t => {
-    const tid = String(t.telegram_id);
-    winMap[tid] = (winMap[tid] || 0) + Number(t.payout_points || 0);
-  });
-
-  // Step 4: Build entries and filter by board
-  let entries = Object.entries(winMap).map(([tid, pts]) => ({
-    tid, pts, user: userMap[tid] || {}
-  }));
-
-  if (currentLbTab === "unicas") {
-    // UNICAS board = only users who selected "UNICAS" on signup (user_group = 'unicas')
-    entries = entries.filter(e => e.user.user_group === "unicas");
-  }
-
-  // Step 5: Sort by total winnings descending
+  document.getElementById("lbList").innerHTML = ""; document.getElementById("lbMyPos").style.display = "none";
+  const myTgId = String(tgId);
+  const { data: trades, error } = await db.from("trades").select("telegram_id, payout_points").eq("status", "won");
+  if (error || !trades) { document.getElementById("lbPodium").innerHTML = '<div class="lb-empty" style="width:100%">Could not load leaderboard</div>'; return; }
+  const { data: users } = await db.from("users").select("telegram_id, username, full_name, avatar_url, user_group");
+  const userMap = {}; (users || []).forEach(u => { userMap[String(u.telegram_id)] = u; });
+  const winMap = {}; trades.forEach(t => { const tid = String(t.telegram_id); winMap[tid] = (winMap[tid]||0) + Number(t.payout_points||0); });
+  let entries = Object.entries(winMap).map(([tid, pts]) => ({ tid, pts, user: userMap[tid] || {} }));
+  if (currentLbTab === "unicas") entries = entries.filter(e => e.user.user_group === "unicas");
   entries.sort((a, b) => b.pts - a.pts);
-
-  // Show a small stats bar above the podium
-  const totalPlayers = entries.length;
-  const totalPrize   = entries.reduce((s, e) => s + e.pts, 0);
-  const boardLabel   = currentLbTab === "unicas" ? "UNICAS" : "Cassino";
-  // Remove old stats bar if switching tabs
-  const oldStats = document.getElementById("lbStats");
-  if (oldStats) oldStats.remove();
-  document.getElementById("lbPodium").insertAdjacentHTML("beforebegin",
-    `<div id="lbStats" style="display:flex;justify-content:space-between;align-items:center;
-      background:var(--surface);border-radius:12px;padding:12px 16px;margin-bottom:16px">
-      <div style="text-align:center">
-        <div style="font-size:18px;font-weight:700;color:var(--gold)">${totalPlayers}</div>
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Players</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:13px;font-weight:700;color:var(--text)">${boardLabel}</div>
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Board</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:18px;font-weight:700;color:var(--gold)">${totalPrize >= 1000 ? (totalPrize/1000).toFixed(1)+"K" : totalPrize}</div>
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Total pts won</div>
-      </div>
-    </div>`
-  );
-
-  if (!entries.length) {
-    document.getElementById("lbPodium").innerHTML =
-      `<div class="lb-empty" style="width:100%">No winners yet on the ${boardLabel} board 🏆<br>
-      <span style="font-size:12px;margin-top:8px;display:block">Start trading to get on the board!</span></div>`;
-    return;
-  }
-
-  // Step 6: Build podium (top 3)
-  const top3 = entries.slice(0, 3);
-  const podiumClasses = ["first", "second", "third"];
-  const medals = ["🥇", "🥈", "🥉"];
-
-  document.getElementById("lbPodium").innerHTML = top3.map((e, i) => {
-    const u = e.user;
-    const name = u.username ? "@" + u.username : "User " + e.tid.slice(-4);
-    const initial = (u.username || u.full_name || "?")[0].toUpperCase();
-    const avatarHtml = u.avatar_url
-      ? `<img src="${u.avatar_url}" alt="${initial}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-      : initial;
-    // Format pts — e.g. 12500 → "12.5K"
-    const pts = e.pts >= 1000 ? (e.pts / 1000).toFixed(1) + "K" : e.pts;
-    return `
-      <div class="lb-pod ${podiumClasses[i]}">
-        <div class="lb-pod-rank">${medals[i]}</div>
-        <div class="lb-pod-avatar">${avatarHtml}</div>
-        <div class="lb-pod-name">${name}</div>
-        <div class="lb-pod-pts">${pts} pts</div>
-        <div class="lb-pod-base"></div>
-      </div>`;
+  const totalPlayers = entries.length, totalPrize = entries.reduce((s,e) => s+e.pts, 0);
+  const boardLabel = currentLbTab === "unicas" ? "UNICAS" : "My Opinio";
+  const oldStats = document.getElementById("lbStats"); if (oldStats) oldStats.remove();
+  document.getElementById("lbPodium").insertAdjacentHTML("beforebegin", `<div id="lbStats" style="display:flex;justify-content:space-between;align-items:center;background:var(--surface);border-radius:12px;padding:12px 16px;margin-bottom:16px"><div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--gold)">${totalPlayers}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Players</div></div><div style="text-align:center"><div style="font-size:13px;font-weight:700;color:var(--text)">${boardLabel}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Board</div></div><div style="text-align:center"><div style="font-size:18px;font-weight:700;color:var(--gold)">${totalPrize>=1000?(totalPrize/1000).toFixed(1)+"K":totalPrize}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Total pts won</div></div></div>`);
+  if (!entries.length) { document.getElementById("lbPodium").innerHTML = `<div class="lb-empty" style="width:100%">No winners yet on the ${boardLabel} board 🏆<br><span style="font-size:12px;margin-top:8px;display:block">Start trading to get on the board!</span></div>`; return; }
+  const top3 = entries.slice(0,3), podiumClasses = ["first","second","third"], medals = ["🥇","🥈","🥉"];
+  document.getElementById("lbPodium").innerHTML = top3.map((e,i) => {
+    const u = e.user, name = u.username ? "@"+u.username : "User "+e.tid.slice(-4);
+    const initial = (u.username||u.full_name||"?")[0].toUpperCase();
+    const avatarHtml = u.avatar_url ? `<img src="${u.avatar_url}" alt="${initial}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : initial;
+    const pts = e.pts>=1000?(e.pts/1000).toFixed(1)+"K":e.pts;
+    return `<div class="lb-pod ${podiumClasses[i]}"><div class="lb-pod-rank">${medals[i]}</div><div class="lb-pod-avatar">${avatarHtml}</div><div class="lb-pod-name">${name}</div><div class="lb-pod-pts">${pts} pts</div><div class="lb-pod-base"></div></div>`;
   }).join("");
-
-  // Step 7: Build rank list (position 4 onwards, or all if < 4 total)
-  const rest = entries.slice(3);
-  document.getElementById("lbList").innerHTML = rest.length
-    ? rest.map((e, i) => buildLbRow(e, i + 4, myTgId)).join("")
-    : "";
-
-  // Step 8: Find and show my position if not in visible top section
+  document.getElementById("lbList").innerHTML = entries.slice(3).map((e,i) => buildLbRow(e, i+4, myTgId)).join("");
   const myRank = entries.findIndex(e => e.tid === myTgId);
-  if (myRank >= 3) {
-    // User is not in podium or top list — show pinned at bottom
-    const myEntry = entries[myRank];
-    document.getElementById("lbMyRow").innerHTML = buildLbRow(myEntry, myRank + 1, myTgId);
-    document.getElementById("lbMyPos").style.display = "block";
-  } else if (myRank === -1) {
-    // User has no wins yet — show them at bottom with 0
-    const myUser = userMap[myTgId] || {};
-    const myEntry = { tid: myTgId, pts: 0, user: myUser };
-    document.getElementById("lbMyRow").innerHTML = buildLbRow(myEntry, entries.length + 1, myTgId);
-    document.getElementById("lbMyPos").style.display = "block";
-  }
+  if (myRank >= 3) { document.getElementById("lbMyRow").innerHTML = buildLbRow(entries[myRank], myRank+1, myTgId); document.getElementById("lbMyPos").style.display = "block"; }
+  else if (myRank === -1) { document.getElementById("lbMyRow").innerHTML = buildLbRow({ tid:myTgId, pts:0, user:userMap[myTgId]||{} }, entries.length+1, myTgId); document.getElementById("lbMyPos").style.display = "block"; }
 }
 
-// Build a single leaderboard row HTML string
 function buildLbRow(e, rank, myTgId) {
-  const u = e.user;
-  const isMe = e.tid === myTgId;
-  const name = u.username ? "@" + u.username : "User " + e.tid.slice(-4);
-  const initial = (u.username || u.full_name || "?")[0].toUpperCase();
-  const avatarHtml = u.avatar_url
-    ? `<img src="${u.avatar_url}" alt="${initial}">`
-    : initial;
-  const pts = e.pts >= 1000 ? (e.pts / 1000).toFixed(1) + "K" : e.pts;
-  return `
-    <div class="lb-row${isMe ? " me" : ""}">
-      <div class="lb-rank">#${rank}</div>
-      <div class="lb-avatar">${avatarHtml}</div>
-      <div class="lb-info">
-        <div class="lb-name">${name}</div>
-        <div class="lb-sub">${e.pts.toLocaleString()} pts won</div>
-      </div>
-      <div class="lb-pts">${pts}</div>
-    </div>`;
+  const u = e.user, isMe = e.tid === myTgId;
+  const name = u.username ? "@"+u.username : "User "+e.tid.slice(-4);
+  const initial = (u.username||u.full_name||"?")[0].toUpperCase();
+  const avatarHtml = u.avatar_url ? `<img src="${u.avatar_url}" alt="${initial}">` : initial;
+  const pts = e.pts>=1000?(e.pts/1000).toFixed(1)+"K":e.pts;
+  return `<div class="lb-row${isMe?" me":""}"><div class="lb-rank">#${rank}</div><div class="lb-avatar">${avatarHtml}</div><div class="lb-info"><div class="lb-name">${name}</div><div class="lb-sub">${e.pts.toLocaleString()} pts won</div></div><div class="lb-pts">${pts}</div></div>`;
 }
 
-// ── REFERRALS ─────────────────────────────────────────────────────────────────
-// BUG FIX: referral code is now pre-loaded from loadProfile().
-// loadReferrals() only fetches the stats (invited / active / earned) and the list.
 async function loadReferrals() {
   if (!tgId) return;
-
-  // The refCode div is already filled by loadProfile().
-  // But re-fetch just in case (e.g. user navigates to referrals before profile loads)
-  const { data: user } = await db
-    .from("users")
-    .select("referral_code")
-    .eq("telegram_id", tgId)
-    .single();
-
-  if (user?.referral_code) {
-    document.getElementById("refCode").innerText = user.referral_code;
-  }
-
-  // Fetch referral records
-  const { data: refs } = await db
-    .from("referrals")
-    .select("status, reward_points, created_at, referred_telegram_id")
-    .eq("referrer_telegram_id", tgId);
-
-  const total  = refs?.length || 0;
-  const active = refs?.filter(r => r.status === "completed").length || 0;
-  const earned = refs?.filter(r => r.status === "completed")
-                      .reduce((s,r) => s + (r.reward_points||0), 0) || 0;
-
-  document.getElementById("refTotal").innerText  = total;
-  document.getElementById("refActive").innerText = active;
-  document.getElementById("refEarned").innerText = earned.toLocaleString();
-
-  // Badge progress (gamification)
-  const badges = [
-    { name: "🌱 Starter",     req: 1,   color: "#22c063" },
-    { name: "🔥 Recruiter",   req: 5,   color: "#4d8fff" },
-    { name: "⚡ Connector",   req: 10,  color: "#a855f7" },
-    { name: "👑 Ambassador",  req: 25,  color: "#f59e0b" },
-  ];
-  document.getElementById("badgeWrap").innerHTML = badges.map(b => {
-    const pct = Math.min(100, Math.round((active / b.req) * 100));
-    const done = active >= b.req;
-    return `<div class="badge-row">
-      <div class="badge-top">
-        <span class="badge-name" style="${done?"color:"+b.color:""}">${b.name} ${done?"✅":""}</span>
-        <span class="badge-req">${active}/${b.req} referrals</span>
-      </div>
-      <div class="badge-bar">
-        <div class="badge-fill" style="width:${pct}%;background:${b.color}"></div>
-      </div>
-    </div>`;
-  }).join("");
-
-  // Per-person list
+  const { data: user } = await db.from("users").select("referral_code").eq("telegram_id", tgId).single();
+  if (user?.referral_code) document.getElementById("refCode").innerText = user.referral_code;
+  const { data: refs } = await db.from("referrals").select("status, reward_points, created_at, referred_telegram_id").eq("referrer_telegram_id", tgId);
+  const total = refs?.length||0, active = refs?.filter(r=>r.status==="completed").length||0, earned = refs?.filter(r=>r.status==="completed").reduce((s,r)=>s+(r.reward_points||0),0)||0;
+  document.getElementById("refTotal").innerText = total; document.getElementById("refActive").innerText = active; document.getElementById("refEarned").innerText = earned.toLocaleString();
+  const badges = [{ name:"🌱 Starter",req:1,color:"#22c063"},{ name:"🔥 Recruiter",req:5,color:"#4d8fff"},{ name:"⚡ Connector",req:10,color:"#a855f7"},{ name:"👑 Ambassador",req:25,color:"#f59e0b"}];
+  document.getElementById("badgeWrap").innerHTML = badges.map(b => { const pct=Math.min(100,Math.round((active/b.req)*100)),done=active>=b.req; return `<div class="badge-row"><div class="badge-top"><span class="badge-name" style="${done?"color:"+b.color:""}">${b.name} ${done?"✅":""}</span><span class="badge-req">${active}/${b.req} referrals</span></div><div class="badge-bar"><div class="badge-fill" style="width:${pct}%;background:${b.color}"></div></div></div>`; }).join("");
   const listEl = document.getElementById("refPeopleList");
-  if (!refs?.length) {
-    listEl.innerHTML = `<div class="empty"><div class="ei">👥</div><p>No referrals yet.<br>Share your code!</p></div>`;
-    return;
-  }
-  listEl.innerHTML = refs.map(r => {
-    const date = new Date(r.created_at).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
-    const statusColor = r.status === "completed" ? "var(--green)" : "var(--gold)";
-    return `<div class="hist-card">
-      <div class="hist-left">
-        <div class="hist-type">👤 Friend #${r.referred_telegram_id?.slice(-4) || "????"}</div>
-        <div class="hist-date">${date}</div>
-      </div>
-      <div class="hist-right">
-        <div class="hist-amt" style="color:${statusColor}">+${r.reward_points||0} pts</div>
-        <div class="hist-status" style="color:${statusColor}">${r.status}</div>
-      </div>
-    </div>`;
-  }).join("");
+  if (!refs?.length) { listEl.innerHTML = `<div class="empty"><div class="ei">👥</div><p>No referrals yet.<br>Share your code!</p></div>`; return; }
+  listEl.innerHTML = refs.map(r => { const date=new Date(r.created_at).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),statusColor=r.status==="completed"?"var(--green)":"var(--gold)"; return `<div class="hist-card"><div class="hist-left"><div class="hist-type">👤 Friend #${r.referred_telegram_id?.slice(-4)||"????"}</div><div class="hist-date">${date}</div></div><div class="hist-right"><div class="hist-amt" style="color:${statusColor}">+${r.reward_points||0} pts</div><div class="hist-status" style="color:${statusColor}">${r.status}</div></div></div>`; }).join("");
 }
 
 function shareReferral() {
   const code = document.getElementById("refCode").innerText;
   if (!code || code === "—") return showToast("Referral code not loaded yet", "bad");
   const tg = window.Telegram?.WebApp;
-  const msg = `🎯 Join me on Cassino Trade!\n\nPredict markets & win real points!\n\nUse my code ${code} when signing up for a FREE 100 pts bonus!\n\nhttps://t.me/CassinoTradeBot`;
-  if (tg?.openTelegramLink) {
-    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent("https://t.me/CassinoTradeBot")}&text=${encodeURIComponent(msg)}`);
-  } else {
-    navigator.clipboard?.writeText(msg).then(() => showToast("Copied to clipboard! 📋", "ok"))
-      .catch(() => showToast(`Your code: ${code}`, "ok"));
-  }
+  const msg = `🎯 Join me on My Opinio!\n\nPredict markets & win real points!\n\nUse my code ${code} when signing up for a FREE 100 pts bonus!\n\nhttps://t.me/CassinoTradeBot`;
+  if (tg?.openTelegramLink) { tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent("https://t.me/CassinoTradeBot")}&text=${encodeURIComponent(msg)}`); }
+  else { navigator.clipboard?.writeText(msg).then(()=>showToast("Copied to clipboard! 📋","ok")).catch(()=>showToast(`Your code: ${code}`,"ok")); }
 }
 
-// ── WITHDRAW ──────────────────────────────────────────────────────────────────
-function wdCalc() {
-  const pts = parseFloat(document.getElementById("wdAmt").value) || 0;
-  document.getElementById("wdHint").innerText = `≈ €${(pts / PTS_PER_EUR).toFixed(2)}`;
-}
+function wdCalc() { document.getElementById("wdHint").innerText = `≈ €${((parseFloat(document.getElementById("wdAmt").value)||0)/PTS_PER_EUR).toFixed(2)}`; }
 
 async function doWithdraw() {
-  const pts  = parseInt(document.getElementById("wdAmt").value) || 0;
-  const iban = document.getElementById("wdIban").value.trim();
-  const el   = document.getElementById("wdErr");
+  const pts = parseInt(document.getElementById("wdAmt").value)||0, iban = document.getElementById("wdIban").value.trim(), el = document.getElementById("wdErr");
   el.style.display = "none";
-  if (pts < MIN_WITHDRAW) return (el.innerText = `Minimum ${MIN_WITHDRAW} pts (€${MIN_WITHDRAW/PTS_PER_EUR})`, el.style.display = "block");
-  if (pts > balance)      return (el.innerText = "Not enough points.", el.style.display = "block");
-  if (!iban)              return (el.innerText = "Enter your IBAN.", el.style.display = "block");
-
-  const btn = document.querySelector('#vWithdraw .btn-gold');
-  btn.disabled = true; btn.innerText = "Submitting...";
+  if (pts < MIN_WITHDRAW) return (el.innerText=`Minimum ${MIN_WITHDRAW} pts (€${MIN_WITHDRAW/PTS_PER_EUR})`,el.style.display="block");
+  if (pts > balance) return (el.innerText="Not enough points.",el.style.display="block");
+  if (!iban) return (el.innerText="Enter your IBAN.",el.style.display="block");
+  const btn = document.querySelector("#vWithdraw .btn-gold"); btn.disabled=true; btn.innerText="Submitting...";
   try {
-    const { error } = await db.from("withdrawals").insert({
-      telegram_id: tgId, amount_points: pts,
-      amount_eur: pts / PTS_PER_EUR, iban, status: "pending"
-    });
+    const { error } = await db.from("withdrawals").insert({ telegram_id:tgId, amount_points:pts, amount_eur:pts/PTS_PER_EUR, iban, status:"pending" });
     if (error) throw error;
-    const { error: e2 } = await db.rpc("deduct_balance", { p_telegram_id: tgId, p_amount: pts });
+    const { error: e2 } = await db.rpc("deduct_balance", { p_telegram_id:tgId, p_amount:pts });
     if (e2) throw e2;
-    balance -= pts;
-    updateBalUI();
-    document.getElementById("wdAmt").value  = "";
-    document.getElementById("wdIban").value = "";
-    document.getElementById("wdHint").innerText = "≈ €0.00";
-    showToast("Withdrawal requested ✅ We'll process in 2-5 days", "ok");
-  } catch (err) { el.innerText = "Error: " + (err.message || "Try again."); el.style.display = "block"; }
-  finally { btn.disabled = false; btn.innerText = "Request Withdrawal"; }
+    balance -= pts; updateBalUI();
+    document.getElementById("wdAmt").value=""; document.getElementById("wdIban").value=""; document.getElementById("wdHint").innerText="≈ €0.00";
+    showToast("Withdrawal requested ✅ We'll process in 2-5 days","ok");
+  } catch(err) { el.innerText="Error: "+(err.message||"Try again."); el.style.display="block"; }
+  finally { btn.disabled=false; btn.innerText="Request Withdrawal"; }
 }
 
-// ── DEPOSIT (Stripe) ──────────────────────────────────────────────────────────
 async function openDeposit() {
-  showToast("Opening deposit page...", "ok");
+  showToast("Opening deposit page...","ok");
   try {
-    const res = await fetch(`${SUPA_URL}/functions/v1/create-deposit-checkout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY },
-      body: JSON.stringify({ telegram_id: tgId })
-    });
+    const res = await fetch(`${SUPA_URL}/functions/v1/create-deposit-checkout`, { method:"POST", headers:{"Content-Type":"application/json","apikey":SUPA_KEY}, body:JSON.stringify({telegram_id:tgId}) });
     const data = await res.json();
-    if (!res.ok || !data.url) { showToast(data.error || "Deposit failed", "bad"); return; }
-    window.open(data.url, "_blank");
-  } catch { showToast("Connection error. Try again.", "bad"); }
+    if (!res.ok || !data.url) { showToast(data.error||"Deposit failed","bad"); return; }
+    window.open(data.url,"_blank");
+  } catch { showToast("Connection error. Try again.","bad"); }
 }
 
-// ── HISTORY ───────────────────────────────────────────────────────────────────
-function histTab(tab) {
-  document.getElementById("htDep").classList.toggle("on", tab === "dep");
-  document.getElementById("htWd").classList.toggle("on",  tab === "wd");
-  loadHistory(tab);
-}
+function histTab(tab) { document.getElementById("htDep").classList.toggle("on",tab==="dep"); document.getElementById("htWd").classList.toggle("on",tab==="wd"); loadHistory(tab); }
 
 async function loadHistory(tab) {
-  const el = document.getElementById("histList");
-  el.innerHTML = '<div class="spinner"></div>';
-
+  const el = document.getElementById("histList"); el.innerHTML='<div class="spinner"></div>';
   if (tab === "dep") {
-    const [depRes, memRes, tiersRes] = await Promise.all([
-      db.from("payments").select("amount_eur, points_added, created_at").eq("telegram_id", tgId).order("created_at", { ascending: false }).limit(100),
-      db.from("user_memberships").select("tier_id, started_at, created_at, status").eq("telegram_id", tgId).order("started_at", { ascending: false }).limit(50),
-      db.from("membership_tiers").select("id, name, price_eur_cents, bonus_points")
+    const [depRes,memRes,tiersRes] = await Promise.all([
+      db.from("payments").select("amount_eur,points_added,created_at").eq("telegram_id",tgId).order("created_at",{ascending:false}).limit(100),
+      db.from("user_memberships").select("tier_id,started_at,created_at,status").eq("telegram_id",tgId).order("started_at",{ascending:false}).limit(50),
+      db.from("membership_tiers").select("id,name,price_eur_cents,bonus_points")
     ]);
-    const tierMap = {};
-    (tiersRes.data || []).forEach(t => { tierMap[t.id] = t; });
-    const depRows = (depRes.data || []).map(p => ({ type:"deposit", date:p.created_at, pts:p.points_added, eur:p.amount_eur, status:"completed" }));
-    const memRows = (memRes.data || []).map(m => {
-      const t = tierMap[m.tier_id] || {};
-      return { type:"membership", date:m.started_at||m.created_at, pts:t.bonus_points||0, eur:((t.price_eur_cents||0)/100), status:m.status, name:t.name||"Unknown" };
-    });
-    const allRows = [...depRows,...memRows].sort((a,b) => new Date(b.date)-new Date(a.date));
-    if (!allRows.length) { el.innerHTML = `<div class="empty"><div class="ei">💳</div><p>No deposits yet.<br>Tap Deposit to add points!</p></div>`; return; }
-    el.innerHTML = allRows.map(row => {
-      const date = new Date(row.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
-      if (row.type === "membership") {
-        const sClass = row.status === "active" ? "hs-completed" : "hs-pending";
-        return `<div class="hist-card"><div class="hist-left"><div class="hist-type">⭐ ${row.name} Membership</div><div class="hist-date">${date}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">+${row.pts} bonus pts included</div></div><div class="hist-right"><div class="hist-amt" style="color:var(--blue)">€${Number(row.eur).toFixed(2)}/mo</div><div class="hist-status ${sClass}">${row.status}</div></div></div>`;
-      }
+    const tierMap={}; (tiersRes.data||[]).forEach(t=>{tierMap[t.id]=t;});
+    const depRows=(depRes.data||[]).map(p=>({type:"deposit",date:p.created_at,pts:p.points_added,eur:p.amount_eur,status:"completed"}));
+    const memRows=(memRes.data||[]).map(m=>{const t=tierMap[m.tier_id]||{};return{type:"membership",date:m.started_at||m.created_at,pts:t.bonus_points||0,eur:((t.price_eur_cents||0)/100),status:m.status,name:t.name||"Unknown"};});
+    const allRows=[...depRows,...memRows].sort((a,b)=>new Date(b.date)-new Date(a.date));
+    if (!allRows.length){el.innerHTML=`<div class="empty"><div class="ei">💳</div><p>No deposits yet.<br>Tap Deposit to add points!</p></div>`;return;}
+    el.innerHTML=allRows.map(row=>{
+      const date=new Date(row.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+      if(row.type==="membership"){const sClass=row.status==="active"?"hs-completed":"hs-pending";return `<div class="hist-card"><div class="hist-left"><div class="hist-type">⭐ ${row.name} Membership</div><div class="hist-date">${date}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">+${row.pts} bonus pts included</div></div><div class="hist-right"><div class="hist-amt" style="color:var(--blue)">€${Number(row.eur).toFixed(2)}/mo</div><div class="hist-status ${sClass}">${row.status}</div></div></div>`;}
       return `<div class="hist-card"><div class="hist-left"><div class="hist-type">💳 Stripe Deposit</div><div class="hist-date">${date}</div></div><div class="hist-right"><div class="hist-amt" style="color:var(--gold)">+${Number(row.pts).toLocaleString()} pts</div><div class="hist-eur">€${Number(row.eur).toFixed(2)}</div><div class="hist-status hs-completed">completed</div></div></div>`;
     }).join("");
   } else {
-    const { data, error } = await db.from("withdrawals").select("amount_eur,amount_points,iban,status,created_at,admin_note").eq("telegram_id", tgId).order("created_at",{ascending:false}).limit(100);
-    if (error || !data?.length) { el.innerHTML = `<div class="empty"><div class="ei">🏦</div><p>No withdrawals yet.<br>Win some trades first!</p></div>`; return; }
-    el.innerHTML = data.map(w => {
-      const sClass = w.status==="completed"?"hs-completed":w.status==="processing"?"hs-processing":w.status==="pending"?"hs-pending":"hs-rejected";
-      const date = new Date(w.created_at).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
-      const iban = w.iban ? w.iban.replace(/\s/g,"").replace(/(.{8}).*(.{4})$/,"$1•••$2") : "—";
+    const{data,error}=await db.from("withdrawals").select("amount_eur,amount_points,iban,status,created_at,admin_note").eq("telegram_id",tgId).order("created_at",{ascending:false}).limit(100);
+    if(error||!data?.length){el.innerHTML=`<div class="empty"><div class="ei">🏦</div><p>No withdrawals yet.<br>Win some trades first!</p></div>`;return;}
+    el.innerHTML=data.map(w=>{
+      const sClass=w.status==="completed"?"hs-completed":w.status==="processing"?"hs-processing":w.status==="pending"?"hs-pending":"hs-rejected";
+      const date=new Date(w.created_at).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+      const iban=w.iban?w.iban.replace(/\s/g,"").replace(/(.{8}).*(.{4})$/,"$1•••$2"):"—";
       return `<div class="hist-card"><div class="hist-left"><div class="hist-type">🏦 Bank Withdrawal</div><div class="hist-date">${date}</div><div class="hist-iban">${iban}</div>${w.admin_note?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${w.admin_note}</div>`:""}</div><div class="hist-right"><div class="hist-amt" style="color:var(--red)">−${Number(w.amount_points).toLocaleString()} pts</div><div class="hist-eur">€${Number(w.amount_eur).toFixed(2)}</div><div class="hist-status ${sClass}">${w.status}</div></div></div>`;
     }).join("");
   }
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
-function showToast(msg, type = "ok") {
-  const t = document.getElementById("toast");
-  t.innerText = msg;
-  t.className = `show ${type}`;
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.className = "", 3000);
+function showToast(msg, type="ok") {
+  const t=document.getElementById("toast"); t.innerText=msg; t.className=`show ${type}`; clearTimeout(t._t); t._t=setTimeout(()=>t.className="",3000);
 }
 
-// ════════════════════════════════════════════════════════════
-// EXPOSE ALL FUNCTIONS TO GLOBAL WINDOW
-// MUST be here at the END — after all function definitions
-// In ES modules, onclick="foo()" needs window.foo to exist
-// Functions are NOT auto-global in modules — we set them here
-// ════════════════════════════════════════════════════════════
-Object.assign(window, {
-  doForgotPassword, sendReset,
-  authTab, doSignup, doLogin,
-  goTo, goBack,
-  openDeposit,
-  openTradeModal, closeModal, pick, qs, calcPayout, placeTrade,
-  doSubmit,
-  doSubscribe,
-  wdCalc, doWithdraw,
-  shareReferral,
-  histTab,
-  uploadAvatar,
-  showToast,
-  selectGroup,
-  switchLbTab,
-  doLogout,
-  addToHomeScreen
-});
-
+Object.assign(window, { doForgotPassword, sendReset, authTab, doSignup, doLogin, goTo, goBack, openDeposit, openTradeModal, closeModal, pick, qs, calcPayout, placeTrade, doSubmit, doSubscribe, wdCalc, doWithdraw, shareReferral, histTab, uploadAvatar, showToast, selectGroup, switchLbTab, doLogout, addToHomeScreen });
 </script>
 </body>
 </html>
