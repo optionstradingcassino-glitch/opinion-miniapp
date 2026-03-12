@@ -1209,17 +1209,17 @@ async function loadTrades() {
       }
     }
 
-    return \`<div class="trade-card">
-      <div class="tc-q">\${label}</div>
+    return `<div class="trade-card">
+      <div class="tc-q">${label}</div>
       <div class="tc-row">
         <div class="tc-left">
-          <span class="tc-badge \${t.option==="YES"?"tcb-yes":"tcb-no"}">\${t.option}</span>
-          <span class="tc-stake">\${(t.amount_points||0).toLocaleString()} pts staked</span>
+          <span class="tc-badge ${t.option==="YES"?"tcb-yes":"tcb-no"}">${t.option}</span>
+          <span class="tc-stake">${(t.amount_points||0).toLocaleString()} pts staked</span>
         </div>
-        <span class="tc-payout \${payClass}">\${payLabel}</span>
+        <span class="tc-payout ${payClass}">${payLabel}</span>
       </div>
-      \${cancelBtn}
-    </div>\`;
+      ${cancelBtn}
+    </div>`;
   }).join("");
 }
 // ── CANCEL TRADE ─────────────────────────────────────────────────────────────
