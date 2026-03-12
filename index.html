@@ -732,12 +732,12 @@ const db = createClient(SUPA_URL, SUPA_KEY, {
 window._db = db;
 
 // ── APP STATE ─────────────────────────────────────────────────────────────────
-let tgId = null, currentTier = "free", balance = 0, markets = [], activeMkt = null, choice = null, prevView = "markets";
+let userId = null, currentTier = "free", balance = 0, markets = [], activeMkt = null, choice = null, prevView = "markets";
 
 // ── LOGOUT ────────────────────────────────────────────────────────────────────
 async function doLogout() {
   await db.auth.signOut(); // wipes the saved session from localStorage
-  tgId = null; balance = 0;
+  userId = null; balance = 0;
   document.getElementById("appShell").classList.remove("show");
   document.getElementById("authWrap").style.display = "flex";
   showToast("Logged out ✓");
@@ -844,13 +844,12 @@ async function resumeSession(authUser) {
     return;
   }
 
-  // Step 2: set the global user ID (called tgId for historical reasons — it's just our internal user key)
-  tgId = String(userRow.telegram_id);
+  userId = String(userRow.telegram_id);
 
   // Step 3: load wallet balance separately (more reliable than joining tables)
   const { data: wallet } = await db.from("wallets")
     .select("balance_points")
-    .eq("telegram_id", tgId)
+    .eq("telegram_id", userId)
     .single();
 
   balance = wallet?.balance_points || 0;
@@ -944,7 +943,7 @@ async function doSignup() {
     if (loginErr || !auth2) return setErr("authErr", "Signup succeeded but login failed. Please log in manually.");
     const { data: userRow2 } = await db.from("users").select("telegram_id").eq("auth_id", auth2.user.id).single();
     if (!userRow2) return setErr("authErr", "Account created but profile not found. Please log in.");
-    tgId = String(userRow2.telegram_id); balance = 0; startApp();
+    userId = String(userRow2.telegram_id); balance = 0; startApp();
   } catch (e) {
     clearTimeout(timeoutId);
     if (e.name === "AbortError") { setErr("authErr", "Server is taking too long. Please try again."); }
@@ -965,10 +964,10 @@ async function doLogin() {
     // Look up this user's internal ID from the database
     const { data: userRow } = await db.from("users").select("telegram_id").eq("auth_id", auth.user.id).single();
     if (!userRow) return setErr("authErr", "Account not found. Please sign up.");
-    tgId = String(userRow.telegram_id);
+    userId = String(userRow.telegram_id);
     // Make sure wallet row exists (safety net for new accounts)
-    await db.from("wallets").upsert({ telegram_id: tgId, balance_points: 0, balance_eur: 0 }, { onConflict: "telegram_id", ignoreDuplicates: true });
-    const { data: w } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
+    await db.from("wallets").upsert({ telegram_id: userId, balance_points: 0, balance_eur: 0 }, { onConflict: "telegram_id", ignoreDuplicates: true });
+    const { data: w } = await db.from("wallets").select("balance_points").eq("telegram_id", userId).single();
     balance = w?.balance_points || 0;
     startApp();
   } catch { setErr("authErr", "Connection error. Try again."); }
@@ -994,13 +993,13 @@ function updateBalUI() {
 function subscribeWallet() {
   db.channel("wallet-rt").on("postgres_changes",
     { event: "UPDATE", schema: "public", table: "wallets" },
-    p => { if (String(p.new.telegram_id) === String(tgId)) { balance = p.new.balance_points; updateBalUI(); } }
+    p => { if (String(p.new.telegram_id) === String(userId)) { balance = p.new.balance_points; updateBalUI(); } }
   ).subscribe();
 }
 
 async function refreshBalanceFromDB() {
   try {
-    const { data } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
+    const { data } = await db.from("wallets").select("balance_points").eq("telegram_id", userId).single();
     if (data?.balance_points !== undefined) { balance = data.balance_points; updateBalUI(); }
   } catch(e) {}
 }
@@ -1116,7 +1115,7 @@ async function placeTrade() {
     const res = await fetch(`${SUPA_URL}/functions/v1/place-trade`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${tradeToken}` },
-      body: JSON.stringify({ telegram_id: tgId, market_id: activeMkt.id, side: choice, stake })
+      body: JSON.stringify({ user_id: userId, market_id: activeMkt.id, side: choice, stake })
     });
     const data = await res.json();
     if (!res.ok) return showToast(data.error || "Trade failed", "bad");
@@ -1129,8 +1128,8 @@ async function placeTrade() {
 
 // ── PROFILE ───────────────────────────────────────────────────────────────────
 async function loadProfile() {
-  if (!tgId) return;
-  const { data: user } = await db.from("users").select("full_name, email, username, referral_code, avatar_url, membership_tier").eq("telegram_id", tgId).single();
+  if (!userId) return;
+  const { data: user } = await db.from("users").select("full_name, email, username, referral_code, avatar_url, membership_tier").eq("telegram_id", userId).single();
   if (!user) return;
   currentTier = user.membership_tier || "free";
   document.getElementById("profName").innerText = user.full_name || "—";
@@ -1138,11 +1137,11 @@ async function loadProfile() {
   if (user.username) document.getElementById("profUsername").innerText = "@" + user.username;
   if (user.referral_code) {
     let code = user.referral_code;
-    if (code.length > 8) { code = code.slice(0,4).toUpperCase() + Math.floor(Math.random()*900+100); db.from("users").update({ referral_code: code }).eq("telegram_id", tgId); }
+    if (code.length > 8) { code = code.slice(0,4).toUpperCase() + Math.floor(Math.random()*900+100); db.from("users").update({ referral_code: code }).eq("telegram_id", userId); }
     document.getElementById("refCode").innerText = code;
   } else {
     const fallback = (user.username || "USER").toUpperCase().slice(0,4) + Math.floor(Math.random()*900+100);
-    db.from("users").update({ referral_code: fallback }).eq("telegram_id", tgId);
+    db.from("users").update({ referral_code: fallback }).eq("telegram_id", userId);
     document.getElementById("refCode").innerText = fallback;
   }
   const letter = (user.full_name || user.username || "?")[0].toUpperCase();
@@ -1160,12 +1159,12 @@ async function uploadAvatar(event) {
   const overlay = document.querySelector(".avatar-overlay"); overlay.style.opacity = "1"; overlay.innerText = "⏳";
   try {
     const ext = file.name.split(".").pop() || "jpg";
-    const filePath = `avatars/${tgId}_${Date.now()}.${ext}`;
+    const filePath = `avatars/${userId}_${Date.now()}.${ext}`;
     const { error: uploadError } = await db.storage.from("avatars").upload(filePath, file, { cacheControl: "3600", upsert: true });
     if (uploadError) throw uploadError;
     const { data: urlData } = db.storage.from("avatars").getPublicUrl(filePath);
     const publicUrl = urlData?.publicUrl; if (!publicUrl) throw new Error("Could not get public URL");
-    await db.from("users").update({ avatar_url: publicUrl }).eq("telegram_id", tgId);
+    await db.from("users").update({ avatar_url: publicUrl }).eq("telegram_id", userId);
     const img = document.getElementById("profAvImg"); img.src = publicUrl; img.style.display = "block";
     document.getElementById("profAvLetter").style.display = "none";
     showToast("Profile photo updated! ✅", "ok");
@@ -1179,7 +1178,7 @@ async function loadTrades() {
   // FIXED: correct column names: option/amount_points/payout_points/status
   const { data, error } = await db.from("trades")
     .select("id, option, amount_points, payout_points, status, created_at, market_id, question")
-    .eq("telegram_id", tgId)
+    .eq("telegram_id", userId)
     .order("created_at", { ascending: false })
     .limit(50);
   if (error || !data?.length) {
@@ -1266,7 +1265,7 @@ async function cancelTrade(tradeId) {
 
   const { data, error } = await db.rpc("cancel_trade", {
     p_trade_id:    tradeId,
-    p_telegram_id: String(tgId)
+    p_telegram_id: String(userId)
   });
 
   if (error) {
@@ -1297,7 +1296,7 @@ async function doSubmit() {
     const res = await fetch(`${SUPA_URL}/functions/v1/submit-question`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${authToken}` },
-      body: JSON.stringify({ telegram_id: tgId, question: q, context: ctx })
+      body: JSON.stringify({ user_id: userId, question: q, context: ctx })
     });
     const data = await res.json();
     if (!res.ok) return setErr("sqErr", data.error || "Submission failed.");
@@ -1310,7 +1309,7 @@ async function doSubmit() {
 
 async function loadSubmissions() {
   const el = document.getElementById("subList"); el.innerHTML = '<div class="spinner"></div>';
-  const { data, error } = await db.from("question_submissions").select("question, status, created_at, pts_refunded").eq("telegram_id", tgId).order("created_at", { ascending: false }).limit(20);
+  const { data, error } = await db.from("question_submissions").select("question, status, created_at, pts_refunded").eq("telegram_id", userId).order("created_at", { ascending: false }).limit(20);
   if (error || !data?.length) { el.innerHTML = `<div class="empty"><div class="ei">📝</div><p>No submissions yet.</p></div>`; return; }
   el.innerHTML = data.map(s => `<div class="sub-item"><div class="sub-q">${s.question}</div><div class="sub-foot"><span class="ss-${s.status}">${s.status.toUpperCase()}</span><span class="sub-pts">${s.pts_refunded ? "100 pts refunded" : "−100 pts"}</span></div></div>`).join("");
 }
@@ -1326,7 +1325,7 @@ async function doSubscribe(tierName) {
     const res = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({ telegram_id: tgId, type: "membership", tier: tierName })
+      body: JSON.stringify({ user_id: userId, type: "membership", tier: tierName })
     });
     const data = await res.json();
     if (!res.ok || !data.url) { showToast(data.error || "Checkout failed", "bad"); }
@@ -1357,7 +1356,7 @@ async function openDeposit() {
     const res = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({ telegram_id: tgId, type: "deposit", amount })
+      body: JSON.stringify({ user_id: userId, type: "deposit", amount })
     });
     const data = await res.json();
     if (!res.ok || !data.url) { showToast(data.error || "Deposit failed", "bad"); return; }
@@ -1379,7 +1378,7 @@ function switchLbTab(tab) {
 async function loadLeaderboard() {
   document.getElementById("lbPodium").innerHTML = '<div class="lb-empty" style="width:100%">Loading...</div>';
   document.getElementById("lbList").innerHTML = ""; document.getElementById("lbMyPos").style.display = "none";
-  const myTgId = String(tgId);
+  const myTgId = String(userId);
   const { data: trades, error } = await db.from("trades").select("telegram_id, payout_points").eq("status", "won");
   if (error || !trades) { document.getElementById("lbPodium").innerHTML = '<div class="lb-empty" style="width:100%">Could not load leaderboard</div>'; return; }
   const { data: users } = await db.from("users").select("telegram_id, username, full_name, avatar_url, user_group");
@@ -1418,12 +1417,12 @@ function buildLbRow(e, rank, myTgId) {
 
 // ── REFERRALS ─────────────────────────────────────────────────────────────────
 async function loadReferrals() {
-  if (!tgId) return;
-  const { data: user } = await db.from("users").select("referral_code").eq("telegram_id", tgId).single();
+  if (!userId) return;
+  const { data: user } = await db.from("users").select("referral_code").eq("telegram_id", userId).single();
   if (user?.referral_code) document.getElementById("refCode").innerText = user.referral_code;
   // FIXED: DB columns are referrer_id / referee_id (not referrer_telegram_id / referred_telegram_id)
   // reward_paid is a boolean — 100pts per completed referral
-  const { data: refs } = await db.from("referrals").select("status, reward_paid, created_at, referee_id").eq("referrer_id", tgId);
+  const { data: refs } = await db.from("referrals").select("status, reward_paid, created_at, referee_id").eq("referrer_id", userId);
   const total = refs?.length||0, active = refs?.filter(r=>r.status==="completed").length||0, earned = active * 100;
   document.getElementById("refTotal").innerText = total; document.getElementById("refActive").innerText = active; document.getElementById("refEarned").innerText = earned.toLocaleString();
   const badges = [{ name:"🌱 Starter",req:1,color:"#22c063"},{ name:"🔥 Recruiter",req:5,color:"#4d8fff"},{ name:"⚡ Connector",req:10,color:"#a855f7"},{ name:"👑 Ambassador",req:25,color:"#f59e0b"}];
@@ -1460,9 +1459,9 @@ async function doWithdraw() {
   if (!iban) return (el.innerText="Enter your IBAN.",el.style.display="block");
   const btn = document.querySelector("#vWithdraw .btn-gold"); btn.disabled=true; btn.innerText="Submitting...";
   try {
-    const { error } = await db.from("withdrawals").insert({ telegram_id:tgId, amount_points:pts, amount_eur:pts/PTS_PER_EUR, iban, status:"pending" });
+    const { error } = await db.from("withdrawals").insert({ telegram_id:userId, amount_points:pts, amount_eur:pts/PTS_PER_EUR, iban, status:"pending" });
     if (error) throw error;
-    const { error: e2 } = await db.rpc("deduct_balance", { p_telegram_id:tgId, p_amount:pts });
+    const { error: e2 } = await db.rpc("deduct_balance", { p_telegram_id:userId, p_amount:pts });
     if (e2) throw e2;
     balance -= pts; updateBalUI();
     document.getElementById("wdAmt").value=""; document.getElementById("wdIban").value=""; document.getElementById("wdHint").innerText="≈ €0.00";
@@ -1478,8 +1477,8 @@ async function loadHistory(tab) {
   const el = document.getElementById("histList"); el.innerHTML='<div class="spinner"></div>';
   if (tab === "dep") {
     const [depRes,memRes,tiersRes] = await Promise.all([
-      db.from("payments").select("amount_eur,points_added,created_at").eq("telegram_id",tgId).order("created_at",{ascending:false}).limit(100),
-      db.from("user_memberships").select("tier_id,started_at,created_at,status").eq("telegram_id",tgId).order("started_at",{ascending:false}).limit(50),
+      db.from("payments").select("amount_eur,points_added,created_at").eq("telegram_id",userId).order("created_at",{ascending:false}).limit(100),
+      db.from("user_memberships").select("tier_id,started_at,created_at,status").eq("telegram_id",userId).order("started_at",{ascending:false}).limit(50),
       db.from("membership_tiers").select("id,name,price_eur_cents,bonus_points")
     ]);
     const tierMap={}; (tiersRes.data||[]).forEach(t=>{tierMap[t.id]=t;});
@@ -1493,7 +1492,7 @@ async function loadHistory(tab) {
       return `<div class="hist-card"><div class="hist-left"><div class="hist-type">💳 Stripe Deposit</div><div class="hist-date">${date}</div></div><div class="hist-right"><div class="hist-amt" style="color:var(--gold)">+${Number(row.pts).toLocaleString()} pts</div><div class="hist-eur">€${Number(row.eur).toFixed(2)}</div><div class="hist-status hs-completed">completed</div></div></div>`;
     }).join("");
   } else {
-    const{data,error}=await db.from("withdrawals").select("amount_eur,amount_points,iban,status,created_at,admin_note").eq("telegram_id",tgId).order("created_at",{ascending:false}).limit(100);
+    const{data,error}=await db.from("withdrawals").select("amount_eur,amount_points,iban,status,created_at,admin_note").eq("telegram_id",userId).order("created_at",{ascending:false}).limit(100);
     if(error||!data?.length){el.innerHTML=`<div class="empty"><div class="ei">🏦</div><p>No withdrawals yet.<br>Win some trades first!</p></div>`;return;}
     el.innerHTML=data.map(w=>{
       const sClass=w.status==="completed"?"hs-completed":w.status==="processing"?"hs-processing":w.status==="pending"?"hs-pending":"hs-rejected";
