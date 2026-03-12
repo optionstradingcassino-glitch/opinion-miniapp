@@ -328,6 +328,10 @@
         <div class="f-hint">Only letters, numbers, underscores · min 3 chars</div>
       </div>
       <div class="f">
+        <label>First Name</label>
+        <input type="text" id="suFirstName" placeholder="Your first name" autocomplete="given-name"/>
+      </div>
+      <div class="f">
         <label>Email</label>
         <input type="email" id="suEmail" placeholder="you@email.com"/>
       </div>
@@ -375,7 +379,14 @@
         <button onclick="authTab('li')" style="background:none;border:none;color:var(--muted);font-family:var(--font-body);font-size:13px;cursor:pointer;text-decoration:underline">Back to login</button>
       </div>
     </div>
-    <div style="height:24px"></div>
+    <div style="height:16px"></div>
+    <div style="text-align:center;font-size:11px;color:var(--muted);padding:0 20px">
+      By signing up you agree to our
+      <a href="https://myopinio.com/terms.html" target="_blank" style="color:var(--muted);text-decoration:underline">Terms of Service</a>
+      &amp;
+      <a href="https://myopinio.com/privacy.html" target="_blank" style="color:var(--muted);text-decoration:underline">Privacy Policy</a>
+    </div>
+    <div style="height:16px"></div>
   </div>
 </div>
 
@@ -876,7 +887,7 @@ async function sendReset() {
     await fetch(`${SUPA_URL}/auth/v1/recover`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": SUPA_KEY },
-      body: JSON.stringify({ email, redirect_to: "https://myopinio.com/resetpassword.html" })
+      body: JSON.stringify({ email, redirect_to: "https://myopinio.com/reset-password.html" })
     });
     okEl.innerText = "If that email exists, a reset link has been sent. Check your inbox and spam folder.";
     okEl.style.display = "block";
@@ -902,12 +913,14 @@ function selectGroup(group) {
 // ── SIGN UP ───────────────────────────────────────────────────────────────────
 async function doSignup() {
   const username = document.getElementById("suUsername").value.trim().toLowerCase();
+  const firstName = document.getElementById("suFirstName").value.trim();
   const email = document.getElementById("suEmail").value.trim();
   const pass = document.getElementById("suPass").value;
   const conf = document.getElementById("suConf").value;
   const refCode = document.getElementById("suRef").value.trim().toUpperCase();
   if (!username || username.length < 3) return setErr("authErr", "Username must be at least 3 characters.");
   if (!/^[a-z0-9_]+$/.test(username)) return setErr("authErr", "Username: only letters, numbers, underscores allowed.");
+  if (!firstName) return setErr("authErr", "Please enter your first name.");
   if (!email || !pass) return setErr("authErr", "Fill in all fields.");
   if (pass !== conf) return setErr("authErr", "Passwords don't match.");
   if (pass.length < 6) return setErr("authErr", "Password must be 6+ chars.");
@@ -920,7 +933,7 @@ async function doSignup() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       signal: controller.signal,
-      body: JSON.stringify({ email, password: pass, telegram_id: null, username, full_name: "", referral_code: refCode || null, user_group: selectedGroup })
+      body: JSON.stringify({ email, password: pass, telegram_id: null, username, full_name: firstName, referral_code: refCode || null, user_group: selectedGroup })
     });
     clearTimeout(timeoutId);
     const data = await res.json();
