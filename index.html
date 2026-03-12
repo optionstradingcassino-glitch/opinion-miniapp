@@ -1151,18 +1151,35 @@ async function uploadAvatar(event) {
 // ── TRADES ────────────────────────────────────────────────────────────────────
 async function loadTrades() {
   const el = document.getElementById("tradeList"); el.innerHTML = '<div class="spinner"></div>';
-  const { data, error } = await db.from("trades").select("side, stake, potential_payout, result, created_at, market_id").eq("telegram_id", tgId).order("created_at", { ascending: false }).limit(50);
-  if (error || !data?.length) { el.innerHTML = `<div class="empty"><div class="ei">📊</div><p>No trades yet.<br>Go pick a market!</p></div>`; document.getElementById("stTotal").innerText = 0; document.getElementById("stWon").innerText = 0; document.getElementById("stPts").innerText = 0; return; }
-  const won = data.filter(t => t.result === "won").length;
-  const pts = data.filter(t => t.result === "won").reduce((s,t) => s + (t.potential_payout||0), 0);
-  document.getElementById("stTotal").innerText = data.length; document.getElementById("stWon").innerText = won; document.getElementById("stPts").innerText = pts.toLocaleString();
+  // FIXED: correct column names: option/amount_points/payout_points/status
+  const { data, error } = await db.from("trades")
+    .select("option, amount_points, payout_points, status, created_at, market_id, question")
+    .eq("telegram_id", tgId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error || !data?.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">📊</div><p>No trades yet.<br>Go pick a market!</p></div>`;
+    document.getElementById("stTotal").innerText = 0;
+    document.getElementById("stWon").innerText = 0;
+    document.getElementById("stPts").innerText = 0;
+    return;
+  }
+  const won = data.filter(t => t.status === "won").length;
+  const pts = data.filter(t => t.status === "won").reduce((s,t) => s + (t.payout_points||0), 0);
+  document.getElementById("stTotal").innerText = data.length;
+  document.getElementById("stWon").innerText = won;
+  document.getElementById("stPts").innerText = pts.toLocaleString();
   el.innerHTML = data.map(t => {
-    const payClass = t.result === "won" ? "tp-won" : t.result === "lost" ? "tp-lost" : "tp-active";
-    const payLabel = t.result === "won" ? `+${t.potential_payout?.toLocaleString()} pts` : t.result === "lost" ? `-${t.stake} pts` : `${t.potential_payout?.toLocaleString()} pts (open)`;
-    return `<div class="trade-card"><div class="tc-q">${t.market_id}</div><div class="tc-row"><div class="tc-left"><span class="tc-badge ${t.side==="YES"?"tcb-yes":"tcb-no"}">${t.side}</span><span class="tc-stake">${t.stake?.toLocaleString()} pts staked</span></div><span class="tc-payout ${payClass}">${payLabel}</span></div></div>`;
+    const payClass = t.status === "won" ? "tp-won" : t.status === "lost" ? "tp-lost" : "tp-active";
+    const payLabel = t.status === "won"
+      ? `+${(t.payout_points||0).toLocaleString()} pts`
+      : t.status === "lost"
+      ? `-${t.amount_points} pts`
+      : `${(t.payout_points||0).toLocaleString()} pts (open)`;
+    const label = t.question || t.market_id?.slice(0,20)+"...";
+    return `<div class="trade-card"><div class="tc-q">${label}</div><div class="tc-row"><div class="tc-left"><span class="tc-badge ${t.option==="YES"?"tcb-yes":"tcb-no"}">${t.option}</span><span class="tc-stake">${(t.amount_points||0).toLocaleString()} pts staked</span></div><span class="tc-payout ${payClass}">${payLabel}</span></div></div>`;
   }).join("");
 }
-
 // ── SUBMIT QUESTION ───────────────────────────────────────────────────────────
 async function doSubmit() {
   const q = document.getElementById("sqQ").value.trim(), ctx = document.getElementById("sqCtx").value.trim();
