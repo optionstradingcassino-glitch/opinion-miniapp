@@ -1300,14 +1300,16 @@ async function loadReferrals() {
   if (!tgId) return;
   const { data: user } = await db.from("users").select("referral_code").eq("telegram_id", tgId).single();
   if (user?.referral_code) document.getElementById("refCode").innerText = user.referral_code;
-  const { data: refs } = await db.from("referrals").select("status, reward_points, created_at, referred_telegram_id").eq("referrer_telegram_id", tgId);
-  const total = refs?.length||0, active = refs?.filter(r=>r.status==="completed").length||0, earned = refs?.filter(r=>r.status==="completed").reduce((s,r)=>s+(r.reward_points||0),0)||0;
+  // FIXED: DB columns are referrer_id / referee_id (not referrer_telegram_id / referred_telegram_id)
+  // reward_paid is a boolean — 100pts per completed referral
+  const { data: refs } = await db.from("referrals").select("status, reward_paid, created_at, referee_id").eq("referrer_id", tgId);
+  const total = refs?.length||0, active = refs?.filter(r=>r.status==="completed").length||0, earned = active * 100;
   document.getElementById("refTotal").innerText = total; document.getElementById("refActive").innerText = active; document.getElementById("refEarned").innerText = earned.toLocaleString();
   const badges = [{ name:"🌱 Starter",req:1,color:"#22c063"},{ name:"🔥 Recruiter",req:5,color:"#4d8fff"},{ name:"⚡ Connector",req:10,color:"#a855f7"},{ name:"👑 Ambassador",req:25,color:"#f59e0b"}];
   document.getElementById("badgeWrap").innerHTML = badges.map(b => { const pct=Math.min(100,Math.round((active/b.req)*100)),done=active>=b.req; return `<div class="badge-row"><div class="badge-top"><span class="badge-name" style="${done?"color:"+b.color:""}">${b.name} ${done?"✅":""}</span><span class="badge-req">${active}/${b.req} referrals</span></div><div class="badge-bar"><div class="badge-fill" style="width:${pct}%;background:${b.color}"></div></div></div>`; }).join("");
   const listEl = document.getElementById("refPeopleList");
   if (!refs?.length) { listEl.innerHTML = `<div class="empty"><div class="ei">👥</div><p>No referrals yet.<br>Share your code!</p></div>`; return; }
-  listEl.innerHTML = refs.map(r => { const date=new Date(r.created_at).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),statusColor=r.status==="completed"?"var(--green)":"var(--gold)"; return `<div class="hist-card"><div class="hist-left"><div class="hist-type">👤 Friend #${r.referred_telegram_id?.slice(-4)||"????"}</div><div class="hist-date">${date}</div></div><div class="hist-right"><div class="hist-amt" style="color:${statusColor}">+${r.reward_points||0} pts</div><div class="hist-status" style="color:${statusColor}">${r.status}</div></div></div>`; }).join("");
+  listEl.innerHTML = refs.map(r => { const date=new Date(r.created_at).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),statusColor=r.status==="completed"?"var(--green)":"var(--gold)"; return `<div class="hist-card"><div class="hist-left"><div class="hist-type">👤 Friend #${String(r.referee_id||"????").slice(-4)}</div><div class="hist-date">${date}</div></div><div class="hist-right"><div class="hist-amt" style="color:${statusColor}">${r.status==="completed"?"+100 pts":"Pending"}</div><div class="hist-status" style="color:${statusColor}">${r.status}</div></div></div>`; }).join("");
 }
 
 // shareReferral: copies invite message to clipboard (no Telegram dependency)
