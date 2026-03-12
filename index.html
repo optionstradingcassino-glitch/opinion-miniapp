@@ -1206,7 +1206,9 @@ async function loadTrades() {
     // "5 min window" is shown as a countdown so the user knows how long they have
     let cancelBtn = "";
     if (t.status === "open") {
-      const placed  = new Date(t.created_at);
+      // Supabase returns timestamps without 'Z' suffix — add it to force UTC parsing
+      // Without this, Italy (UTC+1) would think the trade is 1hr in the future → no button
+      const placed  = new Date(t.created_at.endsWith('Z') ? t.created_at : t.created_at + 'Z');
       const expires = new Date(placed.getTime() + 5 * 60 * 1000); // 5 min after placed
       const now     = new Date();
       const secsLeft = Math.floor((expires - now) / 1000);
