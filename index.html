@@ -487,14 +487,19 @@
         <div class="menu-info"><div class="mi-title">Withdraw</div><div class="mi-sub">Cash out · min €20</div></div>
         <div class="mi-arrow">›</div>
       </div>
+      <!-- LOG OUT -->
       <div class="menu-row" onclick="doLogout()" style="margin-top:8px">
         <div class="menu-icon" style="background:rgba(255,61,90,.1);color:var(--red)">🚪</div>
         <div class="menu-info"><div class="mi-title" style="color:var(--red)">Log Out</div></div>
         <div class="mi-arrow" style="color:var(--red)">›</div>
       </div>
-      <div class="menu-row" id="addHomeBtn" onclick="addToHomeScreen()" style="display:none;margin-top:4px">
+      <!-- ADD TO HOME SCREEN — always visible, works on iOS + Android -->
+      <div class="menu-row" id="addHomeBtn" onclick="addToHomeScreen()" style="margin-top:4px">
         <div class="menu-icon mi-green">📲</div>
-        <div class="menu-info"><div class="mi-title">Add to Home Screen</div><div class="mi-sub">Install app on your phone</div></div>
+        <div class="menu-info">
+          <div class="mi-title">Add to Home Screen</div>
+          <div class="mi-sub">Install app on your phone</div>
+        </div>
         <div class="mi-arrow">›</div>
       </div>
     </div>
@@ -706,45 +711,143 @@ const MIN_WITHDRAW = 200;
 const VIRTUAL_POOL = 1000;
 const START_ODDS   = 1.80;
 
-const db = createClient(SUPA_URL, SUPA_KEY, { auth: { persistSession: true, storage: window.localStorage } });
+// ── SUPABASE CLIENT ───────────────────────────────────────────────────────────
+// persistSession:true means Safari will remember your login between visits
+// storage: window.localStorage is the place it saves the session cookie-like data
+const db = createClient(SUPA_URL, SUPA_KEY, {
+  auth: { persistSession: true, storage: window.localStorage }
+});
 window._db = db;
 
+// ── APP STATE ─────────────────────────────────────────────────────────────────
 let tgId = null, currentTier = "free", balance = 0, markets = [], activeMkt = null, choice = null, prevView = "markets";
 
+// ── LOGOUT ────────────────────────────────────────────────────────────────────
 async function doLogout() {
-  await db.auth.signOut();
+  await db.auth.signOut(); // wipes the saved session from localStorage
   tgId = null; balance = 0;
   document.getElementById("appShell").classList.remove("show");
   document.getElementById("authWrap").style.display = "flex";
   showToast("Logged out ✓");
 }
 
+// ── PWA / ADD TO HOME SCREEN ──────────────────────────────────────────────────
+// Android Chrome fires this event when the app can be installed natively
 let _deferredInstallPrompt = null;
 window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault(); _deferredInstallPrompt = e;
-  const btn = document.getElementById("addHomeBtn");
-  if (btn) btn.style.display = "flex";
+  e.preventDefault();
+  _deferredInstallPrompt = e; // save it so we can trigger it later
 });
 
+// Called when user taps "Add to Home Screen" in the profile menu
 function addToHomeScreen() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+
+  if (isStandalone) {
+    // Already installed — nothing to do
+    showToast("Already installed as an app! ✅", "ok");
+    return;
+  }
+
   if (_deferredInstallPrompt) {
+    // Android Chrome — show the native "Add to Home Screen" popup
     _deferredInstallPrompt.prompt();
-    _deferredInstallPrompt.userChoice.then(() => { _deferredInstallPrompt = null; const btn = document.getElementById("addHomeBtn"); if (btn) btn.style.display = "none"; });
-  } else { showToast("Tap the Share button → 'Add to Home Screen' 📲", "ok"); }
+    _deferredInstallPrompt.userChoice.then(() => { _deferredInstallPrompt = null; });
+  } else if (isIOS) {
+    // iOS Safari doesn't support the event, so we show a step-by-step modal instead
+    showIOSInstallModal();
+  } else {
+    // Other browser — just show a simple toast hint
+    showToast("Open in Safari and tap Share → Add to Home Screen 📲", "ok");
+  }
 }
 
+// Step-by-step modal for iOS users
+function showIOSInstallModal() {
+  const existing = document.getElementById("iosInstallModal");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "iosInstallModal";
+  // Dark semi-transparent backdrop that covers the whole screen
+  modal.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);";
+  modal.innerHTML = `
+    <div style="background:#0c0e15;border:1px solid #1c2035;border-radius:20px 20px 0 0;padding:28px 24px 48px;width:100%;max-width:480px;text-align:center;">
+      <div style="font-size:38px;margin-bottom:12px;">📲</div>
+      <div style="font-family:'Druk Wide',sans-serif;font-size:16px;color:#22c063;margin-bottom:8px;letter-spacing:1px;">ADD TO HOME SCREEN</div>
+      <div style="color:#485070;font-size:13px;margin-bottom:24px;">Install My Opinio as an app on your iPhone</div>
+      <div style="text-align:left;background:#06070b;border-radius:14px;padding:18px 20px;margin-bottom:22px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <span style="font-size:24px;flex-shrink:0;">1️⃣</span>
+          <span style="font-size:14px;color:#dde0f0;">Tap the <strong>Share</strong> button at the bottom of Safari <span style="font-size:20px;">⎙</span></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <span style="font-size:24px;flex-shrink:0;">2️⃣</span>
+          <span style="font-size:14px;color:#dde0f0;">Scroll down and tap <strong>"Add to Home Screen"</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <span style="font-size:24px;flex-shrink:0;">3️⃣</span>
+          <span style="font-size:14px;color:#dde0f0;">Tap <strong>"Add"</strong> in the top right — done! 🎉</span>
+        </div>
+      </div>
+      <button id="iosModalClose" style="width:100%;padding:14px;background:#22c063;color:#000;border:none;border-radius:12px;font-family:'Urbanist',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">Got it!</button>
+    </div>
+  `;
+  // Tap the backdrop (outside the card) to close
+  modal.addEventListener("click", e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+  // Wire up the close button after it's in the DOM
+  document.getElementById("iosModalClose").addEventListener("click", () => modal.remove());
+}
+
+// ── APP BOOT ──────────────────────────────────────────────────────────────────
+// This runs once when the page loads.
+// It checks if there's a saved login session in localStorage.
+// If yes → skip login screen and go straight to the app (Safari fix!)
+// If no → show the login/signup screen
 document.addEventListener("DOMContentLoaded", async () => {
   const { data: { session } } = await db.auth.getSession();
-  if (session) { await resumeSession(session.user); }
-  else { document.getElementById("authWrap").style.display = "flex"; }
+  if (session) {
+    await resumeSession(session.user); // already logged in — restore automatically
+  } else {
+    document.getElementById("authWrap").style.display = "flex"; // show login screen
+  }
 });
 
+// resumeSession: called when a saved session is found on page load
+// Loads the user's internal ID and wallet balance from the database
 async function resumeSession(authUser) {
-  const { data: userRow } = await db.from("users").select("telegram_id, balance_points").eq("auth_id", authUser.id).single();
-  if (!userRow) { document.getElementById("authWrap").style.display = "flex"; return; }
-  tgId = String(userRow.telegram_id); balance = userRow.balance_points || 0; startApp();
+  // Step 1: find which user this auth account belongs to
+  const { data: userRow } = await db.from("users")
+    .select("telegram_id")
+    .eq("auth_id", authUser.id)
+    .single();
+
+  if (!userRow) {
+    // Auth session exists but no matching user row — something went wrong
+    // Clear the broken session and show login screen
+    await db.auth.signOut();
+    document.getElementById("authWrap").style.display = "flex";
+    return;
+  }
+
+  // Step 2: set the global user ID (called tgId for historical reasons — it's just our internal user key)
+  tgId = String(userRow.telegram_id);
+
+  // Step 3: load wallet balance separately (more reliable than joining tables)
+  const { data: wallet } = await db.from("wallets")
+    .select("balance_points")
+    .eq("telegram_id", tgId)
+    .single();
+
+  balance = wallet?.balance_points || 0;
+
+  // Step 4: launch the app!
+  startApp();
 }
 
+// ── AUTH HELPERS ──────────────────────────────────────────────────────────────
 function authTab(t) {
   document.getElementById("formSU").style.display = t === "su" ? "block" : "none";
   document.getElementById("formLI").style.display = t === "li" ? "block" : "none";
@@ -770,8 +873,13 @@ async function sendReset() {
   if (!email) { errEl.innerText = "Enter your email first."; errEl.style.display = "block"; return; }
   const btn = document.getElementById("fpBtn"); btn.disabled = true; btn.innerText = "Sending...";
   try {
-    await fetch(`${SUPA_URL}/auth/v1/recover`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPA_KEY }, body: JSON.stringify({ email, redirect_to: "https://opinion-miniapp.vercel.app/reset-password.html" }) });
-    okEl.innerText = "If that email exists, a reset link has been sent. Check your inbox and spam folder."; okEl.style.display = "block";
+    await fetch(`${SUPA_URL}/auth/v1/recover`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY },
+      body: JSON.stringify({ email, redirect_to: "https://myopinio.com/resetpassword.html" })
+    });
+    okEl.innerText = "If that email exists, a reset link has been sent. Check your inbox and spam folder.";
+    okEl.style.display = "block";
   } catch { errEl.innerText = "Connection error. Try again."; errEl.style.display = "block"; }
   finally { btn.disabled = false; btn.innerText = "Send Reset Link"; }
 }
@@ -791,6 +899,7 @@ function selectGroup(group) {
   }
 }
 
+// ── SIGN UP ───────────────────────────────────────────────────────────────────
 async function doSignup() {
   const username = document.getElementById("suUsername").value.trim().toLowerCase();
   const email = document.getElementById("suEmail").value.trim();
@@ -805,12 +914,18 @@ async function doSignup() {
   setErr("authErr", "");
   const btn = document.getElementById("suBtn"); btn.disabled = true; btn.innerText = "Creating...";
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
   try {
-    const res = await fetch(`${SUPA_URL}/functions/v1/register`, { method: "POST", headers: { "Content-Type": "application/json" }, signal: controller.signal, body: JSON.stringify({ email, password: pass, telegram_id: null, username, full_name: "", referral_code: refCode || null, user_group: selectedGroup }) });
+    const res = await fetch(`${SUPA_URL}/functions/v1/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({ email, password: pass, telegram_id: null, username, full_name: "", referral_code: refCode || null, user_group: selectedGroup })
+    });
     clearTimeout(timeoutId);
     const data = await res.json();
     if (!res.ok) return setErr("authErr", data.error || "Signup failed.");
+    // Auto-login after signup
     const { data: auth2, error: loginErr } = await db.auth.signInWithPassword({ email, password: pass });
     if (loginErr || !auth2) return setErr("authErr", "Signup succeeded but login failed. Please log in manually.");
     const { data: userRow2 } = await db.from("users").select("telegram_id").eq("auth_id", auth2.user.id).single();
@@ -823,6 +938,7 @@ async function doSignup() {
   } finally { btn.disabled = false; btn.innerText = "Create Account"; }
 }
 
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
 async function doLogin() {
   const email = document.getElementById("liEmail").value.trim();
   const pass = document.getElementById("liPass").value;
@@ -832,16 +948,20 @@ async function doLogin() {
   try {
     const { data: auth, error } = await db.auth.signInWithPassword({ email, password: pass });
     if (error) return setErr("authErr", "Login failed: " + (error.message || "Wrong email or password."));
+    // Look up this user's internal ID from the database
     const { data: userRow } = await db.from("users").select("telegram_id").eq("auth_id", auth.user.id).single();
     if (!userRow) return setErr("authErr", "Account not found. Please sign up.");
     tgId = String(userRow.telegram_id);
+    // Make sure wallet row exists (safety net for new accounts)
     await db.from("wallets").upsert({ telegram_id: tgId, balance_points: 0, balance_eur: 0 }, { onConflict: "telegram_id", ignoreDuplicates: true });
     const { data: w } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
-    balance = w?.balance_points || 0; startApp();
+    balance = w?.balance_points || 0;
+    startApp();
   } catch { setErr("authErr", "Connection error. Try again."); }
   finally { btn.disabled = false; btn.innerText = "Login"; }
 }
 
+// ── START APP ─────────────────────────────────────────────────────────────────
 function startApp() {
   document.getElementById("authWrap").style.display = "none";
   document.getElementById("appShell").classList.add("show");
@@ -856,18 +976,22 @@ function updateBalUI() {
   document.getElementById("wdBalEur").innerText = `≈ €${(balance / PTS_PER_EUR).toFixed(2)}`;
 }
 
+// Listens for live balance changes (e.g. after winning a trade or admin adjusting wallet)
 function subscribeWallet() {
-  db.channel("wallet-rt").on("postgres_changes", { event: "UPDATE", schema: "public", table: "wallets" },
-    p => { if (String(p.new.telegram_id) === String(tgId)) { balance = p.new.balance_points; updateBalUI(); } }).subscribe();
+  db.channel("wallet-rt").on("postgres_changes",
+    { event: "UPDATE", schema: "public", table: "wallets" },
+    p => { if (String(p.new.telegram_id) === String(tgId)) { balance = p.new.balance_points; updateBalUI(); } }
+  ).subscribe();
 }
 
 async function refreshBalanceFromDB() {
   try {
     const { data } = await db.from("wallets").select("balance_points").eq("telegram_id", tgId).single();
-    if (data && data.balance_points !== undefined) { balance = data.balance_points; updateBalUI(); }
+    if (data?.balance_points !== undefined) { balance = data.balance_points; updateBalUI(); }
   } catch(e) {}
 }
 
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
 const viewMap = { markets:"vMarkets", portfolio:"vPortfolio", leaderboard:"vLeaderboard", profile:"vProfile", referrals:"vReferrals", history:"vHistory", membership:"vMembership", withdraw:"vWithdraw", submit:"vSubmit" };
 
 function goTo(name) {
@@ -886,13 +1010,13 @@ function goTo(name) {
   if (name === "history")     loadHistory("dep");
   if (name === "membership")  updateMembershipUI();
 }
-
 function currentView() {
   for (const [k, v] of Object.entries(viewMap)) if (document.getElementById(v)?.classList.contains("active")) return k;
   return "markets";
 }
 function goBack() { goTo(prevView || "profile"); }
 
+// ── MARKET ODDS ───────────────────────────────────────────────────────────────
 function calcOdds(yesPool, noPool) {
   const total = yesPool + noPool;
   if (total === 0) return { yesOdds: START_ODDS, noOdds: START_ODDS };
@@ -905,6 +1029,7 @@ function calcOdds(yesPool, noPool) {
   };
 }
 
+// ── MARKETS ───────────────────────────────────────────────────────────────────
 async function loadMarkets() {
   try {
     const res = await fetch(`${SUPA_URL}/functions/v1/get-markets`, { headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` } });
@@ -927,6 +1052,7 @@ function renderMarkets() {
   }).join("");
 }
 
+// ── TRADE MODAL ───────────────────────────────────────────────────────────────
 function openTradeModal(mktId, side) {
   activeMkt = markets.find(m => m.id === mktId); if (!activeMkt) return;
   choice = side;
@@ -949,6 +1075,7 @@ function calcPayout() {
   document.getElementById("ppOdds").innerText = `×${odds} odds`;
 }
 
+// ── PLACE TRADE ───────────────────────────────────────────────────────────────
 async function placeTrade() {
   if (!activeMkt || !choice) return showToast("Pick YES or NO first", "bad");
   const stake = parseInt(document.getElementById("stakeIn").value) || 0;
@@ -961,15 +1088,21 @@ async function placeTrade() {
   try {
     const { data: { session: tradeSess } } = await db.auth.getSession();
     const tradeToken = tradeSess?.access_token || SUPA_KEY;
-    const res = await fetch(`${SUPA_URL}/functions/v1/place-trade`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${tradeToken}` }, body: JSON.stringify({ telegram_id: tgId, market_id: activeMkt.id, side: choice, stake }) });
+    const res = await fetch(`${SUPA_URL}/functions/v1/place-trade`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${tradeToken}` },
+      body: JSON.stringify({ telegram_id: tgId, market_id: activeMkt.id, side: choice, stake })
+    });
     const data = await res.json();
     if (!res.ok) return showToast(data.error || "Trade failed", "bad");
     balance = data.new_balance; updateBalUI(); closeModal();
-    showToast(`✅ Trade placed! Potential: ${data.potential_payout?.toLocaleString()} pts`, "ok"); loadMarkets();
+    showToast(`✅ Trade placed! Potential: ${data.potential_payout?.toLocaleString()} pts`, "ok");
+    loadMarkets();
   } catch { showToast("Connection error. Try again.", "bad"); }
   finally { btn.disabled = false; btn.innerText = "Confirm Trade"; }
 }
 
+// ── PROFILE ───────────────────────────────────────────────────────────────────
 async function loadProfile() {
   if (!tgId) return;
   const { data: user } = await db.from("users").select("full_name, email, username, referral_code, avatar_url, membership_tier").eq("telegram_id", tgId).single();
@@ -1015,6 +1148,7 @@ async function uploadAvatar(event) {
   finally { overlay.style.opacity = "0"; overlay.innerText = "📷"; event.target.value = ""; }
 }
 
+// ── TRADES ────────────────────────────────────────────────────────────────────
 async function loadTrades() {
   const el = document.getElementById("tradeList"); el.innerHTML = '<div class="spinner"></div>';
   const { data, error } = await db.from("trades").select("side, stake, potential_payout, result, created_at, market_id").eq("telegram_id", tgId).order("created_at", { ascending: false }).limit(50);
@@ -1029,6 +1163,7 @@ async function loadTrades() {
   }).join("");
 }
 
+// ── SUBMIT QUESTION ───────────────────────────────────────────────────────────
 async function doSubmit() {
   const q = document.getElementById("sqQ").value.trim(), ctx = document.getElementById("sqCtx").value.trim();
   if (q.length < 10) return setErr("sqErr", "Question must be at least 10 characters.");
@@ -1038,7 +1173,11 @@ async function doSubmit() {
   try {
     const { data: { session: sess } } = await db.auth.getSession();
     const authToken = sess?.access_token || SUPA_KEY;
-    const res = await fetch(`${SUPA_URL}/functions/v1/submit-question`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${authToken}` }, body: JSON.stringify({ telegram_id: tgId, question: q, context: ctx }) });
+    const res = await fetch(`${SUPA_URL}/functions/v1/submit-question`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${authToken}` },
+      body: JSON.stringify({ telegram_id: tgId, question: q, context: ctx })
+    });
     const data = await res.json();
     if (!res.ok) return setErr("sqErr", data.error || "Submission failed.");
     balance = data.new_balance; updateBalUI();
@@ -1055,13 +1194,22 @@ async function loadSubmissions() {
   el.innerHTML = data.map(s => `<div class="sub-item"><div class="sub-q">${s.question}</div><div class="sub-foot"><span class="ss-${s.status}">${s.status.toUpperCase()}</span><span class="sub-pts">${s.pts_refunded ? "100 pts refunded" : "−100 pts"}</span></div></div>`).join("");
 }
 
+// ── MEMBERSHIP / DEPOSIT ──────────────────────────────────────────────────────
 async function doSubscribe(tierName) {
   const btn = document.getElementById(`membBtn-${tierName}`); if (!btn) return;
   btn.disabled = true; btn.innerText = "Redirecting...";
   try {
-    const res = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, { method: "POST", headers: { "Content-Type": "application/json", "apikey": SUPA_KEY }, body: JSON.stringify({ telegram_id: tgId, tier: tierName }) });
+    // Send session token so the edge function can verify who this is
+    const { data: { session: sess } } = await db.auth.getSession();
+    const token = sess?.access_token || SUPA_KEY;
+    const res = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ telegram_id: tgId, type: "membership", tier: tierName })
+    });
     const data = await res.json();
-    if (!res.ok || !data.url) { showToast(data.error || "Checkout failed", "bad"); } else { window.open(data.url, "_blank"); }
+    if (!res.ok || !data.url) { showToast(data.error || "Checkout failed", "bad"); }
+    else { window.open(data.url, "_blank"); }
   } catch { showToast("Connection error. Try again.", "bad"); }
   finally { btn.disabled = false; updateMembershipUI(); }
 }
@@ -1074,6 +1222,29 @@ function updateMembershipUI() {
   });
 }
 
+// openDeposit: opens Stripe checkout for a wallet top-up
+// Sends session token so the edge function knows who's paying
+async function openDeposit() {
+  const amountStr = prompt("How much do you want to deposit? (€, min €10)");
+  if (!amountStr) return;
+  const amount = parseFloat(amountStr);
+  if (isNaN(amount) || amount < 10) return showToast("Minimum deposit is €10", "bad");
+  showToast("Opening payment page...", "ok");
+  try {
+    const { data: { session: sess } } = await db.auth.getSession();
+    const token = sess?.access_token || SUPA_KEY;
+    const res = await fetch(`${SUPA_URL}/functions/v1/create-checkout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPA_KEY, "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ telegram_id: tgId, type: "deposit", amount })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.url) { showToast(data.error || "Deposit failed", "bad"); return; }
+    window.open(data.url, "_blank");
+  } catch { showToast("Connection error. Try again.", "bad"); }
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────────────────────────
 let currentLbTab = "cassino";
 function switchLbTab(tab) {
   currentLbTab = tab;
@@ -1124,6 +1295,7 @@ function buildLbRow(e, rank, myTgId) {
   return `<div class="lb-row${isMe?" me":""}"><div class="lb-rank">#${rank}</div><div class="lb-avatar">${avatarHtml}</div><div class="lb-info"><div class="lb-name">${name}</div><div class="lb-sub">${e.pts.toLocaleString()} pts won</div></div><div class="lb-pts">${pts}</div></div>`;
 }
 
+// ── REFERRALS ─────────────────────────────────────────────────────────────────
 async function loadReferrals() {
   if (!tgId) return;
   const { data: user } = await db.from("users").select("referral_code").eq("telegram_id", tgId).single();
@@ -1138,15 +1310,23 @@ async function loadReferrals() {
   listEl.innerHTML = refs.map(r => { const date=new Date(r.created_at).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}),statusColor=r.status==="completed"?"var(--green)":"var(--gold)"; return `<div class="hist-card"><div class="hist-left"><div class="hist-type">👤 Friend #${r.referred_telegram_id?.slice(-4)||"????"}</div><div class="hist-date">${date}</div></div><div class="hist-right"><div class="hist-amt" style="color:${statusColor}">+${r.reward_points||0} pts</div><div class="hist-status" style="color:${statusColor}">${r.status}</div></div></div>`; }).join("");
 }
 
+// shareReferral: copies invite message to clipboard (no Telegram dependency)
 function shareReferral() {
   const code = document.getElementById("refCode").innerText;
   if (!code || code === "—") return showToast("Referral code not loaded yet", "bad");
-  const tg = window.Telegram?.WebApp;
-  const msg = `🎯 Join me on My Opinio!\n\nPredict markets & win real points!\n\nUse my code ${code} when signing up for a FREE 100 pts bonus!\n\nhttps://t.me/CassinoTradeBot`;
-  if (tg?.openTelegramLink) { tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent("https://t.me/CassinoTradeBot")}&text=${encodeURIComponent(msg)}`); }
-  else { navigator.clipboard?.writeText(msg).then(()=>showToast("Copied to clipboard! 📋","ok")).catch(()=>showToast(`Your code: ${code}`,"ok")); }
+  const msg = `🎯 Join me on My Opinio!\n\nPredict markets & win real points!\n\nUse my code ${code} when signing up for a FREE 100 pts bonus!\n\nhttps://myopinio.com`;
+  // Use Web Share API if available (native share sheet on mobile)
+  if (navigator.share) {
+    navigator.share({ title: "Join My Opinio!", text: msg, url: "https://myopinio.com" }).catch(() => {});
+  } else {
+    // Fallback: copy to clipboard
+    navigator.clipboard?.writeText(msg)
+      .then(() => showToast("Invite link copied! 📋", "ok"))
+      .catch(() => showToast(`Your code: ${code}`, "ok"));
+  }
 }
 
+// ── WITHDRAW ──────────────────────────────────────────────────────────────────
 function wdCalc() { document.getElementById("wdHint").innerText = `≈ €${((parseFloat(document.getElementById("wdAmt").value)||0)/PTS_PER_EUR).toFixed(2)}`; }
 
 async function doWithdraw() {
@@ -1168,16 +1348,7 @@ async function doWithdraw() {
   finally { btn.disabled=false; btn.innerText="Request Withdrawal"; }
 }
 
-async function openDeposit() {
-  showToast("Opening deposit page...","ok");
-  try {
-    const res = await fetch(`${SUPA_URL}/functions/v1/create-deposit-checkout`, { method:"POST", headers:{"Content-Type":"application/json","apikey":SUPA_KEY}, body:JSON.stringify({telegram_id:tgId}) });
-    const data = await res.json();
-    if (!res.ok || !data.url) { showToast(data.error||"Deposit failed","bad"); return; }
-    window.open(data.url,"_blank");
-  } catch { showToast("Connection error. Try again.","bad"); }
-}
-
+// ── HISTORY ───────────────────────────────────────────────────────────────────
 function histTab(tab) { document.getElementById("htDep").classList.toggle("on",tab==="dep"); document.getElementById("htWd").classList.toggle("on",tab==="wd"); loadHistory(tab); }
 
 async function loadHistory(tab) {
@@ -1210,11 +1381,18 @@ async function loadHistory(tab) {
   }
 }
 
+// ── TOAST ─────────────────────────────────────────────────────────────────────
 function showToast(msg, type="ok") {
   const t=document.getElementById("toast"); t.innerText=msg; t.className=`show ${type}`; clearTimeout(t._t); t._t=setTimeout(()=>t.className="",3000);
 }
 
-Object.assign(window, { doForgotPassword, sendReset, authTab, doSignup, doLogin, goTo, goBack, openDeposit, openTradeModal, closeModal, pick, qs, calcPayout, placeTrade, doSubmit, doSubscribe, wdCalc, doWithdraw, shareReferral, histTab, uploadAvatar, showToast, selectGroup, switchLbTab, doLogout, addToHomeScreen });
+// ── EXPOSE ALL FUNCTIONS TO HTML onclick="" ATTRIBUTES ────────────────────────
+Object.assign(window, {
+  doForgotPassword, sendReset, authTab, doSignup, doLogin, goTo, goBack,
+  openDeposit, openTradeModal, closeModal, pick, qs, calcPayout, placeTrade,
+  doSubmit, doSubscribe, wdCalc, doWithdraw, shareReferral, histTab,
+  uploadAvatar, showToast, selectGroup, switchLbTab, doLogout, addToHomeScreen
+});
 </script>
 </body>
 </html>
