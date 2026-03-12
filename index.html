@@ -1080,7 +1080,18 @@ function openTradeModal(mktId, side) {
 }
 function closeModal() { document.getElementById("tradeOverlay").classList.remove("open"); activeMkt = null; choice = null; }
 function pick(side) { choice = side; document.getElementById("chYes").classList.toggle("sel", side === "YES"); document.getElementById("chNo").classList.toggle("sel", side === "NO"); calcPayout(); }
-function qs(amt) { document.getElementById("stakeIn").value = amt; calcPayout(); }
+function qs(amt) {
+  // Adds to current value — type 100 then tap +500 = 600
+  const inp = document.getElementById("stakeIn");
+  const current = parseInt(inp.value) || 0;
+  inp.value = current + amt;
+  calcPayout();
+}
+function qsClear() {
+  // Red X button resets stake to empty
+  document.getElementById("stakeIn").value = "";
+  calcPayout();
+}
 function calcPayout() {
   const stake = parseFloat(document.getElementById("stakeIn").value) || 0;
   if (!choice || !activeMkt || stake <= 0) { document.getElementById("ppAmt").innerText = "—"; document.getElementById("ppOdds").innerText = choice ? "Enter stake" : "Pick YES or NO first"; return; }
