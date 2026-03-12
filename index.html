@@ -1237,25 +1237,32 @@ async function loadTrades() {
 }
 // ── CANCEL TRADE ─────────────────────────────────────────────────────────────
 async function cancelTrade(tradeId) {
-  // Ask the user to confirm before cancelling
   if (!confirm("Cancel this trade? Your stake will be refunded immediately.")) return;
 
-  // Call the DB function we created — it checks the 5 min window server-side too
   const { data, error } = await db.rpc("cancel_trade", {
     p_trade_id: tradeId,
     p_telegram_id: tgId
   });
 
-  if (error || !data?.ok) {
+  // Log so we can debug exactly what comes back
+  console.log("cancelTrade result:", JSON.stringify(data), "error:", error);
+
+  // Supabase RPC returns the jsonb directly as 'data'
+  // data = { ok: true, refunded: 100 } OR { ok: false, error: "..." }
+  if (error) {
+    showToast("Error: " + error.message, "bad");
+    return;
+  }
+  if (!data || data.ok === false) {
     showToast(data?.error || "Could not cancel trade", "bad");
     return;
   }
 
-  // Refund was successful — update balance and refresh the list
-  balance += data.refunded;
+  // Success — refund wallet and refresh
+  balance += (data.refunded || 0);
   updateBalUI();
-  showToast(`↩ Trade cancelled! ${data.refunded.toLocaleString()} pts refunded`, "ok");
-  loadTrades(); // refresh the portfolio list
+  showToast("↩ Trade cancelled! " + (data.refunded || 0).toLocaleString() + " pts refunded", "ok");
+  loadTrades();
 }
 
 // ── SUBMIT QUESTION ───────────────────────────────────────────────────────────
