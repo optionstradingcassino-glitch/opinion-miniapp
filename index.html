@@ -1264,22 +1264,15 @@ async function loadTrades() {
 async function cancelTrade(tradeId) {
   if (!confirm("Cancel this trade? Your stake will be refunded immediately.")) return;
 
-  // Show exactly what we are sending — helps debug ID mismatches
-  alert("DEBUG — tradeId: " + tradeId + "\ntgId: " + tgId + "\ntype of tgId: " + typeof tgId);
-
   const { data, error } = await db.rpc("cancel_trade", {
     p_trade_id:    tradeId,
     p_telegram_id: String(tgId)
   });
 
-  // Show exactly what came back
-  alert("DEBUG — data: " + JSON.stringify(data) + "\nerror: " + JSON.stringify(error));
-
   if (error) {
     showToast("Error: " + error.message, "bad");
     return;
   }
-
   if (!data || data.ok === false) {
     showToast(data?.error || "Could not cancel trade", "bad");
     return;
