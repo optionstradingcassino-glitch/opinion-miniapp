@@ -691,11 +691,12 @@
     <input class="stake-in" id="stakeIn" type="number" placeholder="Min 100 pts" oninput="calcPayout()" min="100"/>
     <div class="min-bet-hint">Minimum bet: 100 pts</div>
     <div class="quick-row">
-      <button class="q-btn" onclick="qs(100)">100</button>
-      <button class="q-btn" onclick="qs(500)">500</button>
-      <button class="q-btn" onclick="qs(1000)">1K</button>
-      <button class="q-btn" onclick="qs(5000)">5K</button>
-      <button class="q-btn" onclick="qs(10000)">10K</button>
+      <button class="q-btn" onclick="qs(100)">+100</button>
+      <button class="q-btn" onclick="qs(500)">+500</button>
+      <button class="q-btn" onclick="qs(1000)">+1K</button>
+      <button class="q-btn" onclick="qs(5000)">+5K</button>
+      <button class="q-btn" onclick="qs(10000)">+10K</button>
+      <button class="q-btn" onclick="qsClear()" style="color:var(--red);border-color:rgba(239,68,68,.3)">✕</button>
     </div>
     <div class="payout-preview">
       <div class="pp-left">
@@ -1166,7 +1167,7 @@ async function loadTrades() {
   const el = document.getElementById("tradeList"); el.innerHTML = '<div class="spinner"></div>';
   // FIXED: correct column names: option/amount_points/payout_points/status
   const { data, error } = await db.from("trades")
-    .select("option, amount_points, payout_points, status, created_at, market_id, question")
+    .select("id, option, amount_points, payout_points, status, created_at, market_id, question")
     .eq("telegram_id", tgId)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -1183,16 +1184,67 @@ async function loadTrades() {
   document.getElementById("stWon").innerText = won;
   document.getElementById("stPts").innerText = pts.toLocaleString();
   el.innerHTML = data.map(t => {
-    const payClass = t.status === "won" ? "tp-won" : t.status === "lost" ? "tp-lost" : "tp-active";
-    const payLabel = t.status === "won"
-      ? `+${(t.payout_points||0).toLocaleString()} pts`
-      : t.status === "lost"
-      ? `-${t.amount_points} pts`
-      : `${(t.payout_points||0).toLocaleString()} pts (open)`;
+    const payClass  = t.status === "won" ? "tp-won" : t.status === "lost" ? "tp-lost" : t.status === "cancelled" ? "tp-lost" : "tp-active";
+    const payLabel  = t.status === "won"       ? `+${(t.payout_points||0).toLocaleString()} pts`
+                    : t.status === "lost"      ? `-${t.amount_points} pts`
+                    : t.status === "cancelled" ? `Cancelled`
+                    : `${(t.payout_points||0).toLocaleString()} pts (open)`;
     const label = t.question || t.market_id?.slice(0,20)+"...";
-    return `<div class="trade-card"><div class="tc-q">${label}</div><div class="tc-row"><div class="tc-left"><span class="tc-badge ${t.option==="YES"?"tcb-yes":"tcb-no"}">${t.option}</span><span class="tc-stake">${(t.amount_points||0).toLocaleString()} pts staked</span></div><span class="tc-payout ${payClass}">${payLabel}</span></div></div>`;
+
+    // Show cancel button ONLY if trade is open AND within 5 minutes of placement
+    // "5 min window" is shown as a countdown so the user knows how long they have
+    let cancelBtn = "";
+    if (t.status === "open") {
+      const placed  = new Date(t.created_at);
+      const expires = new Date(placed.getTime() + 5 * 60 * 1000); // 5 min after placed
+      const now     = new Date();
+      const secsLeft = Math.floor((expires - now) / 1000);
+      if (secsLeft > 0) {
+        const minsLeft = Math.floor(secsLeft / 60);
+        const sLeft    = secsLeft % 60;
+        const timeStr  = `${minsLeft}:${String(sLeft).padStart(2,"0")}`;
+        cancelBtn = `<button onclick="cancelTrade('${t.id}')" style="margin-top:8px;width:100%;padding:7px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#ef4444;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer">
+          ↩ Cancel trade · ${timeStr} left
+        </button>`;
+      }
+    }
+
+    return \`<div class="trade-card">
+      <div class="tc-q">\${label}</div>
+      <div class="tc-row">
+        <div class="tc-left">
+          <span class="tc-badge \${t.option==="YES"?"tcb-yes":"tcb-no"}">\${t.option}</span>
+          <span class="tc-stake">\${(t.amount_points||0).toLocaleString()} pts staked</span>
+        </div>
+        <span class="tc-payout \${payClass}">\${payLabel}</span>
+      </div>
+      \${cancelBtn}
+    </div>\`;
   }).join("");
 }
+// ── CANCEL TRADE ─────────────────────────────────────────────────────────────
+async function cancelTrade(tradeId) {
+  // Ask the user to confirm before cancelling
+  if (!confirm("Cancel this trade? Your stake will be refunded immediately.")) return;
+
+  // Call the DB function we created — it checks the 5 min window server-side too
+  const { data, error } = await db.rpc("cancel_trade", {
+    p_trade_id: tradeId,
+    p_telegram_id: tgId
+  });
+
+  if (error || !data?.ok) {
+    showToast(data?.error || "Could not cancel trade", "bad");
+    return;
+  }
+
+  // Refund was successful — update balance and refresh the list
+  balance += data.refunded;
+  updateBalUI();
+  showToast(`↩ Trade cancelled! ${data.refunded.toLocaleString()} pts refunded`, "ok");
+  loadTrades(); // refresh the portfolio list
+}
+
 // ── SUBMIT QUESTION ───────────────────────────────────────────────────────────
 async function doSubmit() {
   const q = document.getElementById("sqQ").value.trim(), ctx = document.getElementById("sqCtx").value.trim();
