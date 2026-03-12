@@ -1194,30 +1194,34 @@ async function loadTrades() {
   document.getElementById("stTotal").innerText = data.length;
   document.getElementById("stWon").innerText = won;
   document.getElementById("stPts").innerText = pts.toLocaleString();
+  // Store trades globally so the live timer can access them
+  window._openTrades = data.filter(t => t.status === "open");
+
+  // Render trade cards — cancel buttons have data-tradeid so the timer can update them
   el.innerHTML = data.map(t => {
-    const payClass  = t.status === "won" ? "tp-won" : t.status === "lost" ? "tp-lost" : t.status === "cancelled" ? "tp-lost" : "tp-active";
-    const payLabel  = t.status === "won"       ? `+${(t.payout_points||0).toLocaleString()} pts`
-                    : t.status === "lost"      ? `-${t.amount_points} pts`
-                    : t.status === "cancelled" ? `Cancelled`
-                    : `${(t.payout_points||0).toLocaleString()} pts (open)`;
+    const payClass = t.status === "won" ? "tp-won" : t.status === "lost" ? "tp-lost" : t.status === "cancelled" ? "tp-lost" : "tp-active";
+    const payLabel = t.status === "won"       ? `+${(t.payout_points||0).toLocaleString()} pts`
+                   : t.status === "lost"      ? `-${t.amount_points} pts`
+                   : t.status === "cancelled" ? `Cancelled`
+                   : `${(t.payout_points||0).toLocaleString()} pts (open)`;
     const label = t.question || t.market_id?.slice(0,20)+"...";
 
-    // Show cancel button ONLY if trade is open AND within 5 minutes of placement
-    // "5 min window" is shown as a countdown so the user knows how long they have
+    // Only open trades within 5 min get a cancel button
+    // data-tradeid lets the live timer find and update this button every second
     let cancelBtn = "";
     if (t.status === "open") {
-      // Supabase returns timestamps without 'Z' suffix — add it to force UTC parsing
-      // Without this, Italy (UTC+1) would think the trade is 1hr in the future → no button
-      const placed  = new Date(t.created_at.endsWith('Z') ? t.created_at : t.created_at + 'Z');
-      const expires = new Date(placed.getTime() + 5 * 60 * 1000); // 5 min after placed
-      const now     = new Date();
-      const secsLeft = Math.floor((expires - now) / 1000);
+      // Add Z so browser reads it as UTC — without this Italy (UTC+1) breaks the math
+      const placed   = new Date(t.created_at.endsWith("Z") ? t.created_at : t.created_at + "Z");
+      const expiresAt = placed.getTime() + 5 * 60 * 1000; // 5 minutes in ms
+      const secsLeft = Math.floor((expiresAt - Date.now()) / 1000);
       if (secsLeft > 0) {
-        const minsLeft = Math.floor(secsLeft / 60);
-        const sLeft    = secsLeft % 60;
-        const timeStr  = `${minsLeft}:${String(sLeft).padStart(2,"0")}`;
-        cancelBtn = `<button onclick="cancelTrade('${t.id}')" style="margin-top:8px;width:100%;padding:7px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#ef4444;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer">
-          ↩ Cancel trade · ${timeStr} left
+        // data-expires stores the absolute expiry timestamp so the interval can count down
+        cancelBtn = `<button
+          data-tradeid="${t.id}"
+          data-expires="${expiresAt}"
+          onclick="cancelTrade('${t.id}')"
+          style="margin-top:8px;width:100%;padding:7px;border-radius:8px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#ef4444;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer">
+          ↩ Cancel trade · ${Math.floor(secsLeft/60)}:${String(secsLeft%60).padStart(2,"0")} left
         </button>`;
       }
     }
@@ -1234,35 +1238,55 @@ async function loadTrades() {
       ${cancelBtn}
     </div>`;
   }).join("");
+
+  // Start live countdown — runs every second and updates all visible cancel buttons
+  // Clears any old interval first so we don't stack them up
+  if (window._cancelTimer) clearInterval(window._cancelTimer);
+  window._cancelTimer = setInterval(() => {
+    const btns = document.querySelectorAll("button[data-expires]");
+    if (!btns.length) { clearInterval(window._cancelTimer); return; }
+    btns.forEach(btn => {
+      const secsLeft = Math.floor((Number(btn.dataset.expires) - Date.now()) / 1000);
+      if (secsLeft <= 0) {
+        // Time is up — remove the button so user can't click it anymore
+        btn.remove();
+      } else {
+        // Update the countdown text every second
+        const m = Math.floor(secsLeft / 60);
+        const s = String(secsLeft % 60).padStart(2, "0");
+        btn.textContent = `↩ Cancel trade · ${m}:${s} left`;
+      }
+    });
+  }, 1000);
 }
+
 // ── CANCEL TRADE ─────────────────────────────────────────────────────────────
 async function cancelTrade(tradeId) {
   if (!confirm("Cancel this trade? Your stake will be refunded immediately.")) return;
 
+  // Call the DB function — it checks the 5 min window server-side as a safety net
   const { data, error } = await db.rpc("cancel_trade", {
-    p_trade_id: tradeId,
-    p_telegram_id: tgId
+    p_trade_id:    tradeId,
+    p_telegram_id: tgId   // tgId = our internal user key (stored as telegram_id in DB)
   });
 
-  // Log so we can debug exactly what comes back
-  console.log("cancelTrade result:", JSON.stringify(data), "error:", error);
-
-  // Supabase RPC returns the jsonb directly as 'data'
-  // data = { ok: true, refunded: 100 } OR { ok: false, error: "..." }
   if (error) {
+    // DB-level error (network, permissions, etc.)
     showToast("Error: " + error.message, "bad");
     return;
   }
+
+  // data is the raw jsonb object: { ok: true, refunded: 100 } or { ok: false, error: "..." }
   if (!data || data.ok === false) {
     showToast(data?.error || "Could not cancel trade", "bad");
     return;
   }
 
-  // Success — refund wallet and refresh
+  // Success!
   balance += (data.refunded || 0);
   updateBalUI();
   showToast("↩ Trade cancelled! " + (data.refunded || 0).toLocaleString() + " pts refunded", "ok");
-  loadTrades();
+  loadTrades(); // refresh the list
 }
 
 // ── SUBMIT QUESTION ───────────────────────────────────────────────────────────
